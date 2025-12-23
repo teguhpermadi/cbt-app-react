@@ -94,7 +94,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingStudent) return;
-        editForm.put(StudentController.update(editingStudent?.id).url(), {
+        editForm.put(StudentController.update(editingStudent?.id).url, {
             onSuccess: () => {
                 setIsEditOpen(false);
                 editForm.reset();
@@ -104,7 +104,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
 
     const handleDelete = (id: string) => {
         if (confirm('Are you sure you want to delete this student?')) {
-            deleteForm.delete(StudentController.destroy(id).url());
+            deleteForm.delete(StudentController.destroy(id).url);
         }
     };
 
