@@ -7,6 +7,7 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\AcademicYearController;
 
 Route::get('/', function () {
     return Inertia::render('welcome', [
@@ -21,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('students', StudentController::class);
+        Route::resource('academic-years', AcademicYearController::class);
     });
 });
 
