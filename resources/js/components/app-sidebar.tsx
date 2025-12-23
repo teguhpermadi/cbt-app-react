@@ -12,9 +12,10 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { index as gradesIndex } from '@/routes/admin/grades';
+import { index as examsIndex } from '@/routes/admin/exams';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 
@@ -48,6 +49,11 @@ const mainNavItems: NavItem[] = [
         title: 'Grade Management',
         href: gradesIndex(),
         icon: GraduationCap,
+    },
+    {
+        title: 'Exam Management',
+        href: examsIndex(),
+        icon: ClipboardList,
     },
 ];
 
