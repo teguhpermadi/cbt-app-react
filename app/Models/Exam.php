@@ -45,6 +45,8 @@ class Exam extends Model
         'end_time' => 'datetime',
     ];
 
+    protected $appends = ['status'];
+
     /**
      * Accessor untuk menentukan status ujian berdasarkan waktu saat ini.
      */

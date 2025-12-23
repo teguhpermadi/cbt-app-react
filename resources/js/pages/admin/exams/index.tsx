@@ -300,7 +300,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                             <td className="px-6 py-4">{exam.teacher?.name || 'N/A'}</td>
                                             <td className="px-6 py-4">{exam.duration} mins</td>
                                             <td className="px-6 py-4">
-                                                <Badge variant={exam.status === 'Ongoing' ? 'default' : exam.status === 'Finished' ? 'destructive' : 'secondary'}>
+                                                <Badge variant={exam.status === 'ongoing' ? 'default' : exam.status === 'finished' ? 'destructive' : 'secondary'}>
                                                     {exam.status}
                                                 </Badge>
                                             </td>
