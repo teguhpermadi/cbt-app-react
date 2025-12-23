@@ -39,7 +39,7 @@ interface Subject {
         id: string;
         name: string;
     };
-    academicYear: {
+    academic_year: {
         id: string;
         year: string;
     };
@@ -115,7 +115,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
             code: subject.code || '',
             description: subject.description || '',
             grade_id: subject.grade?.id || '',
-            academic_year_id: subject.academicYear?.id || '',
+            academic_year_id: subject.academic_year?.id || '',
         });
         setIsEditOpen(true);
     };
@@ -258,7 +258,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                                             </td>
                                             <td className="px-6 py-4">
                                                 <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                    {subject.academicYear?.year || 'N/A'}
+                                                    {subject.academic_year?.year || 'N/A'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 text-right">
