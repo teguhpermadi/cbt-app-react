@@ -25,6 +25,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import Pagination from '@/components/Pagination';
 import AcademicYearController from '@/actions/App/Http/Controllers/Admin/AcademicYearController';
 import { index } from '@/routes/admin/academic-years';
 import { dashboard } from '@/routes';
@@ -224,6 +225,8 @@ export default function Index({ academicYears }: IndexProps) {
                         </div>
                     )}
                 </div>
+
+                <Pagination links={academicYears.links} />
             </div>
 
             {/* Edit Modal */}

@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import Pagination from '@/components/Pagination';
 import UserController from '@/actions/App/Http/Controllers/Admin/UserController';
 import { index } from '@/routes/admin/users';
 import { dashboard } from '@/routes';
@@ -236,6 +237,7 @@ export default function Index({ users, roles }: IndexProps) {
                         </table>
                     </div>
                 </div>
+                <Pagination links={users.links} />
             </div>
 
             {/* Edit Modal */}
@@ -280,6 +282,6 @@ export default function Index({ users, roles }: IndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </AppLayout >
     );
 }

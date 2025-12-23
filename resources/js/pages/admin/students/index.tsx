@@ -24,6 +24,7 @@ import {
 } from "@/components/ui/select";
 import { useState } from 'react';
 import InputError from '@/components/input-error';
+import Pagination from '@/components/Pagination';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
 import { index } from '@/routes/admin/students';
 import { dashboard } from '@/routes';
@@ -34,6 +35,20 @@ interface Student {
     email: string;
     grades: any[];
     created_at: string;
+}
+
+interface CreateStudentForm {
+    name: string;
+    email: string;
+    password: string;
+    grade_id: string;
+    academic_year_id: string;
+}
+
+interface EditStudentForm {
+    name: string;
+    email: string;
+    grade_id: string;
 }
 
 interface IndexProps {
@@ -55,7 +70,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState<any>(null);
 
-    const createForm = useForm({
+    const createForm = useForm<CreateStudentForm>({
         name: '',
         email: '',
         password: '',
@@ -63,7 +78,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
         academic_year_id: academicYears[0]?.id || '',
     });
 
-    const editForm = useForm({
+    const editForm = useForm<EditStudentForm>({
         name: '',
         email: '',
         grade_id: '',
@@ -250,6 +265,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                         </table>
                     </div>
                 </div>
+                <Pagination links={students.links} />
             </div>
 
             {/* Edit Modal */}
@@ -294,6 +310,6 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </AppLayout >
     );
 }
