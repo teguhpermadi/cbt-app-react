@@ -22,6 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('students', StudentController::class);
+        Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
         Route::resource('academic-years', AcademicYearController::class);
     });
 });

@@ -34,6 +34,11 @@ const mainNavItems: NavItem[] = [
         icon: GraduationCap,
     },
     {
+        title: 'Subject Management',
+        href: '/admin/subjects',
+        icon: BookOpen,
+    },
+    {
         title: 'Academic Years',
         href: '/admin/academic-years',
         icon: Calendar,
