@@ -20,11 +20,17 @@ class GradeUserSeeder extends Seeder
             return;
         }
 
+        $activeYear = \App\Models\AcademicYear::active()->first();
+
         foreach ($students as $student) {
             // Assign each student to a random grade
             $student->grades()->attach(
                 $grades->random()->id,
-                ['is_active' => true, 'id' => (string) \Illuminate\Support\Str::ulid()]
+                [
+                    'is_active' => true,
+                    'id' => (string) \Illuminate\Support\Str::ulid(),
+                    'academic_year_id' => $activeYear?->id
+                ]
             );
         }
     }

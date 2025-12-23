@@ -75,7 +75,7 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsToMany(Grade::class)
             ->using(GradeUser::class)
-            ->withPivot('id', 'is_active')
+            ->withPivot('id', 'is_active', 'academic_year_id')
             ->withTimestamps();
     }
 }

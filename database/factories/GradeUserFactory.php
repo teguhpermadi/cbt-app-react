@@ -19,6 +19,7 @@ class GradeUserFactory extends Factory
         return [
             'grade_id' => \App\Models\Grade::factory(),
             'user_id' => \App\Models\User::factory(),
+            'academic_year_id' => \App\Models\AcademicYear::active()->first()?->id ?? \App\Models\AcademicYear::factory(),
             'is_active' => true,
         ];
     }

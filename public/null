@@ -1,2 +1,6 @@
 User::get()
 User::where('name', 'teguh')->get()
+User::where('name','%like', 'teguh')->get()
+User::where('name','%like%', 'teguh')->get()
+User::where('name','teguh')->get()
+User::where('name','quo')->get()

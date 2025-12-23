@@ -32,7 +32,7 @@ class Grade extends Model
     {
         return $this->belongsToMany(User::class)
             ->using(GradeUser::class)
-            ->withPivot('id', 'is_active')
+            ->withPivot('id', 'is_active', 'academic_year_id')
             ->withTimestamps();
     }
 

@@ -71,7 +71,7 @@ class StudentController extends Controller
         // Update grade if changed (simplified logic)
         $student->grades()->sync([$validated['grade_id'] => [
             'id' => \Illuminate\Support\Str::ulid(),
-            'academic_year_id' => AcademicYear::where('is_active', true)->first()?->id,
+            'academic_year_id' => AcademicYear::active()->first()?->id,
             'is_active' => true,
         ]]);
 

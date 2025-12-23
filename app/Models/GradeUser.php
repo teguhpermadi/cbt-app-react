@@ -18,6 +18,7 @@ class GradeUser extends Pivot
     protected $fillable = [
         'grade_id',
         'user_id',
+        'academic_year_id',
         'is_active',
     ];
 
