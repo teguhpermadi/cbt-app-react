@@ -32,13 +32,15 @@ export default function Login({
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
-                className="flex flex-col gap-6"
+                className="space-y-6"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                    Email address
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -47,18 +49,21 @@ export default function Login({
                                     autoFocus
                                     tabIndex={1}
                                     autoComplete="email"
-                                    placeholder="email@example.com"
+                                    placeholder="name@company.com"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <div className="flex items-center">
-                                    <Label htmlFor="password">Password</Label>
+                            <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                        Password
+                                    </Label>
                                     {canResetPassword && (
                                         <TextLink
                                             href={request()}
-                                            className="ml-auto text-sm"
+                                            className="text-xs font-medium text-primary hover:underline"
                                             tabIndex={5}
                                         >
                                             Forgot password?
@@ -72,37 +77,41 @@ export default function Login({
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
-                                    placeholder="Password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="flex items-center space-x-3">
+                            <div className="flex items-center space-x-2">
                                 <Checkbox
                                     id="remember"
                                     name="remember"
                                     tabIndex={3}
+                                    className="rounded-md border-muted-foreground/30 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                                 />
-                                <Label htmlFor="remember">Remember me</Label>
+                                <Label htmlFor="remember" className="text-xs font-medium text-muted-foreground cursor-pointer">
+                                    Keep me logged in
+                                </Label>
                             </div>
 
                             <Button
                                 type="submit"
-                                className="mt-4 w-full"
+                                className="h-11 w-full rounded-xl bg-primary text-sm font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
                                 tabIndex={4}
                                 disabled={processing}
                                 data-test="login-button"
                             >
-                                {processing && <Spinner />}
-                                Log in
+                                {processing ? <Spinner className="mr-2 size-4" /> : null}
+                                Sign In
                             </Button>
                         </div>
 
                         {canRegister && (
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <TextLink href={register()} tabIndex={5}>
-                                    Sign up
+                            <div className="pt-2 text-center text-xs font-medium text-muted-foreground">
+                                New here?{' '}
+                                <TextLink href={register()} className="text-primary hover:underline" tabIndex={5}>
+                                    Create a free account
                                 </TextLink>
                             </div>
                         )}

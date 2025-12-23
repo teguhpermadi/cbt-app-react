@@ -21,13 +21,15 @@ export default function Register() {
                 {...store.form()}
                 resetOnSuccess={['password', 'password_confirmation']}
                 disableWhileProcessing
-                className="flex flex-col gap-6"
+                className="space-y-6"
             >
                 {({ processing, errors }) => (
                     <>
-                        <div className="grid gap-6">
-                            <div className="grid gap-2">
-                                <Label htmlFor="name">Name</Label>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="name" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                    Full Name
+                                </Label>
                                 <Input
                                     id="name"
                                     type="text"
@@ -36,7 +38,8 @@ export default function Register() {
                                     tabIndex={1}
                                     autoComplete="name"
                                     name="name"
-                                    placeholder="Full name"
+                                    placeholder="Enter your name"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError
                                     message={errors.name}
@@ -44,8 +47,10 @@ export default function Register() {
                                 />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="email">Email address</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                    Email address
+                                </Label>
                                 <Input
                                     id="email"
                                     type="email"
@@ -53,13 +58,16 @@ export default function Register() {
                                     tabIndex={2}
                                     autoComplete="email"
                                     name="email"
-                                    placeholder="email@example.com"
+                                    placeholder="name@company.com"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password">Password</Label>
+                            <div className="space-y-2">
+                                <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
+                                    Password
+                                </Label>
                                 <Input
                                     id="password"
                                     type="password"
@@ -67,13 +75,14 @@ export default function Register() {
                                     tabIndex={3}
                                     autoComplete="new-password"
                                     name="password"
-                                    placeholder="Password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError message={errors.password} />
                             </div>
 
-                            <div className="grid gap-2">
-                                <Label htmlFor="password_confirmation">
+                            <div className="space-y-2">
+                                <Label htmlFor="password_confirmation" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
                                     Confirm password
                                 </Label>
                                 <Input
@@ -83,7 +92,8 @@ export default function Register() {
                                     tabIndex={4}
                                     autoComplete="new-password"
                                     name="password_confirmation"
-                                    placeholder="Confirm password"
+                                    placeholder="••••••••"
+                                    className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError
                                     message={errors.password_confirmation}
@@ -92,19 +102,19 @@ export default function Register() {
 
                             <Button
                                 type="submit"
-                                className="mt-2 w-full"
+                                className="h-11 w-full rounded-xl bg-primary text-sm font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:hover:scale-100"
                                 tabIndex={5}
                                 data-test="register-user-button"
                             >
-                                {processing && <Spinner />}
-                                Create account
+                                {processing ? <Spinner className="mr-2 size-4" /> : null}
+                                Create Account
                             </Button>
                         </div>
 
-                        <div className="text-center text-sm text-muted-foreground">
+                        <div className="pt-2 text-center text-xs font-medium text-muted-foreground">
                             Already have an account?{' '}
-                            <TextLink href={login()} tabIndex={6}>
-                                Log in
+                            <TextLink href={login()} className="text-primary hover:underline" tabIndex={6}>
+                                Back to login
                             </TextLink>
                         </div>
                     </>
