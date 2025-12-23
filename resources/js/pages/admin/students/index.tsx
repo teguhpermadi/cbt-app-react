@@ -46,8 +46,8 @@ interface IndexProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: dashboard() },
-    { title: 'Student Management', href: index() },
+    { title: 'Dashboard', href: dashboard().url },
+    { title: 'Student Management', href: index().url },
 ];
 
 export default function Index({ students, grades, academicYears }: IndexProps) {
@@ -94,7 +94,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingStudent) return;
-        editForm.put(StudentController.update(editingStudent?.id).url(), {
+        editForm.put(StudentController.update(editingStudent?.id).url, {
             onSuccess: () => {
                 setIsEditOpen(false);
                 editForm.reset();
@@ -104,7 +104,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
 
     const handleDelete = (id: string) => {
         if (confirm('Are you sure you want to delete this student?')) {
-            deleteForm.delete(StudentController.destroy(id).url());
+            deleteForm.delete(StudentController.destroy(id).url);
         }
     };
 
@@ -156,7 +156,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                                     <SelectValue placeholder="Grade" />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-xl border-none shadow-xl">
-                                                    {grades.map(g => g && (
+                                                    {grades.filter(Boolean).map(g => (
                                                         <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -170,7 +170,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                                     <SelectValue placeholder="Year" />
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-xl border-none shadow-xl">
-                                                    {academicYears.map(ay => ay && (
+                                                    {academicYears.filter(Boolean).map(ay => (
                                                         <SelectItem key={ay.id} value={ay.id}>{ay.name}</SelectItem>
                                                     ))}
                                                 </SelectContent>
@@ -278,7 +278,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                         <SelectValue placeholder="Select grade" />
                                     </SelectTrigger>
                                     <SelectContent className="rounded-xl border-none shadow-xl">
-                                        {grades.map(g => g && (
+                                        {grades.filter(Boolean).map(g => (
                                             <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
                                         ))}
                                     </SelectContent>

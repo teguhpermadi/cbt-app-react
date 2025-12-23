@@ -42,8 +42,8 @@ interface IndexProps {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    { title: 'Dashboard', href: dashboard() },
-    { title: 'User Management', href: index() },
+    { title: 'Dashboard', href: dashboard().url },
+    { title: 'User Management', href: index().url },
 ];
 
 export default function Index({ users, roles }: IndexProps) {
@@ -92,7 +92,7 @@ export default function Index({ users, roles }: IndexProps) {
     const submitEdit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editingUser) return;
-        editForm.put(UserController.update(editingUser?.id).url(), {
+        editForm.put(UserController.update(editingUser?.id).url, {
             onSuccess: () => {
                 setIsEditOpen(false);
                 editForm.reset();
@@ -102,7 +102,7 @@ export default function Index({ users, roles }: IndexProps) {
 
     const handleDelete = (id: string) => {
         if (confirm('Are you sure you want to delete this user?')) {
-            deleteForm.delete(UserController.destroy(id).url());
+            deleteForm.delete(UserController.destroy(id).url);
         }
     };
 
@@ -200,7 +200,7 @@ export default function Index({ users, roles }: IndexProps) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
                                                 {user.roles && user.roles.length > 0 ? (
-                                                    user.roles.map((role: any) => role && (
+                                                    user.roles.filter(Boolean).map((role: any) => (
                                                         <Badge key={role.id} variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
                                                             {role.name}
                                                         </Badge>

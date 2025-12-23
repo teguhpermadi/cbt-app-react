@@ -1,0 +1,2 @@
+User::get()
+User::where('name', 'teguh')->get()
