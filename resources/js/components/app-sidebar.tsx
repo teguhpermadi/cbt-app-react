@@ -11,6 +11,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { index as gradesIndex } from '@/routes/admin/grades';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar } from 'lucide-react';
@@ -42,6 +43,11 @@ const mainNavItems: NavItem[] = [
         title: 'Academic Years',
         href: '/admin/academic-years',
         icon: Calendar,
+    },
+    {
+        title: 'Grade Management',
+        href: gradesIndex(),
+        icon: GraduationCap,
     },
 ];
 

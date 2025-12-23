@@ -24,6 +24,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('students', StudentController::class);
         Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
         Route::resource('academic-years', AcademicYearController::class);
+        Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
     });
 });
 
