@@ -11,15 +11,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Models\Scopes\ActiveAcademicYearScope;
 
 class Exam extends Model
 {
     use HasFactory, HasUlids, LogsActivity, SoftDeletes;
 
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::addGlobalScope(new ActiveAcademicYearScope);
+    }
+
     protected $fillable = [
         'academic_year_id',
-        'grade_id',
-        'subject_id',
         'grade_id',
         'subject_id',
         'teacher_id',       // Guru yang membuat ujian

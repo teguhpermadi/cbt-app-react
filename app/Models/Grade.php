@@ -8,11 +8,22 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
+use App\Models\Scopes\ActiveAcademicYearScope;
 
 class Grade extends Model
 {
     /** @use HasFactory<\Database\Factories\GradeFactory> */
     use HasFactory, HasUlids, SoftDeletes, LogsActivity;
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::addGlobalScope(new ActiveAcademicYearScope);
+    }
 
     protected $fillable = [
         'name',

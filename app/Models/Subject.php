@@ -10,11 +10,22 @@ use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use App\Models\Scopes\ActiveAcademicYearScope;
 
 class Subject extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\SubjectFactory> */
     use HasFactory, HasUlids, LogsActivity, InteractsWithMedia, SoftDeletes;
+
+    /**
+     * The "booted" method of the model.
+     *
+     * @return void
+     */
+    protected static function booted()
+    {
+        static::addGlobalScope(new ActiveAcademicYearScope);
+    }
 
     protected $fillable = [
         'name',
