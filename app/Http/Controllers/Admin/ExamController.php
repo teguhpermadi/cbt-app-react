@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\Exam;
 use App\Models\Grade;
+use App\Models\QuestionBank;
 use App\Models\Subject;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -28,6 +29,7 @@ class ExamController extends Controller
         $grades = Grade::all();
         $subjects = Subject::all();
         $teachers = User::where('user_type', 'teacher')->get(); // Assuming 'teacher' user_type
+        $questionBanks = QuestionBank::all();
 
         return Inertia::render('admin/exams/index', [
             'exams' => $exams,
@@ -36,6 +38,7 @@ class ExamController extends Controller
             'subjects' => $subjects,
             'teachers' => $teachers,
             'examTypes' => ExamTypeEnum::cases(),
+            'questionBanks' => $questionBanks,
         ]);
     }
 
@@ -80,6 +83,7 @@ class ExamController extends Controller
             'grade_id' => 'required|exists:grades,id',
             'subject_id' => 'required|exists:subjects,id',
             'teacher_id' => 'required|exists:users,id',
+            'question_bank_id' => 'required|exists:question_banks,id',
             'exam_type' => ['required', Rule::in(ExamTypeEnum::cases())],
             'duration' => 'required|integer|min:1',
             'passing_score' => 'required|integer|min:0|max:100',

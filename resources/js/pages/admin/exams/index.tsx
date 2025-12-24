@@ -22,7 +22,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import { dashboard } from '@/routes';
@@ -47,6 +47,7 @@ interface Exam {
     grade: { id: string; name: string; };
     subject: { id: string; name: string; };
     teacher: { id: string; name: string; };
+    question_bank: { id: string; name: string; };
 }
 
 interface CreateExamForm {
@@ -54,6 +55,7 @@ interface CreateExamForm {
     grade_id: string;
     subject_id: string;
     teacher_id: string;
+    question_bank_id: string;
     title: string;
     exam_type: string;
     duration: number;
@@ -74,6 +76,7 @@ interface IndexProps {
     subjects: any[];
     teachers: any[];
     examTypes: string[];
+    questionBanks: any[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -81,7 +84,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Exam Management', href: examsIndexRoute.url() },
 ];
 
-export default function Index({ exams, academicYears, grades, subjects, teachers, examTypes }: IndexProps) {
+export default function Index({ exams, academicYears, grades, subjects, teachers, examTypes, questionBanks }: IndexProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingExam, setEditingExam] = useState<Exam | null>(null);
@@ -91,6 +94,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         grade_id: '',
         subject_id: '',
         teacher_id: '',
+        question_bank_id: '',
         title: '',
         exam_type: '',
         duration: 60,
@@ -106,6 +110,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         grade_id: '',
         subject_id: '',
         teacher_id: '',
+        question_bank_id: '',
         title: '',
         exam_type: '',
         duration: 0,
@@ -137,6 +142,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
             grade_id: exam.grade?.id || '',
             subject_id: exam.subject?.id || '',
             teacher_id: exam.teacher?.id || '',
+            question_bank_id: exam.question_bank?.id || '',
         });
         setIsEditOpen(true);
     };
@@ -158,6 +164,67 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         }
     };
 
+    // --- Chained Select Logic for Create Form ---
+    const createFilteredSubjects = useMemo(() => {
+        if (!createForm.data.grade_id) return [];
+        return subjects.filter((s: any) => s.grade_id === createForm.data.grade_id);
+    }, [createForm.data.grade_id, subjects]);
+
+    const createFilteredQuestionBanks = useMemo(() => {
+        if (!createForm.data.subject_id) return [];
+        return questionBanks.filter((qb: any) => qb.subject_id === createForm.data.subject_id);
+    }, [createForm.data.subject_id, questionBanks]);
+
+    // Reset dependent fields when parent fields change
+    useEffect(() => {
+        // Find if current subject is valid for new grade
+        const isValid = createFilteredSubjects.find(s => s.id === createForm.data.subject_id);
+        if (!isValid && createForm.data.subject_id) {
+            createForm.setData('subject_id', '');
+        }
+    }, [createForm.data.grade_id]);
+
+    useEffect(() => {
+        // Find if current question bank is valid for new subject
+        const isValid = createFilteredQuestionBanks.find(qb => qb.id === createForm.data.question_bank_id);
+        if (!isValid && createForm.data.question_bank_id) {
+            createForm.setData('question_bank_id', '');
+        }
+    }, [createForm.data.subject_id]);
+
+
+    // --- Chained Select Logic for Edit Form ---
+    const editFilteredSubjects = useMemo(() => {
+        if (!editForm.data.grade_id) return [];
+        return subjects.filter((s: any) => s.grade_id === editForm.data.grade_id);
+    }, [editForm.data.grade_id, subjects]);
+
+    const editFilteredQuestionBanks = useMemo(() => {
+        if (!editForm.data.subject_id) return [];
+        return questionBanks.filter((qb: any) => qb.subject_id === editForm.data.subject_id);
+    }, [editForm.data.subject_id, questionBanks]);
+
+    useEffect(() => {
+        // Only reset if we are interacting (to avoid resetting on initial load)
+        // However, form reset handled by openEdit somewhat. 
+        // Here we need to be careful not to wipe data when opening modal.
+        // But since we set data first, then open modal, these effects might run.
+        // Let's assume user interaction triggers changes.
+        // Actually, simple way: check if current selected matches filtered.
+        const currentId = editForm.data.subject_id;
+        if (currentId && !editFilteredSubjects.find(s => s.id === currentId)) {
+            editForm.setData('subject_id', '');
+        }
+    }, [editForm.data.grade_id]);
+
+    useEffect(() => {
+        const currentId = editForm.data.question_bank_id;
+        if (currentId && !editFilteredQuestionBanks.find(qb => qb.id === currentId)) {
+            editForm.setData('question_bank_id', '');
+        }
+    }, [editForm.data.subject_id]);
+
+
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title="Exam Management" />
@@ -168,7 +235,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Exam Management</h1>
                         <p className="text-muted-foreground font-medium">Manage exams, schedules, and settings.</p>
                     </div>
-                     <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                         <DialogTrigger asChild>
                             <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
                                 <Plus className="size-4" />
@@ -176,7 +243,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                             </Button>
                         </DialogTrigger>
                         <DialogContent className="sm:max-w-4xl rounded-3xl border-none shadow-2xl">
-                           <form onSubmit={submitCreate}>
+                            <form onSubmit={submitCreate}>
                                 <DialogHeader>
                                     <DialogTitle className="text-xl font-bold">Create Exam</DialogTitle>
                                     <DialogDescription>Fill in the details to create a new exam.</DialogDescription>
@@ -204,15 +271,36 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                     <SelectContent>{grades.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
                                                 </Select>
                                             </div>
-                                        </div>
-                                         <div className="grid grid-cols-2 gap-4">
                                             <div className="space-y-2">
                                                 <Label>Subject</Label>
-                                                <Select onValueChange={(v) => createForm.setData('subject_id', v)} value={createForm.data.subject_id}>
+                                                <Select onValueChange={(v) => createForm.setData('subject_id', v)} value={createForm.data.subject_id} disabled={!createForm.data.grade_id}>
                                                     <SelectTrigger><SelectValue placeholder="Select Subject" /></SelectTrigger>
-                                                    <SelectContent>{subjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                                    <SelectContent>
+                                                        {createFilteredSubjects.length > 0 ? (
+                                                            createFilteredSubjects.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)
+                                                        ) : (
+                                                            <div className="p-2 text-sm text-muted-foreground">No subjects for this grade</div>
+                                                        )}
+                                                    </SelectContent>
                                                 </Select>
                                             </div>
+                                            <div className="space-y-2">
+                                                <Label>Question Bank</Label>
+                                                <Select onValueChange={(v) => createForm.setData('question_bank_id', v)} value={createForm.data.question_bank_id} disabled={!createForm.data.subject_id}>
+                                                    <SelectTrigger><SelectValue placeholder="Select Question Bank" /></SelectTrigger>
+                                                    <SelectContent>
+                                                        {createFilteredQuestionBanks.length > 0 ? (
+                                                            createFilteredQuestionBanks.map((qb: any) => <SelectItem key={qb.id} value={qb.id}>{qb.name}</SelectItem>)
+                                                        ) : (
+                                                            <div className="p-2 text-sm text-muted-foreground">No question banks for this subject</div>
+                                                        )}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+
                                             <div className="space-y-2">
                                                 <Label>Teacher</Label>
                                                 <Select onValueChange={(v) => createForm.setData('teacher_id', v)} value={createForm.data.teacher_id}>
@@ -220,14 +308,15 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                     <SelectContent>{teachers.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
                                                 </Select>
                                             </div>
+                                            <div className="space-y-2">
+                                                <Label>Exam Type</Label>
+                                                <Select onValueChange={(v) => createForm.setData('exam_type', v)} value={createForm.data.exam_type}>
+                                                    <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                                                    <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
+                                                </Select>
+                                            </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <Label>Exam Type</Label>
-                                            <Select onValueChange={(v) => createForm.setData('exam_type', v)} value={createForm.data.exam_type}>
-                                                <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                                                <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
-                                            </Select>
-                                        </div>
+
                                     </div>
                                     {/* Column 2 */}
                                     <div className="space-y-4">
@@ -260,7 +349,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                             <label htmlFor="is_randomized">Randomize Questions</label>
                                         </div>
                                         <div className="flex items-center space-x-2">
-                                            <Checkbox id="is_published" checked={createForm.data.is_published} onCheckedChange={(c) => createForm.setData('is_published', !!c)}/>
+                                            <Checkbox id="is_published" checked={createForm.data.is_published} onCheckedChange={(c) => createForm.setData('is_published', !!c)} />
                                             <label htmlFor="is_published">Publish Exam</label>
                                         </div>
                                     </div>
@@ -294,6 +383,8 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                             <td className="px-6 py-4">
                                                 <div className="font-bold text-slate-900 dark:text-slate-100">{exam.title}</div>
                                                 <div className="text-xs text-muted-foreground">{exam.exam_type}</div>
+                                                <br />
+                                                <div className="text-xs text-muted-foreground">{exam.question_bank?.name || 'N/A'}</div>
                                             </td>
                                             <td className="px-6 py-4">{exam.subject?.name || 'N/A'}</td>
                                             <td className="px-6 py-4">{exam.grade?.name || 'N/A'}</td>
@@ -342,8 +433,8 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                 <DialogContent key={editingExam?.id} className="sm:max-w-4xl rounded-3xl border-none shadow-2xl">
-                   <form onSubmit={submitEdit}>
+                <DialogContent key={editingExam?.id} className="sm:max-w-4xl rounded-3xl border-none shadow-2xl">
+                    <form onSubmit={submitEdit}>
                         <DialogHeader>
                             <DialogTitle className="text-xl font-bold">Edit Exam</DialogTitle>
                             <DialogDescription>Update details for {editingExam?.title}.</DialogDescription>
@@ -371,15 +462,35 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                             <SelectContent>{grades.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
                                         </Select>
                                     </div>
-                                </div>
-                                    <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Subject</Label>
-                                        <Select onValueChange={(v) => editForm.setData('subject_id', v)} value={editForm.data.subject_id}>
+                                        <Select onValueChange={(v) => editForm.setData('subject_id', v)} value={editForm.data.subject_id} disabled={!editForm.data.grade_id}>
                                             <SelectTrigger><SelectValue placeholder="Select Subject" /></SelectTrigger>
-                                            <SelectContent>{subjects.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}</SelectContent>
+                                            <SelectContent>
+                                                {editFilteredSubjects.length > 0 ? (
+                                                    editFilteredSubjects.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)
+                                                ) : (
+                                                    <div className="p-2 text-sm text-muted-foreground">No subjects for this grade</div>
+                                                )}
+                                            </SelectContent>
                                         </Select>
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label>Question Bank</Label>
+                                        <Select onValueChange={(v) => editForm.setData('question_bank_id', v)} value={editForm.data.question_bank_id} disabled={!editForm.data.subject_id}>
+                                            <SelectTrigger><SelectValue placeholder="Select Question Bank" /></SelectTrigger>
+                                            <SelectContent>
+                                                {editFilteredQuestionBanks.length > 0 ? (
+                                                    editFilteredQuestionBanks.map((qb: any) => <SelectItem key={qb.id} value={qb.id}>{qb.name}</SelectItem>)
+                                                ) : (
+                                                    <div className="p-2 text-sm text-muted-foreground">No question banks for this subject</div>
+                                                )}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+
                                     <div className="space-y-2">
                                         <Label>Teacher</Label>
                                         <Select onValueChange={(v) => editForm.setData('teacher_id', v)} value={editForm.data.teacher_id}>
@@ -387,14 +498,15 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                             <SelectContent>{teachers.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
                                         </Select>
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label>Exam Type</Label>
+                                        <Select onValueChange={(v) => editForm.setData('exam_type', v)} value={editForm.data.exam_type}>
+                                            <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                                            <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
+                                        </Select>
+                                    </div>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label>Exam Type</Label>
-                                    <Select onValueChange={(v) => editForm.setData('exam_type', v)} value={editForm.data.exam_type}>
-                                        <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                                        <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
-                                    </Select>
-                                </div>
+
                             </div>
                             {/* Column 2 */}
                             <div className="space-y-4">
@@ -427,7 +539,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                     <label htmlFor="edit_is_randomized">Randomize Questions</label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)}/>
+                                    <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)} />
                                     <label htmlFor="edit_is_published">Publish Exam</label>
                                 </div>
                             </div>
