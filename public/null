@@ -1,3 +1,5 @@
-User::where('name','a')->get()
-User::where('name','a')->with('grade')->get()
-User::where('name','a')->with('grades')->get()
+Subject::->with('academicYear')->get()
+Subject::with('academicYear')->get()
+Subject::with('grades','academicYear')->get()
+Subject::with('grades','academicYear')->get()
+Subject::with('grade','academicYear')->get()

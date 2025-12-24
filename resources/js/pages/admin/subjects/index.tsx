@@ -233,56 +233,58 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                             </thead>
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {subjects.data.length > 0 ? (
-                                    subjects.data.map((subject: any) => (
-                                        <tr key={subject.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
-                                            <td className="px-6 py-4">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-2">
-                                                        <span className="font-bold text-slate-900 dark:text-slate-100">{subject.name}</span>
-                                                        {subject.code && (
-                                                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-mono">
-                                                                {subject.code}
-                                                            </Badge>
+                                    subjects.data.map((subject: Subject) => {
+                                        return (
+                                            <tr key={subject.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                                                <td className="px-6 py-4">
+                                                    <div className="flex flex-col">
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="font-bold text-slate-900 dark:text-slate-100">{subject.name}</span>
+                                                            {subject.code && (
+                                                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 font-mono">
+                                                                    {subject.code}
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                        {subject.description && (
+                                                            <span className="text-xs text-muted-foreground font-medium truncate max-w-[200px]">{subject.description}</span>
                                                         )}
                                                     </div>
-                                                    {subject.description && (
-                                                        <span className="text-xs text-muted-foreground font-medium truncate max-w-[200px]">{subject.description}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Badge variant="outline" className="rounded-lg px-2.5 py-1 flex w-fit items-center gap-1.5 font-bold text-blue-600 bg-blue-50/50 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 uppercase tracking-tighter text-[10px]">
-                                                    <BookOpen className="size-3.5" />
-                                                    {subject.grade?.name || 'N/A'}
-                                                </Badge>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                                                    {subject.academic_year?.year || 'N/A'}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                <div className="flex justify-end gap-2">
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
-                                                        onClick={() => openEdit(subject)}
-                                                    >
-                                                        <Edit className="size-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all font-bold"
-                                                        onClick={() => handleDelete(subject.id)}
-                                                    >
-                                                        <Trash2 className="size-4" />
-                                                    </Button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Badge variant="outline" className="rounded-lg px-2.5 py-1 flex w-fit items-center gap-1.5 font-bold text-blue-600 bg-blue-50/50 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-900/50 uppercase tracking-tighter text-[10px]">
+                                                        <BookOpen className="size-3.5" />
+                                                        {subject.grade?.name || 'N/A'}
+                                                    </Badge>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                        {subject.academic_year?.year || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-right">
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
+                                                            onClick={() => openEdit(subject)}
+                                                        >
+                                                            <Edit className="size-4" />
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all font-bold"
+                                                            onClick={() => handleDelete(subject.id)}
+                                                        >
+                                                            <Trash2 className="size-4" />
+                                                        </Button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 ) : (
                                     <tr>
                                         <td colSpan={4} className="px-6 py-12 text-center text-muted-foreground">
