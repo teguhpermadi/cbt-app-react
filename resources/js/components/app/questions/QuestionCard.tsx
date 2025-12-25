@@ -5,14 +5,11 @@ import { DifficultySelector } from "./DifficultySelector";
 import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
 
-export interface Question {
-    id: string;
-    content: any; // Using any for now as content might be JSON or complex object
-    difficulty_level: string;
-    timer: number;
-    score_value: number;
-    question_type: string;
-}
+import AnswerOptions from "./AnswerOptions";
+import { Question } from "./types";
+
+// Removed local interface Question definition in favor of types.ts
+
 
 interface QuestionCardProps {
     question: Question;
@@ -21,6 +18,10 @@ interface QuestionCardProps {
 }
 
 export default function QuestionCard({ question, onUpdate, readOnly = false }: QuestionCardProps) {
+    // Default to readOnly for now, so we show key answer always when viewing.
+    // In edit mode (readOnly=false), we also want to see the key answer to know what's correct.
+    const showKeyAnswer = true;
+
     const handleValueChange = (field: keyof Question, value: any) => {
         if (onUpdate && !readOnly) {
             onUpdate(question.id, field, value);
@@ -76,8 +77,10 @@ export default function QuestionCard({ question, onUpdate, readOnly = false }: Q
                     )}
                 </div>
             </CardContent>
-            <CardFooter className="p-3 bg-slate-50/20 dark:bg-slate-900/20 border-t border-slate-100 dark:border-slate-800 min-h-[40px]">
-                {/* Footer intentionally left empty for now */}
+            <CardFooter className="p-3 bg-slate-50/20 dark:bg-slate-900/20 border-t border-slate-100 dark:border-slate-800 flex-col items-start gap-4">
+                <div className="w-full">
+                    <AnswerOptions question={question} showKeyAnswer={showKeyAnswer} />
+                </div>
             </CardFooter>
         </Card>
     );

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\QuestionBank;
 use App\Models\Subject;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class QuestionBankController extends Controller
@@ -66,7 +67,7 @@ class QuestionBankController extends Controller
             'is_public' => 'boolean',
         ]);
 
-        $validated['user_id'] = auth()->id();
+        $validated['user_id'] = Auth::id();
 
         QuestionBank::create($validated);
 
@@ -80,7 +81,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionBank $questionBank)
     {
         // Load questions associated with this question bank
-        $questionBank->load('questions');
+        $questionBank->load(['questions.options']);
 
         // Ambil subject yang aktif (berdasarkan tahun ajaran aktif)
         $subjects = Subject::query()
