@@ -11,6 +11,23 @@ import { useDebounce } from 'use-debounce';
 import { index } from '@/routes/admin/question-banks';
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 
+import {
+    DndContext,
+    closestCenter,
+    KeyboardSensor,
+    PointerSensor,
+    useSensor,
+    useSensors,
+    DragEndEvent
+} from '@dnd-kit/core';
+import {
+    arrayMove,
+    SortableContext,
+    sortableKeyboardCoordinates,
+    verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { useEffect, useState } from 'react';
+import { SortableQuestionCard } from '@/components/app/questions/SortableQuestionCard';
 import QuestionCard, { Question } from '@/components/app/questions/QuestionCard';
 
 import 'katex/dist/katex.min.css';
@@ -40,6 +57,42 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
         e.preventDefault();
         // Using Wayground Action
         put(QuestionBankController.update(questionBank.id).url);
+    };
+
+    const [sortedQuestions, setSortedQuestions] = useState(questions);
+
+    useEffect(() => {
+        setSortedQuestions(questions);
+    }, [questions]);
+
+    const sensors = useSensors(
+        useSensor(PointerSensor),
+        useSensor(KeyboardSensor, {
+            coordinateGetter: sortableKeyboardCoordinates,
+        })
+    );
+
+    const handleDragEnd = (event: DragEndEvent) => {
+        const { active, over } = event;
+
+        if (active.id !== over?.id) {
+            setSortedQuestions((items) => {
+                const oldIndex = items.findIndex((item) => item.id === active.id);
+                const newIndex = items.findIndex((item) => item.id === over?.id);
+
+                const newOrder = arrayMove(items, oldIndex, newIndex);
+
+                // Send reorder request to backend
+                router.post('/admin/questions/reorder', {
+                    ids: newOrder.map(q => q.id)
+                }, {
+                    preserveScroll: true,
+                    preserveState: true,
+                });
+
+                return newOrder;
+            });
+        }
     };
 
     const handleQuestionUpdate = (id: string, field: string, value: any) => {
@@ -91,15 +144,26 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                     </div>
 
                     {questions.length > 0 ? (
-                        <div className="space-y-4">
-                            {questions.map((question) => (
-                                <QuestionCard
-                                    key={question.id}
-                                    question={question}
-                                    onUpdate={handleQuestionUpdate}
-                                />
-                            ))}
-                        </div>
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragEnd={handleDragEnd}
+                        >
+                            <SortableContext
+                                items={sortedQuestions.map(q => q.id)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
+                                    {sortedQuestions.map((question) => (
+                                        <SortableQuestionCard
+                                            key={question.id}
+                                            question={question}
+                                            onUpdate={handleQuestionUpdate}
+                                        />
+                                    ))}
+                                </div>
+                            </SortableContext>
+                        </DndContext>
                     ) : (
                         <Card className="min-h-[300px] flex items-center justify-center border-dashed">
                             <CardContent className="text-center text-muted-foreground">

@@ -24,4 +24,21 @@ class QuestionController extends Controller
 
         return back()->with('success', 'Soal berhasil diperbarui.');
     }
+
+    /**
+     * Reorder questions.
+     */
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:questions,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            Question::where('id', $id)->update(['order' => $index + 1]);
+        }
+
+        return back()->with('success', 'Urutan soal berhasil diperbarui.');
+    }
 }

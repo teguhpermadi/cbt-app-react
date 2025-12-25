@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
         Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
+        Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
         Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
     });
 });
