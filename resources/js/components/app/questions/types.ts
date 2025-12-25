@@ -23,3 +23,13 @@ export interface AnswerOptionProps {
     options: Option[];
     showKeyAnswer?: boolean;
 }
+
+export const QUESTION_TYPE_LABELS: Record<string, string> = {
+    multiple_choice: 'Pilihan Ganda',
+    multiple_selection: 'Pilihan Kompleks',
+    true_false: 'Benar/Salah',
+    matching: 'Menjodohkan',
+    ordering: 'Mengurutkan',
+    numerical_input: 'Input Angka',
+    essay: 'Esai/Uraian',
+};

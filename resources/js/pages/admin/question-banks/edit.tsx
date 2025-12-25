@@ -10,6 +10,7 @@ import { useDebounce } from 'use-debounce';
 // Wayground Imports
 import { index } from '@/routes/admin/question-banks';
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
+import QuestionController from '@/actions/App/Http/Controllers/Admin/QuestionController';
 
 import {
     DndContext,
@@ -96,9 +97,16 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
     };
 
     const handleQuestionUpdate = (id: string, field: string, value: any) => {
-        router.put(`/admin/questions/${id}`, {
+        router.put(QuestionController.update(id).url, {
             [field]: value
         }, {
+            preserveScroll: true,
+            preserveState: true,
+        });
+    };
+
+    const handleQuestionDelete = (id: string) => {
+        router.delete(QuestionController.destroy(id).url, {
             preserveScroll: true,
             preserveState: true,
         });
@@ -159,6 +167,7 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                                             key={question.id}
                                             question={question}
                                             onUpdate={handleQuestionUpdate}
+                                            onDelete={handleQuestionDelete}
                                         />
                                     ))}
                                 </div>

@@ -41,4 +41,14 @@ class QuestionController extends Controller
 
         return back()->with('success', 'Urutan soal berhasil diperbarui.');
     }
+
+    /**
+     * Remove the specified resource from storage.
+     */
+    public function destroy(Question $question)
+    {
+        $question->delete();
+
+        return back()->with('success', 'Soal berhasil dihapus.');
+    }
 }

@@ -1,14 +1,16 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { GripVertical } from "lucide-react";
-import QuestionCard, { Question } from "./QuestionCard";
+import QuestionCard from "./QuestionCard";
+import { Question } from "./types";
 
 interface SortableQuestionCardProps {
     question: Question;
     onUpdate?: (id: string, field: keyof Question, value: any) => void;
+    onDelete?: (id: string) => void;
 }
 
-export function SortableQuestionCard({ question, onUpdate }: SortableQuestionCardProps) {
+export function SortableQuestionCard({ question, onUpdate, onDelete }: SortableQuestionCardProps) {
     const {
         attributes,
         listeners,
@@ -41,6 +43,7 @@ export function SortableQuestionCard({ question, onUpdate }: SortableQuestionCar
             <QuestionCard
                 question={question}
                 onUpdate={onUpdate}
+                onDelete={onDelete}
             />
         </div>
     );

@@ -1,4 +1,7 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Edit, Trash2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import { DifficultySelector } from "./DifficultySelector";
@@ -6,7 +9,7 @@ import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
 
 import AnswerOptions from "./AnswerOptions";
-import { Question } from "./types";
+import { Question, QUESTION_TYPE_LABELS } from "./types";
 
 // Removed local interface Question definition in favor of types.ts
 
@@ -14,10 +17,18 @@ import { Question } from "./types";
 interface QuestionCardProps {
     question: Question;
     onUpdate?: (id: string, field: keyof Question, value: any) => void;
+    onEdit?: (question: Question) => void;
+    onDelete?: (id: string) => void;
     readOnly?: boolean;
 }
 
-export default function QuestionCard({ question, onUpdate, readOnly = false }: QuestionCardProps) {
+export default function QuestionCard({
+    question,
+    onUpdate,
+    onEdit,
+    onDelete,
+    readOnly = false
+}: QuestionCardProps) {
     // Default to readOnly for now, so we show key answer always when viewing.
     // In edit mode (readOnly=false), we also want to see the key answer to know what's correct.
     const showKeyAnswer = true;
@@ -47,24 +58,57 @@ export default function QuestionCard({ question, onUpdate, readOnly = false }: Q
     return (
         <Card className="overflow-hidden border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl transition-all hover:shadow-md">
             <CardHeader className="p-3 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
-                <div className="flex flex-wrap items-center gap-2">
-                    <DifficultySelector
-                        value={question.difficulty_level}
-                        onValueChange={(val) => handleValueChange('difficulty_level', val)}
-                        disabled={readOnly}
-                    />
+                <div className="flex flex-col gap-3">
+                    <div className="flex items-center justify-between">
+                        <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+                            {QUESTION_TYPE_LABELS[question.question_type] ?? question.question_type}
+                        </Badge>
 
-                    <TimerSelector
-                        value={question.timer}
-                        onValueChange={(val) => handleValueChange('timer', val)}
-                        disabled={readOnly}
-                    />
+                        <DifficultySelector
+                            value={question.difficulty_level}
+                            onValueChange={(val) => handleValueChange('difficulty_level', val)}
+                            disabled={readOnly}
+                        />
 
-                    <ScoreSelector
-                        value={question.score_value}
-                        onValueChange={(val) => handleValueChange('score_value', val)}
-                        disabled={readOnly}
-                    />
+                        <TimerSelector
+                            value={question.timer}
+                            onValueChange={(val) => handleValueChange('timer', val)}
+                            disabled={readOnly}
+                        />
+
+                        <ScoreSelector
+                            value={question.score_value}
+                            onValueChange={(val) => handleValueChange('score_value', val)}
+                            disabled={readOnly}
+                        />
+
+                        {!readOnly && (
+                            <div className="flex items-center gap-1">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                    onClick={() => onEdit && onEdit(question)}
+                                >
+                                    <Edit className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                    onClick={() => {
+                                        if (onDelete) {
+                                            if (window.confirm("Apakah anda yakin ingin menghapus pertanyaan ini?")) {
+                                                onDelete(question.id);
+                                            }
+                                        }
+                                    }}
+                                >
+                                    <Trash2 className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="p-6">
