@@ -70,6 +70,26 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
         setSortedQuestions(questions);
     }, [questions]);
 
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const scrollToId = params.get('scrollTo');
+        if (scrollToId) {
+            setTimeout(() => {
+                const element = document.getElementById(scrollToId);
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Provide visual feedback
+                    element.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+                    setTimeout(() => element.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
+
+                    // Clean up query param
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, '', newUrl);
+                }
+            }, 500);
+        }
+    }, [questions]);
+
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {

@@ -94,9 +94,10 @@ class QuestionController extends Controller
             }
         });
 
-        return to_route('admin.question-banks.edit', $question->question_bank_id)
-            ->with('success', 'Soal berhasil diperbarui.')
-            ->withFragment("question-{$question->id}");
+        return to_route('admin.question-banks.edit', [
+            'question_bank' => $question->question_bank_id,
+            'scrollTo' => "question-{$question->id}"
+        ])->with('success', 'Soal berhasil diperbarui.');
     }
 
     private function generateDefaultKey($type, $index)
