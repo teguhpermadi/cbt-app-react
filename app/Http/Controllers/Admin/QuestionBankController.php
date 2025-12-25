@@ -79,6 +79,9 @@ class QuestionBankController extends Controller
      */
     public function edit(QuestionBank $questionBank)
     {
+        // Load questions associated with this question bank
+        $questionBank->load('questions');
+
         // Ambil subject yang aktif (berdasarkan tahun ajaran aktif)
         $subjects = Subject::query()
             ->whereHas('academicYear', function ($query) {
@@ -95,6 +98,7 @@ class QuestionBankController extends Controller
 
         return Inertia::render('admin/question-banks/edit', [
             'questionBank' => $questionBank,
+            'questions' => $questionBank->questions,
             'subjects' => $subjects,
         ]);
     }
