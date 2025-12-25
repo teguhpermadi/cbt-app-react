@@ -26,6 +26,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('academic-years', AcademicYearController::class);
         Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+        Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
     });
 });
 

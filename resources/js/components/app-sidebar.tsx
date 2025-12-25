@@ -55,6 +55,11 @@ const mainNavItems: NavItem[] = [
         href: examsIndex(),
         icon: ClipboardList,
     },
+    {
+        title: 'Bank Soal',
+        href: '/admin/question-banks',
+        icon: BookOpen,
+    },
 ];
 
 const footerNavItems: NavItem[] = [
