@@ -13,6 +13,8 @@ import QuestionBankController from '@/actions/App/Http/Controllers/Admin/Questio
 
 import QuestionCard, { Question } from '@/components/app/questions/QuestionCard';
 
+import 'katex/dist/katex.min.css';
+
 interface QuestionBank {
     id: number;
     name: string;

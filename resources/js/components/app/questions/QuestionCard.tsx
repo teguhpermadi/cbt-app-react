@@ -1,4 +1,6 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { useEffect, useRef } from "react";
+import renderMathInElement from "katex/dist/contrib/auto-render";
 import { DifficultySelector } from "./DifficultySelector";
 import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
@@ -24,6 +26,22 @@ export default function QuestionCard({ question, onUpdate, readOnly = false }: Q
             onUpdate(question.id, field, value);
         }
     };
+
+    const contentRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (contentRef.current && typeof question.content === 'string') {
+            renderMathInElement(contentRef.current, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+            });
+        }
+    }, [question.content]);
 
     return (
         <Card className="overflow-hidden border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl transition-all hover:shadow-md">
@@ -52,7 +70,7 @@ export default function QuestionCard({ question, onUpdate, readOnly = false }: Q
                 <div className="prose prose-sm max-w-none dark:prose-invert">
                     {/* Render content based on type later, for now just dump or show text */}
                     {typeof question.content === 'string' ? (
-                        <div dangerouslySetInnerHTML={{ __html: question.content }} />
+                        <div ref={contentRef} dangerouslySetInnerHTML={{ __html: question.content }} />
                     ) : (
                         <p className="text-muted-foreground italic">Content format required rendering implementation</p>
                     )}
