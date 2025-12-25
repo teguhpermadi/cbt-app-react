@@ -8,9 +8,11 @@ interface SortableQuestionCardProps {
     question: Question;
     onUpdate?: (id: string, field: keyof Question, value: any) => void;
     onDelete?: (id: string) => void;
+    onEdit?: (question: Question) => void;
+    id?: string;
 }
 
-export function SortableQuestionCard({ question, onUpdate, onDelete }: SortableQuestionCardProps) {
+export function SortableQuestionCard({ question, onUpdate, onDelete, onEdit, id }: SortableQuestionCardProps) {
     const {
         attributes,
         listeners,
@@ -28,7 +30,7 @@ export function SortableQuestionCard({ question, onUpdate, onDelete }: SortableQ
     };
 
     return (
-        <div ref={setNodeRef} style={style} className="relative group">
+        <div ref={setNodeRef} style={style} className="relative group" id={id}>
             {/* Drag Handle */}
             <div
                 {...attributes}
@@ -44,6 +46,7 @@ export function SortableQuestionCard({ question, onUpdate, onDelete }: SortableQ
                 question={question}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                onEdit={onEdit}
             />
         </div>
     );

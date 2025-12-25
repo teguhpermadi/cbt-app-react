@@ -8,7 +8,8 @@ import { FormEventHandler } from 'react';
 import { useDebounce } from 'use-debounce';
 
 // Wayground Imports
-import { index } from '@/routes/admin/question-banks';
+// Wayground Imports
+// import { index } from '@/routes/admin/question-banks'; // Removed invalid import
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 import QuestionController from '@/actions/App/Http/Controllers/Admin/QuestionController';
 
@@ -29,7 +30,10 @@ import {
 } from '@dnd-kit/sortable';
 import { useEffect, useState } from 'react';
 import { SortableQuestionCard } from '@/components/app/questions/SortableQuestionCard';
-import QuestionCard, { Question } from '@/components/app/questions/QuestionCard';
+import QuestionCard from '@/components/app/questions/QuestionCard';
+import { Question } from '@/components/app/questions/types';
+
+
 
 import 'katex/dist/katex.min.css';
 
@@ -119,7 +123,7 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
             {/* Custom Top Bar */}
             <div className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
                 <Button variant="ghost" size="icon" asChild>
-                    <Link href={index().url}>
+                    <Link href={QuestionBankController.index().url}>
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
                 </Button>
@@ -165,9 +169,11 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                                     {sortedQuestions.map((question) => (
                                         <SortableQuestionCard
                                             key={question.id}
+                                            id={`question-${question.id}`}
                                             question={question}
                                             onUpdate={handleQuestionUpdate}
                                             onDelete={handleQuestionDelete}
+                                            onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
                                         />
                                     ))}
                                 </div>
