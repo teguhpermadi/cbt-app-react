@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react'; // Added useRef
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, Plus, Trash2, AlertCircle } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Trash2, AlertCircle, Image as ImageIcon, X } from 'lucide-react'; // Added Image icon
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,6 +36,9 @@ interface Option {
     is_correct: boolean;
     order: number;
     metadata?: any;
+    media_url?: string | null;
+    media_file?: File | null;
+    delete_media?: boolean;
 }
 
 interface Question {
@@ -47,25 +50,28 @@ interface Question {
     timer: number;
     score_value: number;
     options: Option[];
+    media_url?: string | null;
 }
 
 interface EnumOption {
     value: string | number;
-    name?: string; // or relying on manual mapping if name isn't passed
+    name?: string;
 }
 
 interface QuestionFormData {
+    _method: string;
     content: string;
     question_type: string;
     difficulty_level: string;
     timer: number;
     score_value: number;
     options: Option[];
+    question_media?: File | null;
+    delete_question_media?: boolean;
 }
 
 interface Props {
     question: Question;
-
     difficulties: EnumOption[];
     timers: EnumOption[];
     scores: EnumOption[];
@@ -73,32 +79,45 @@ interface Props {
 
 export default function EditQuestion({ question, difficulties, timers, scores }: Props) {
     const initialData: QuestionFormData = {
+        _method: 'PUT',
         content: question.content || '',
         question_type: question.question_type,
         difficulty_level: question.difficulty_level,
         timer: question.timer,
         score_value: question.score_value,
-        options: question.options,
+        options: question.options.map(opt => ({ ...opt, media_file: null, delete_media: false })),
+        question_media: null,
+        delete_question_media: false,
     };
 
-    const { data, setData, put, processing, errors, isDirty } = useForm(initialData);
-
-    // Reset options when type changes if needed, or handle conversion
-    // For now, we keep it simple: if type changes, we might need to reset structure
-    // But let's allow user to keep content if possible.
+    const { data, setData, post, processing, errors } = useForm(initialData);
+    const [previewQuestionMedia, setPreviewQuestionMedia] = useState<string | null>(question.media_url || null);
 
     const handleTypeChange = (value: string) => {
-        // If type changes significantly, we might want to reset options
-        // For now just update type
         setData('question_type', value);
     };
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        put(QuestionController.update(question.id).url);
+        // Use POST with _method: PUT to support file uploads
+        post(QuestionController.update(question.id).url);
     };
 
+    const handleQuestionMediaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            setData('question_media', file);
+            setData('delete_question_media', false);
+            const objectUrl = URL.createObjectURL(file);
+            setPreviewQuestionMedia(objectUrl);
+        }
+    };
 
+    const removeQuestionMedia = () => {
+        setData('question_media', null);
+        setData('delete_question_media', true);
+        setPreviewQuestionMedia(null);
+    };
 
     return (
         <div className="min-h-screen bg-muted/40 flex flex-col">
@@ -159,6 +178,42 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                             className="min-h-[120px] text-lg p-4 resize-y"
                         />
                         {errors.content && <p className="text-red-500 text-sm">{errors.content}</p>}
+
+                        {/* Media Upload for Question */}
+                        <div className="space-y-2">
+                            <Label>Media / Gambar (Opsional)</Label>
+                            <div className="flex items-start gap-4">
+                                {previewQuestionMedia ? (
+                                    <div className="relative group">
+                                        <img src={previewQuestionMedia} alt="Preview" className="h-40 w-auto object-contain rounded-md border bg-muted" />
+                                        <Button
+                                            type="button"
+                                            variant="destructive"
+                                            size="icon"
+                                            className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                            onClick={removeQuestionMedia}
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <div className="h-40 w-40 flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground">
+                                        <ImageIcon className="h-10 w-10 opacity-50" />
+                                    </div>
+                                )}
+
+                                <div className="space-y-2">
+                                    <Input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleQuestionMediaChange}
+                                        className="max-w-xs"
+                                    />
+                                    <p className="text-xs text-muted-foreground">Format: JPG, PNG, GIF. Maks: 2MB.</p>
+                                </div>
+                            </div>
+                        </div>
+
                     </CardContent>
                 </Card>
 
@@ -167,6 +222,7 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                     type={data.question_type}
                     options={data.options}
                     onChange={(newOptions) => setData('options', newOptions)}
+                    errors={errors} // Pass errors to show option specific errors if needed
                 />
 
             </div>
@@ -175,7 +231,7 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
 }
 
 
-function OptionsEditor({ type, options, onChange }: { type: string, options: Option[], onChange: (opts: Option[]) => void }) {
+function OptionsEditor({ type, options, onChange, errors }: { type: string, options: Option[], onChange: (opts: Option[]) => void, errors: any }) {
 
     // Initialize default options if empty based on type
     useEffect(() => {
@@ -193,7 +249,9 @@ function OptionsEditor({ type, options, onChange }: { type: string, options: Opt
                 option_key: key,
                 content: '',
                 is_correct: false,
-                order: i
+                order: i,
+                media_url: null,
+                media_file: null
             }));
         } else if (qType === 'true_false') {
             newOps = [
@@ -225,6 +283,20 @@ function OptionsEditor({ type, options, onChange }: { type: string, options: Opt
         }
 
         onChange(newOpts);
+    };
+
+    const handleOptionFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            updateOption(index, 'media_file', file);
+            updateOption(index, 'delete_media', false);
+        }
+    };
+
+    const removeOptionMedia = (index: number) => {
+        updateOption(index, 'media_file', null);
+        updateOption(index, 'media_url', null); // Clear existing URL preview
+        updateOption(index, 'delete_media', true);
     };
 
     const addOption = () => {
@@ -261,32 +333,85 @@ function OptionsEditor({ type, options, onChange }: { type: string, options: Opt
                                     {option.option_key}
                                 </span>
                             </div>
-                            <div className="flex-1 space-y-2">
+                            <div className="flex-1 space-y-3">
                                 <Textarea
                                     value={option.content}
                                     onChange={(e) => updateOption(index, 'content', e.target.value)}
                                     placeholder={`Jawaban ${option.option_key}`}
-                                    className="resize-none"
+                                    className="resize-none min-h-[80px]"
                                 />
-                                <div className="flex items-center gap-2">
-                                    {type === 'multiple_choice' ? (
-                                        <div className="flex items-center gap-2 cursor-pointer" onClick={() => updateOption(index, 'is_correct', true)}>
-                                            <div className={`h-4 w-4 rounded-full border border-primary flex items-center justify-center ${option.is_correct ? 'bg-primary' : ''}`}>
-                                                {option.is_correct && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
+
+                                <div className="flex items-center gap-4">
+                                    {/* Control Correctness */}
+                                    <div className="flex items-center gap-2">
+                                        {type === 'multiple_choice' ? (
+                                            <div className="flex items-center gap-2 cursor-pointer p-1" onClick={() => updateOption(index, 'is_correct', true)}>
+                                                <div className={`h-4 w-4 rounded-full border border-primary flex items-center justify-center ${option.is_correct ? 'bg-primary' : ''}`}>
+                                                    {option.is_correct && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
+                                                </div>
+                                                <Label className="cursor-pointer">Benar</Label>
                                             </div>
-                                            <Label className="cursor-pointer">Benar</Label>
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={`opt-${index}`}
-                                                checked={option.is_correct}
-                                                onCheckedChange={(c) => updateOption(index, 'is_correct', !!c)}
+                                        ) : (
+                                            <div className="flex items-center space-x-2">
+                                                <Checkbox
+                                                    id={`opt-${index}`}
+                                                    checked={option.is_correct}
+                                                    onCheckedChange={(c) => updateOption(index, 'is_correct', !!c)}
+                                                />
+                                                <Label htmlFor={`opt-${index}`}>Benar</Label>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    <div className="h-4 w-px bg-border" />
+
+                                    {/* Media Control */}
+                                    <div className="flex flex-col gap-2">
+                                        <div className="flex items-center gap-2">
+                                            <Label htmlFor={`file-${index}`} className="cursor-pointer flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-2 py-1 rounded-md">
+                                                <ImageIcon className="h-3.5 w-3.5" />
+                                                {option.media_url || option.media_file ? "Ganti Gambar" : "Tambah Gambar"}
+                                            </Label>
+                                            <Input
+                                                id={`file-${index}`}
+                                                type="file"
+                                                className="hidden"
+                                                accept="image/*"
+                                                onChange={(e) => handleOptionFileChange(index, e)}
                                             />
-                                            <Label htmlFor={`opt-${index}`}>Benar</Label>
+
+                                            {(option.media_url || option.media_file) && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    className="h-7 px-2 text-destructive hover:bg-destructive/10 text-xs"
+                                                    onClick={() => removeOptionMedia(index)}
+                                                >
+                                                    Hapus
+                                                </Button>
+                                            )}
                                         </div>
-                                    )}
+
+                                        {/* File Name Indicator (if new file selected) */}
+                                        {option.media_file && (
+                                            <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">
+                                                {option.media_file.name}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
+
+                                {/* Media Preview */}
+                                {(option.media_url || option.media_file) && !option.delete_media && (
+                                    <div className="mt-3 p-2 border rounded-md bg-muted/30">
+                                        <p className="text-[10px] text-muted-foreground mb-1">Preview Gambar:</p>
+                                        <img
+                                            src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
+                                            alt={`Preview Opsi ${option.option_key}`}
+                                            className="h-32 w-auto min-w-[100px] object-contain rounded-sm border bg-background"
+                                        />
+                                    </div>
+                                )}
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => removeOption(index)} className="text-destructive">
                                 <Trash2 className="h-4 w-4" />
@@ -306,10 +431,10 @@ function OptionsEditor({ type, options, onChange }: { type: string, options: Opt
             <div className="grid grid-cols-2 gap-4">
                 {options.map((option, index) => (
                     <div key={index}
-                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all ${option.is_correct ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${option.is_correct ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
                         onClick={() => updateOption(index, 'is_correct', true)}
                     >
-                        <div className="flex items-center justify-between">
+                        <div className="flex items-center justify-between z-10 relative">
                             <span className="font-semibold text-lg">{option.content}</span>
                             {option.is_correct && <CheckSquare className="h-5 w-5 text-primary" />}
                         </div>
@@ -371,7 +496,6 @@ function OptionsEditor({ type, options, onChange }: { type: string, options: Opt
     }
 
     if (type === 'matching') {
-        // Distinct left and right options
         const leftOpts = options.filter(o => o.metadata?.side === 'left');
 
         const updatePair = (pairId: number, side: 'left' | 'right', val: string) => {

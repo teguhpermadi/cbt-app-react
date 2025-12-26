@@ -21,6 +21,14 @@ class QuestionController extends Controller
     public function edit(Question $question)
     {
         $question->load('options');
+        
+        // Inject Media URLs for Frontend
+        $question->media_url = $question->getFirstMediaUrl('question_content');
+        
+        $question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
 
         return Inertia::render('admin/questions/edit', [
             'question' => $question,
@@ -43,12 +51,13 @@ class QuestionController extends Controller
             'difficulty_level' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(DifficultyLevelEnum::cases(), 'value'))],
             'timer' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(TimerEnum::cases(), 'value'))],
             'score_value' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(QuestionScoreEnum::cases(), 'value'))],
+            
+            'question_media' => 'nullable|file|image|max:2048', // Max 2MB
+            'delete_question_media' => 'nullable|boolean',
 
             // Options Validation
             'options' => 'array',
-
-            // Allow dynamic validation for options based on type if needed,
-            // but for now we'll handle basic structure
+            'options.*.media_file' => 'nullable|file|image|max:2048',
         ]);
 
         DB::transaction(function () use ($request, $question, $validated) {
@@ -61,15 +70,23 @@ class QuestionController extends Controller
                 'score_value' => $validated['score_value'],
             ]);
 
-            // 3. Handle Options
-            // Strategy: Sync options.
-            // - If ID exists, update.
-            // - If ID doesn't exist, create.
-            // - Delete options that are not in the request.
+            // Handle Question Media
+            if ($request->hasFile('question_media')) {
+                $question->clearMediaCollection('question_content');
+                $question->addMediaFromRequest('question_media')->toMediaCollection('question_content');
+            } elseif ($request->boolean('delete_question_media')) {
+                $question->clearMediaCollection('question_content');
+            }
 
+            // 3. Handle Options
             $requestOptions = collect($request->input('options', []));
             $existingOptionIds = $question->options()->pluck('id')->toArray();
-            $incomingOptionIds = $requestOptions->pluck('id')->filter()->toArray();
+            
+            // Note: Request options might not have ID if they are new, but indices align if structure is maintained.
+            // However, Inertia sends JSON. When file uploads are involved, inputs are converted to FormData.
+            // Key mapping is crucial.
+            
+            $incomingOptionIds = collect($requestOptions)->pluck('id')->filter()->toArray();
 
             // Delete removed options
             $idsToDelete = array_diff($existingOptionIds, $incomingOptionIds);
@@ -81,15 +98,25 @@ class QuestionController extends Controller
                     'question_id' => $question->id,
                     'option_key' => $optData['option_key'] ?? $this->generateDefaultKey($question->question_type, $index),
                     'content' => $optData['content'] ?? '',
-                    'is_correct' => $optData['is_correct'] ?? false,
+                    'is_correct' => filter_var($optData['is_correct'] ?? false, FILTER_VALIDATE_BOOLEAN),
                     'order' => $optData['order'] ?? $index,
                     'metadata' => $optData['metadata'] ?? null,
                 ];
 
                 if (isset($optData['id']) && $optData['id']) {
-                    Option::where('id', $optData['id'])->update($optionData);
+                    $option = Option::find($optData['id']);
+                    $option->update($optionData);
                 } else {
-                    Option::create($optionData);
+                    $option = Option::create($optionData);
+                }
+
+                // Handle Option Media
+                // Using dot notation for array in request file retrieval
+                if ($request->hasFile("options.$index.media_file")) {
+                    $option->clearMediaCollection('option_media');
+                    $option->addMediaFromRequest("options.$index.media_file")->toMediaCollection('option_media');
+                } elseif (isset($optData['delete_media']) && filter_var($optData['delete_media'], FILTER_VALIDATE_BOOLEAN)) {
+                    $option->clearMediaCollection('option_media');
                 }
             }
         });
