@@ -21,10 +21,10 @@ class QuestionController extends Controller
     public function edit(Question $question)
     {
         $question->load('options');
-        
+
         // Inject Media URLs for Frontend
         $question->media_url = $question->getFirstMediaUrl('question_content');
-        
+
         $question->options->transform(function ($option) {
             $option->media_url = $option->getFirstMediaUrl('option_media');
             return $option;
@@ -51,7 +51,7 @@ class QuestionController extends Controller
             'difficulty_level' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(DifficultyLevelEnum::cases(), 'value'))],
             'timer' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(TimerEnum::cases(), 'value'))],
             'score_value' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(QuestionScoreEnum::cases(), 'value'))],
-            
+
             'question_media' => 'nullable|file|image|max:2048', // Max 2MB
             'delete_question_media' => 'nullable|boolean',
 
@@ -81,11 +81,11 @@ class QuestionController extends Controller
             // 3. Handle Options
             $requestOptions = collect($request->input('options', []));
             $existingOptionIds = $question->options()->pluck('id')->toArray();
-            
+
             // Note: Request options might not have ID if they are new, but indices align if structure is maintained.
             // However, Inertia sends JSON. When file uploads are involved, inputs are converted to FormData.
             // Key mapping is crucial.
-            
+
             $incomingOptionIds = collect($requestOptions)->pluck('id')->filter()->toArray();
 
             // Delete removed options
