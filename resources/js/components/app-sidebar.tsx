@@ -19,49 +19,6 @@ import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, Clipboard
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-    {
-        title: 'User Management',
-        href: '/admin/users',
-        icon: Users,
-    },
-    {
-        title: 'Student Management',
-        href: '/admin/students',
-        icon: GraduationCap,
-    },
-    {
-        title: 'Subject Management',
-        href: '/admin/subjects',
-        icon: BookOpen,
-    },
-    {
-        title: 'Academic Years',
-        href: '/admin/academic-years',
-        icon: Calendar,
-    },
-    {
-        title: 'Grade Management',
-        href: gradesIndex(),
-        icon: GraduationCap,
-    },
-    {
-        title: 'Exam Management',
-        href: examsIndex(),
-        icon: ClipboardList,
-    },
-    {
-        title: 'Bank Soal',
-        href: '/admin/question-banks',
-        icon: BookOpen,
-    },
-];
-
 const footerNavItems: NavItem[] = [
     {
         title: 'Repository',
@@ -76,6 +33,49 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'User Management',
+            href: '/admin/users',
+            icon: Users,
+        },
+        {
+            title: 'Student Management',
+            href: '/admin/students',
+            icon: GraduationCap,
+        },
+        {
+            title: 'Subject Management',
+            href: '/admin/subjects',
+            icon: BookOpen,
+        },
+        {
+            title: 'Academic Years',
+            href: '/admin/academic-years',
+            icon: Calendar,
+        },
+        {
+            title: 'Grade Management',
+            href: gradesIndex(),
+            icon: GraduationCap,
+        },
+        {
+            title: 'Exam Management',
+            href: examsIndex(),
+            icon: ClipboardList,
+        },
+        {
+            title: 'Bank Soal',
+            href: '/admin/question-banks',
+            icon: BookOpen,
+        },
+    ];
+
     return (
         <Sidebar collapsible="icon" variant="inset" className="border-r-0 bg-slate-50/50 dark:bg-slate-900/50">
             <SidebarHeader className="py-4">
