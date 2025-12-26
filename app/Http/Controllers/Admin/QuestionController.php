@@ -111,10 +111,11 @@ class QuestionController extends Controller
                 }
 
                 // Handle Option Media
-                // Using dot notation for array in request file retrieval
+                // Retrieve file using dot notation for nested array
                 if ($request->hasFile("options.$index.media_file")) {
+                    $file = $request->file("options.$index.media_file");
                     $option->clearMediaCollection('option_media');
-                    $option->addMediaFromRequest("options.$index.media_file")->toMediaCollection('option_media');
+                    $option->addMedia($file)->toMediaCollection('option_media');
                 } elseif (isset($optData['delete_media']) && filter_var($optData['delete_media'], FILTER_VALIDATE_BOOLEAN)) {
                     $option->clearMediaCollection('option_media');
                 }

@@ -41,10 +41,11 @@ export default function AnswerOptionsMultipleSelection({ options, showKeyAnswer 
                                 dangerouslySetInnerHTML={{ __html: option.content }}
                             />
 
-                            {option.media_path && (
+                            {/* Media (URL or Path) */}
+                            {(option.media_url || option.media_path) && (
                                 <div className="mt-2 rounded-lg overflow-hidden border border-border max-w-xs">
                                     <img
-                                        src={option.media_path}
+                                        src={option.media_url || option.media_path || ''}
                                         alt={`Option ${option.option_key}`}
                                         className="w-full h-auto object-cover"
                                     />

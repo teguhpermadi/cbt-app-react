@@ -4,6 +4,7 @@ export interface Option {
     option_key: string;
     content: string;
     media_path: string | null;
+    media_url?: string | null; // Added media_url
     order: number;
     is_correct: boolean;
     metadata: any;
@@ -16,6 +17,7 @@ export interface Question {
     timer: number;
     score_value: number;
     question_type: string;
+    media_url?: string | null; // Added media_url
     options?: Option[]; // Add options relation
 }
 

@@ -38,6 +38,17 @@ export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }
                         JAWABAN BENAR
                     </span>
                 )}
+
+                {/* Media Preview */}
+                {(option.media_url || option.media_path) && (
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border w-20 h-20 bg-white/50">
+                        <img
+                            src={option.media_url || option.media_path || ''}
+                            alt={label}
+                            className="w-full h-full object-contain"
+                        />
+                    </div>
+                )}
             </div>
         );
     };

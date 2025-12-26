@@ -113,6 +113,17 @@ export default function QuestionCard({
             </CardHeader>
             <CardContent className="p-6">
                 <div className="prose prose-sm max-w-none dark:prose-invert">
+                    {/* Media Preview */}
+                    {question.media_url && (
+                        <div className="mb-4">
+                            <img
+                                src={question.media_url}
+                                alt="Question Media"
+                                className="max-h-[300px] max-w-full rounded-md object-contain border bg-slate-50 dark:bg-slate-900"
+                            />
+                        </div>
+                    )}
+
                     {/* Render content based on type later, for now just dump or show text */}
                     {typeof question.content === 'string' ? (
                         <div ref={contentRef} dangerouslySetInnerHTML={{ __html: question.content }} />

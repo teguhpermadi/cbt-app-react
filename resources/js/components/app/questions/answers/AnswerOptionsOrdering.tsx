@@ -43,7 +43,18 @@ export default function AnswerOptionsOrdering({ options, showKeyAnswer = true }:
                             <GripVertical className="w-4 h-4" />
                         </div>
 
-                        <div className="flex-1 text-sm font-medium" dangerouslySetInnerHTML={{ __html: option.content }} />
+                        <div className="flex-1">
+                            <div className="text-sm font-medium" dangerouslySetInnerHTML={{ __html: option.content }} />
+                            {(option.media_url || option.media_path) && (
+                                <div className="mt-2 rounded-lg overflow-hidden border border-border max-w-xs">
+                                    <img
+                                        src={option.media_url || option.media_path || ''}
+                                        alt="Visual"
+                                        className="w-full h-auto object-cover"
+                                    />
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             ))}

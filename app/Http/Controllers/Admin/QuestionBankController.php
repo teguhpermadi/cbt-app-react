@@ -83,6 +83,18 @@ class QuestionBankController extends Controller
         // Load questions associated with this question bank
         $questionBank->load(['questions.options']);
 
+        // Inject Media URLs
+        $questionBank->questions->transform(function ($question) {
+            $question->media_url = $question->getFirstMediaUrl('question_content');
+
+            $question->options->transform(function ($option) {
+                $option->media_url = $option->getFirstMediaUrl('option_media');
+                return $option;
+            });
+
+            return $question;
+        });
+
         // Ambil subject yang aktif (berdasarkan tahun ajaran aktif)
         $subjects = Subject::query()
             ->whereHas('academicYear', function ($query) {

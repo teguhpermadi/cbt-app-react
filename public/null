@@ -1,11 +1,59 @@
-AcademicYear::get()
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')->update('is_active','true')
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')->update(['is_active','true'])
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')->update(['is_active',true])
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')->update(['is_active',true])
-AcademicYear::find('01kd5m1n74bx7ctxv7chjkzxrc')
-Question::get();
-Question::get()->limit(2);
-Question::limit(1);
-Question::limit(1)->get();
+Question::find('01kd5m1pc4cqs31rznv3t8txc2');
+Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+$question->getFirstMediaUrl('question_content');
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl();
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl();
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl();
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });
+$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+
+$question->options->transform(function ($option) {
+            $option->media_url = $option->getFirstMediaUrl('option_media');
+            return $option;
+        });

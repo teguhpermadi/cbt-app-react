@@ -28,6 +28,17 @@ export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = t
                 )}
             </div>
 
+            {/* Context/Explanation Image */}
+            {(option.media_url || option.media_path) && (
+                <div className="rounded-lg overflow-hidden border border-border max-w-xs">
+                    <img
+                        src={option.media_url || option.media_path || ''}
+                        alt="Context"
+                        className="w-full h-auto object-cover"
+                    />
+                </div>
+            )}
+
             {showKeyAnswer && (
                 <div className="bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-100 dark:border-slate-800 space-y-2">
                     <h4 className="text-xs font-semibold uppercase text-muted-foreground tracking-wider">Kunci Jawaban</h4>

@@ -37,10 +37,11 @@ export default function AnswerOptionsMultipleChoice({ options, showKeyAnswer = t
                                 dangerouslySetInnerHTML={{ __html: option.content }}
                             />
 
-                            {option.media_path && (
+                            {/* Media Preview */}
+                            {(option.media_url || option.media_path) && (
                                 <div className="mt-2 rounded-lg overflow-hidden border border-border max-w-xs">
                                     <img
-                                        src={option.media_path}
+                                        src={option.media_url || option.media_path || ''}
                                         alt={`Option ${option.option_key}`}
                                         className="w-full h-auto object-cover"
                                     />

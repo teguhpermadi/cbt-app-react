@@ -41,6 +41,17 @@ export default function AnswerOptionsMatching({ options, showKeyAnswer = true }:
                     </span>
                 )}
                 <div dangerouslySetInnerHTML={{ __html: option.content }} />
+
+                {/* Media Preview */}
+                {(option.media_url || option.media_path) && (
+                    <div className="mt-2 rounded overflow-hidden border border-border h-12 w-auto bg-white/50 inline-block">
+                        <img
+                            src={option.media_url || option.media_path || ''}
+                            alt="Visual"
+                            className="h-full w-auto object-contain"
+                        />
+                    </div>
+                )}
                 {side === 'left' && showKeyAnswer && (
                     <span className="ml-auto text-xs font-bold opacity-50 bg-white/50 dark:bg-black/20 px-1 rounded">
                         {option.metadata?.pair_id}
