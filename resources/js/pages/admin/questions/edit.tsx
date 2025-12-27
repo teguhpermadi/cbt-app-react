@@ -112,11 +112,49 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
         }));
     };
 
+    const [validationError, setValidationError] = useState<string | null>(null);
+
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
+        setValidationError(null);
+
+        // 1. Validate Question Content
+        if (!data.content || data.content.trim() === '') {
+            setValidationError('Konten soal wajib diisi.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        // 2. Validate Options Existence
+        if (!data.options || data.options.length === 0) {
+            setValidationError('Opsi jawaban harus tersedia.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        // 3. Validate Options Content (Checking if at least one looks valid if needed, or all)
+        // For now, let's just make sure they aren't all empty if that's a requirement,
+        // but often options might be images only. Let's rely on basic check.
+        // If strict validation is needed for each option content:
+        const hasValidOption = data.options.some(opt => opt.content && opt.content.trim() !== '');
+        // CHECK: Is it mandatory for ALL options to have text? Or just Media?
+        // User said "opsi jawaban yang wajib ada".
+        // Let's assume we check if options array is not empty (done above).
+
+        // 4. Validate Correct Answer
+        const hasCorrectAnswer = data.options.some(opt => opt.is_correct);
+        if (!hasCorrectAnswer) {
+            setValidationError('Harus ada setidaknya satu kunci jawaban yang dipilih.');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
         // Use POST with _method: PUT to support file uploads
         post(QuestionController.update(question.id).url, {
             forceFormData: true,
+            onError: () => {
+                setValidationError("Terjadi kesalahan saat menyimpan. Periksa kembali inputan anda.");
+            }
         });
     };
 
@@ -181,6 +219,16 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
 
             {/* CONTENT */}
             <div className="flex-1 overflow-auto p-6 space-y-6 max-w-5xl mx-auto w-full">
+
+                {validationError && (
+                    <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertTitle>Error Validasi</AlertTitle>
+                        <AlertDescription>
+                            {validationError}
+                        </AlertDescription>
+                    </Alert>
+                )}
 
                 {/* QUESTION CARD */}
                 <Card className="border-primary/10 shadow-md">
