@@ -69,9 +69,9 @@ class QuestionBankController extends Controller
 
         $validated['user_id'] = Auth::id();
 
-        QuestionBank::create($validated);
+        $questionBank = QuestionBank::create($validated);
 
-        return redirect()->route('admin.question-banks.index')
+        return redirect()->route('admin.question-banks.edit', $questionBank)
             ->with('success', 'Bank Soal berhasil dibuat.');
     }
 
