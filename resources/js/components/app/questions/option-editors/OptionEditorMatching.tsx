@@ -1,11 +1,18 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
-import { GitMerge, Image as ImageIcon } from 'lucide-react';
+import { GitMerge, Image as ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Option, OptionEditorProps } from './types';
 
 export default function OptionEditorMatching({ options, onChange }: OptionEditorProps) {
+
+    // Generic update helper
+    const updateOptionRaw = (index: number, updates: Partial<Option>) => {
+        const newOpts = [...options];
+        newOpts[index] = { ...newOpts[index], ...updates };
+        onChange(newOpts);
+    };
 
     const updateOption = (index: number, field: keyof Option, value: any) => {
         const newOpts = [...options];
@@ -23,18 +30,62 @@ export default function OptionEditorMatching({ options, onChange }: OptionEditor
     const handleOptionFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            updateOption(index, 'media_file', file);
-            updateOption(index, 'delete_media', false);
+            updateOptionRaw(index, {
+                media_file: file,
+                delete_media: false
+            });
         }
     };
 
     const removeOptionMedia = (index: number) => {
-        updateOption(index, 'media_file', null);
-        updateOption(index, 'media_url', null);
-        updateOption(index, 'delete_media', true);
+        updateOptionRaw(index, {
+            media_file: null,
+            media_url: null,
+            delete_media: true
+        });
     };
 
     const leftOpts = options.filter(o => o.metadata?.side === 'left');
+
+    const renderImageUploader = (opt: Option, index: number) => (
+        <div className="space-y-2 mt-2">
+            <div className="flex items-start gap-2">
+                {(!opt.delete_media && (opt.media_url || opt.media_file)) ? (
+                    <div className="relative group">
+                        <img
+                            src={opt.media_file ? URL.createObjectURL(opt.media_file) : opt.media_url!}
+                            alt={`Preview`}
+                            className="h-20 w-auto min-w-[60px] object-contain rounded-md border bg-muted"
+                        />
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute -top-2 -right-2 h-5 w-5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => removeOptionMedia(index)}
+                        >
+                            <X className="h-3 w-3" />
+                        </Button>
+                    </div>
+                ) : (
+                    <Label htmlFor={`match-file-${index}`} className="h-20 w-20 flex flex-col items-center justify-center rounded-md border border-dashed bg-muted/30 text-muted-foreground cursor-pointer hover:bg-muted/50">
+                        <ImageIcon className="h-5 w-5 opacity-50 mb-1" />
+                        <span className="text-[10px]">Img</span>
+                    </Label>
+                )}
+
+                <div className="space-y-1">
+                    <Input
+                        id={`match-file-${index}`}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleOptionFileChange(index, e)}
+                        className="max-w-[150px] text-xs h-8"
+                    />
+                </div>
+            </div>
+        </div>
+    );
 
     return (
         <div className="space-y-6">
@@ -53,7 +104,7 @@ export default function OptionEditorMatching({ options, onChange }: OptionEditor
 
                 return (
                     <div key={pairId ?? `pair-${i}`} className="space-y-2 border-b pb-4 last:border-0">
-                        <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-center">
+                        <div className="grid grid-cols-[1fr,auto,1fr] gap-4 items-start">
                             {/* LEFT INPUT */}
                             <div className="space-y-2">
                                 <Input
@@ -61,23 +112,10 @@ export default function OptionEditorMatching({ options, onChange }: OptionEditor
                                     onChange={(e) => updatePairContent(pairId, 'left', e.target.value)}
                                     placeholder={`Item ${pairId}`}
                                 />
-                                {/* Media Left */}
-                                <div className="flex items-center gap-2">
-                                    <Label htmlFor={`match-l-file-${leftOptIndex}`} className="cursor-pointer flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-1 rounded-md">
-                                        <ImageIcon className="h-3 w-3" /> Img
-                                    </Label>
-                                    <Input id={`match-l-file-${leftOptIndex}`} type="file" className="hidden" accept="image/*" onChange={(e) => handleOptionFileChange(leftOptIndex, e)} />
-                                    {(leftOpt.media_url || leftOpt.media_file) && (
-                                        <Button variant="ghost" size="sm" className="h-6 px-1 text-destructive text-[10px]" onClick={() => removeOptionMedia(leftOptIndex)}>Hapus</Button>
-                                    )}
-                                    {leftOpt.media_file && <span className="text-[10px] truncate max-w-[80px]">{leftOpt.media_file.name}</span>}
-                                </div>
-                                {(leftOpt.media_url || leftOpt.media_file) && !leftOpt.delete_media && (
-                                    <img src={leftOpt.media_file ? URL.createObjectURL(leftOpt.media_file) : leftOpt.media_url!} className="h-16 w-auto object-contain border rounded bg-muted" />
-                                )}
+                                {renderImageUploader(leftOpt, leftOptIndex)}
                             </div>
 
-                            <div className="text-muted-foreground flex flex-col items-center justify-center h-full">
+                            <div className="text-muted-foreground flex flex-col items-center justify-center pt-2">
                                 <GitMerge className="h-4 w-4" />
                             </div>
 
@@ -88,20 +126,7 @@ export default function OptionEditorMatching({ options, onChange }: OptionEditor
                                     onChange={(e) => updatePairContent(pairId, 'right', e.target.value)}
                                     placeholder={`Pasangan ${pairId}`}
                                 />
-                                {/* Media Right */}
-                                <div className="flex items-center gap-2">
-                                    <Label htmlFor={`match-r-file-${rightOptIndex}`} className="cursor-pointer flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-1 rounded-md">
-                                        <ImageIcon className="h-3 w-3" /> Img
-                                    </Label>
-                                    <Input id={`match-r-file-${rightOptIndex}`} type="file" className="hidden" accept="image/*" onChange={(e) => handleOptionFileChange(rightOptIndex, e)} />
-                                    {(rightOpt.media_url || rightOpt.media_file) && (
-                                        <Button variant="ghost" size="sm" className="h-6 px-1 text-destructive text-[10px]" onClick={() => removeOptionMedia(rightOptIndex)}>Hapus</Button>
-                                    )}
-                                    {rightOpt.media_file && <span className="text-[10px] truncate max-w-[80px]">{rightOpt.media_file.name}</span>}
-                                </div>
-                                {(rightOpt.media_url || rightOpt.media_file) && !rightOpt.delete_media && (
-                                    <img src={rightOpt.media_file ? URL.createObjectURL(rightOpt.media_file) : rightOpt.media_url!} className="h-16 w-auto object-contain border rounded bg-muted" />
-                                )}
+                                {rightOpt && renderImageUploader(rightOpt, rightOptIndex)}
                             </div>
                         </div>
                     </div>

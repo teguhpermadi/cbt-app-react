@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, X } from 'lucide-react';
 import { Option, OptionEditorProps } from './types';
 
 export default function OptionEditorNumerical({ options, onChange }: OptionEditorProps) {
@@ -78,41 +78,44 @@ export default function OptionEditorNumerical({ options, onChange }: OptionEdito
 
                 {/* Media Upload */}
                 <div className="space-y-2 border-t pt-4">
-                    <div className="flex items-center gap-2">
-                        <Label htmlFor="num-file" className="cursor-pointer flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-2 py-1 rounded-md">
-                            <ImageIcon className="h-3.5 w-3.5" />
-                            {numOption.media_url || numOption.media_file ? "Ganti Gambar Penjelasan" : "Tambah Gambar Penjelasan"}
-                        </Label>
-                        <Input
-                            id="num-file"
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                        />
-                        {(numOption.media_url || numOption.media_file) && (
-                            <Button // Fixed: Changed 'button' to Button component
-                                variant="ghost" // Fixed: Added variant
-                                size="sm" // Fixed: Added size
-                                type="button"
-                                className="h-7 px-2 text-destructive hover:bg-destructive/10 text-xs" // Fixed: Added className
-                                onClick={removeMedia}
-                            >
-                                Hapus
-                            </Button>
+                    <div className="flex items-start gap-4">
+                        {(!numOption.delete_media && (numOption.media_url || numOption.media_file)) ? (
+                            <div className="relative group">
+                                <img
+                                    src={numOption.media_file ? URL.createObjectURL(numOption.media_file) : numOption.media_url!}
+                                    alt="Preview"
+                                    className="h-32 w-auto min-w-[100px] object-contain rounded-md border bg-muted"
+                                />
+                                <Button
+                                    type="button"
+                                    variant="destructive"
+                                    size="icon"
+                                    className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                    onClick={removeMedia}
+                                >
+                                    <X className="h-3 w-3" />
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="h-32 w-32 flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground">
+                                <ImageIcon className="h-8 w-8 opacity-50" />
+                            </div>
                         )}
-                        {numOption.media_file && <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">{numOption.media_file.name}</span>}
-                    </div>
 
-                    {(numOption.media_url || numOption.media_file) && !numOption.delete_media && (
-                        <div className="mt-1 p-2 border rounded-md bg-muted/30 w-fit">
-                            <img
-                                src={numOption.media_file ? URL.createObjectURL(numOption.media_file) : numOption.media_url!}
-                                alt="Preview"
-                                className="h-32 w-auto object-contain rounded-sm border bg-background"
+                        <div className="space-y-2 pt-2">
+                            <Label htmlFor="num-file" className="cursor-pointer text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                                {numOption.media_url || numOption.media_file ? "Ganti Gambar Penjelasan" : "Tambah Gambar Penjelasan"}
+                            </Label>
+                            <Input
+                                id="num-file"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                className="max-w-xs h-8 text-xs"
                             />
+                            <p className="text-[10px] text-muted-foreground">Format: JPG, PNG, GIF. Maks: 2MB.</p>
                         </div>
-                    )}
+                    </div>
                 </div>
             </CardContent>
         </Card>

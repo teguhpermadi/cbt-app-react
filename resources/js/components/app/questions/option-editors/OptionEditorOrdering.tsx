@@ -1,11 +1,18 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Trash2, Plus, Image as ImageIcon } from 'lucide-react';
+import { Trash2, Plus, Image as ImageIcon, X } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { Option, OptionEditorProps } from './types';
 
 export default function OptionEditorOrdering({ options, onChange }: OptionEditorProps) {
+
+    // Generic update helper
+    const updateOptionRaw = (index: number, updates: Partial<Option>) => {
+        const newOpts = [...options];
+        newOpts[index] = { ...newOpts[index], ...updates };
+        onChange(newOpts);
+    };
 
     const updateOption = (index: number, field: keyof Option, value: any) => {
         const newOpts = [...options];
@@ -16,15 +23,19 @@ export default function OptionEditorOrdering({ options, onChange }: OptionEditor
     const handleOptionFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            updateOption(index, 'media_file', file);
-            updateOption(index, 'delete_media', false);
+            updateOptionRaw(index, {
+                media_file: file,
+                delete_media: false
+            });
         }
     };
 
     const removeOptionMedia = (index: number) => {
-        updateOption(index, 'media_file', null);
-        updateOption(index, 'media_url', null);
-        updateOption(index, 'delete_media', true);
+        updateOptionRaw(index, {
+            media_file: null,
+            media_url: null,
+            delete_media: true
+        });
     };
 
     const addOption = () => {
@@ -63,41 +74,45 @@ export default function OptionEditorOrdering({ options, onChange }: OptionEditor
                     </div>
 
                     {/* Media Upload */}
-                    <div className="flex items-center gap-2 ml-11">
-                        <Label htmlFor={`order-file-${index}`} className="cursor-pointer flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-2 py-1 rounded-md">
-                            <ImageIcon className="h-3.5 w-3.5" />
-                            {option.media_url || option.media_file ? "Ganti Gambar" : "Tambah Gambar"}
-                        </Label>
-                        <Input
-                            id={`order-file-${index}`}
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={(e) => handleOptionFileChange(index, e)}
-                        />
-                        {(option.media_url || option.media_file) && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                type="button"
-                                className="h-7 px-2 text-destructive hover:bg-destructive/10 text-xs"
-                                onClick={() => removeOptionMedia(index)}
-                            >
-                                Hapus
-                            </Button>
-                        )}
-                        {option.media_file && <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">{option.media_file.name}</span>}
-                    </div>
+                    <div className="ml-11 mt-2 space-y-2">
+                        <div className="flex items-start gap-4">
+                            {(!option.delete_media && (option.media_url || option.media_file)) ? (
+                                <div className="relative group">
+                                    <img
+                                        src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
+                                        alt={`Preview Step ${index + 1}`}
+                                        className="h-24 w-auto min-w-[80px] object-contain rounded-md border bg-muted"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => removeOptionMedia(index)}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="h-24 w-24 flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground">
+                                    <ImageIcon className="h-6 w-6 opacity-50" />
+                                </div>
+                            )}
 
-                    {(option.media_url || option.media_file) && !option.delete_media && (
-                        <div className="ml-11 mt-1 p-2 border rounded-md bg-muted/30 w-fit">
-                            <img
-                                src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
-                                alt={`Preview Step ${index + 1}`}
-                                className="h-24 w-auto object-contain rounded-sm border bg-background"
-                            />
+                            <div className="space-y-2 pt-2">
+                                <Label htmlFor={`order-file-${index}`} className="cursor-pointer text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                                    {option.media_url || option.media_file ? "Ganti Gambar" : "Tambah Gambar"}
+                                </Label>
+                                <Input
+                                    id={`order-file-${index}`}
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleOptionFileChange(index, e)}
+                                    className="max-w-xs h-8 text-xs"
+                                />
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             ))}
             <Button variant="outline" onClick={addOption} className="mt-2">

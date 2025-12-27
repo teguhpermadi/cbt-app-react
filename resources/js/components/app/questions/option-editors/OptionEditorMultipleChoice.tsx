@@ -14,6 +14,13 @@ interface Props extends OptionEditorProps {
 
 export default function OptionEditorMultipleChoice({ options, onChange, type, errors }: Props) {
 
+    // Generic update helper that accepts a partial object to merge
+    const updateOptionRaw = (index: number, updates: Partial<Option>) => {
+        const newOpts = [...options];
+        newOpts[index] = { ...newOpts[index], ...updates };
+        onChange(newOpts);
+    };
+
     const updateOption = (index: number, field: keyof Option, value: any) => {
         const newOpts = [...options];
         newOpts[index] = { ...newOpts[index], [field]: value };
@@ -34,15 +41,19 @@ export default function OptionEditorMultipleChoice({ options, onChange, type, er
     const handleOptionFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            updateOption(index, 'media_file', file);
-            updateOption(index, 'delete_media', false);
+            updateOptionRaw(index, {
+                media_file: file,
+                delete_media: false
+            });
         }
     };
 
     const removeOptionMedia = (index: number) => {
-        updateOption(index, 'media_file', null);
-        updateOption(index, 'media_url', null); // Clear existing URL preview
-        updateOption(index, 'delete_media', true);
+        updateOptionRaw(index, {
+            media_file: null,
+            media_url: null,
+            delete_media: true
+        });
     };
 
     const addOption = () => {
@@ -74,91 +85,84 @@ export default function OptionEditorMultipleChoice({ options, onChange, type, er
                                 {option.option_key}
                             </span>
                         </div>
-                        <div className="flex-1 space-y-3">
-                            <Textarea
-                                value={option.content}
-                                onChange={(e) => updateOption(index, 'content', e.target.value)}
-                                placeholder={`Jawaban ${option.option_key}`}
-                                className="resize-none min-h-[80px]"
-                            />
-                            {errors?.[`options.${index}.content`] && (
-                                <p className="text-destructive text-xs">{errors[`options.${index}.content`]}</p>
-                            )}
-
-                            <div className="flex items-center gap-4">
-                                {/* Control Correctness */}
-                                <div className="flex items-center gap-2">
-                                    {type === 'multiple_choice' ? (
-                                        <div className="flex items-center gap-2 cursor-pointer p-1" onClick={() => updateOption(index, 'is_correct', true)}>
-                                            <div className={`h-4 w-4 rounded-full border border-primary flex items-center justify-center ${option.is_correct ? 'bg-primary' : ''}`}>
-                                                {option.is_correct && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
-                                            </div>
-                                            <Label className="cursor-pointer">Benar</Label>
+                        <div className="flex-1 space-y-4">
+                            <div className="flex flex-col space-y-2">
+                                <div className="flex items-center justify-between">
+                                    <Label>Teks Jawaban</Label>
+                                    <div className="flex items-center gap-4">
+                                        {/* Control Correctness */}
+                                        <div className="flex items-center gap-2">
+                                            {type === 'multiple_choice' ? (
+                                                <div className="flex items-center gap-2 cursor-pointer p-1" onClick={() => updateOption(index, 'is_correct', true)}>
+                                                    <div className={`h-4 w-4 rounded-full border border-primary flex items-center justify-center ${option.is_correct ? 'bg-primary' : ''}`}>
+                                                        {option.is_correct && <div className="h-2 w-2 rounded-full bg-primary-foreground" />}
+                                                    </div>
+                                                    <Label className="cursor-pointer">Benar</Label>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center space-x-2">
+                                                    <Checkbox
+                                                        id={`opt-${index}`}
+                                                        checked={option.is_correct}
+                                                        onCheckedChange={(c) => updateOption(index, 'is_correct', !!c)}
+                                                    />
+                                                    <Label htmlFor={`opt-${index}`}>Benar</Label>
+                                                </div>
+                                            )}
                                         </div>
-                                    ) : (
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox
-                                                id={`opt-${index}`}
-                                                checked={option.is_correct}
-                                                onCheckedChange={(c) => updateOption(index, 'is_correct', !!c)}
-                                            />
-                                            <Label htmlFor={`opt-${index}`}>Benar</Label>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="h-4 w-px bg-border" />
-
-                                {/* Media Control */}
-                                <div className="flex flex-col gap-2">
-                                    <div className="flex items-center gap-2">
-                                        <Label htmlFor={`file-${index}`} className="cursor-pointer flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-2 py-1 rounded-md">
-                                            <ImageIcon className="h-3.5 w-3.5" />
-                                            {option.media_url || option.media_file ? "Ganti Gambar" : "Tambah Gambar"}
-                                        </Label>
-                                        <Input
-                                            id={`file-${index}`}
-                                            type="file"
-                                            className="hidden"
-                                            accept="image/*"
-                                            onChange={(e) => handleOptionFileChange(index, e)}
-                                        />
-
-                                        {(option.media_url || option.media_file) && (
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                type="button"
-                                                className="h-7 px-2 text-destructive hover:bg-destructive/10 text-xs"
-                                                onClick={() => removeOptionMedia(index)}
-                                            >
-                                                Hapus
-                                            </Button>
-                                        )}
                                     </div>
-
-                                    {/* File Name Indicator (if new file selected) */}
-                                    {option.media_file && (
-                                        <span className="text-[10px] text-muted-foreground truncate max-w-[150px]">
-                                            {option.media_file.name}
-                                        </span>
-                                    )}
                                 </div>
+                                <Textarea
+                                    value={option.content}
+                                    onChange={(e) => updateOption(index, 'content', e.target.value)}
+                                    placeholder={`Jawaban ${option.option_key}`}
+                                    className="resize-none min-h-[80px]"
+                                />
+                                {errors?.[`options.${index}.content`] && (
+                                    <p className="text-destructive text-xs">{errors[`options.${index}.content`]}</p>
+                                )}
                             </div>
 
-                            {/* Media Preview */}
-                            {(option.media_url || option.media_file) && !option.delete_media && (
-                                <div className="mt-3 p-2 border rounded-md bg-muted/30">
-                                    <p className="text-[10px] text-muted-foreground mb-1">Preview Gambar:</p>
-                                    <img
-                                        src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
-                                        alt={`Preview Opsi ${option.option_key}`}
-                                        className="h-32 w-auto min-w-[100px] object-contain rounded-sm border bg-background"
-                                    />
+                            {/* Media Upload Section */}
+                            <div className="space-y-2">
+                                <Label>Gambar Opsi (Opsional)</Label>
+                                <div className="flex items-start gap-4">
+                                    {(!option.delete_media && (option.media_url || option.media_file)) ? (
+                                        <div className="relative group">
+                                            <img
+                                                src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
+                                                alt={`Preview ${option.option_key}`}
+                                                className="h-32 w-auto min-w-[100px] object-contain rounded-md border bg-muted"
+                                            />
+                                            <Button
+                                                type="button"
+                                                variant="destructive"
+                                                size="icon"
+                                                className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                                onClick={() => removeOptionMedia(index)}
+                                            >
+                                                <X className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                    ) : (
+                                        <div className="h-32 w-32 flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground">
+                                            <ImageIcon className="h-8 w-8 opacity-50" />
+                                        </div>
+                                    )}
+
+                                    <div className="space-y-2 pt-2">
+                                        <Input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => handleOptionFileChange(index, e)}
+                                            className="max-w-xs"
+                                        />
+                                        <p className="text-xs text-muted-foreground">Format: JPG, PNG, GIF. Maks: 2MB.</p>
+                                    </div>
                                 </div>
-                            )}
+                            </div>
                         </div>
-                        <Button variant="ghost" size="icon" onClick={() => removeOption(index)} className="text-destructive">
+                        <Button variant="ghost" size="icon" onClick={() => removeOption(index)} className="text-destructive mt-2">
                             <Trash2 className="h-4 w-4" />
                         </Button>
                     </CardContent>

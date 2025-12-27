@@ -3,10 +3,17 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { CheckSquare, Image as ImageIcon } from 'lucide-react';
+import { CheckSquare, Image as ImageIcon, X } from 'lucide-react';
 import { Option, OptionEditorProps } from './types';
 
 export default function OptionEditorTrueFalse({ options, onChange }: OptionEditorProps) {
+
+    // Generic update helper
+    const updateOptionRaw = (index: number, updates: Partial<Option>) => {
+        const newOpts = [...options];
+        newOpts[index] = { ...newOpts[index], ...updates };
+        onChange(newOpts);
+    };
 
     const updateOption = (index: number, field: keyof Option, value: any) => {
         const newOpts = [...options];
@@ -24,15 +31,19 @@ export default function OptionEditorTrueFalse({ options, onChange }: OptionEdito
     const handleOptionFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            updateOption(index, 'media_file', file);
-            updateOption(index, 'delete_media', false);
+            updateOptionRaw(index, {
+                media_file: file,
+                delete_media: false
+            });
         }
     };
 
     const removeOptionMedia = (index: number) => {
-        updateOption(index, 'media_file', null);
-        updateOption(index, 'media_url', null);
-        updateOption(index, 'delete_media', true);
+        updateOptionRaw(index, {
+            media_file: null,
+            media_url: null,
+            delete_media: true
+        });
     };
 
     return (
@@ -50,40 +61,43 @@ export default function OptionEditorTrueFalse({ options, onChange }: OptionEdito
                     </div>
 
                     {/* Media Upload for T/F */}
-                    <div className="flex items-center gap-2">
-                        <Label htmlFor={`tf-file-${index}`} className="cursor-pointer flex items-center gap-1 text-xs font-medium text-primary hover:text-primary/80 transition-colors bg-primary/10 px-2 py-1 rounded-md">
-                            <ImageIcon className="h-3.5 w-3.5" />
-                            {option.media_url || option.media_file ? "Ganti Gambar" : "Tambah Gambar"}
-                        </Label>
-                        <Input
-                            id={`tf-file-${index}`}
-                            type="file"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={(e) => handleOptionFileChange(index, e)}
-                        />
-                        {(option.media_url || option.media_file) && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                type="button"
-                                className="h-7 px-2 text-destructive hover:bg-destructive/10 text-xs"
-                                onClick={() => removeOptionMedia(index)}
-                            >
-                                Hapus
-                            </Button>
-                        )}
-                    </div>
-                    {/* Media Preview */}
-                    {(option.media_url || option.media_file) && !option.delete_media && (
-                        <div className="mt-1 p-2 border rounded-md bg-muted/30">
-                            <img
-                                src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
-                                alt={`Preview ${option.content}`}
-                                className="h-24 w-auto object-contain rounded-sm border bg-background mx-auto"
-                            />
+                    <div className="space-y-2">
+                        <Label>Gambar (Opsional)</Label>
+                        <div className="flex items-start gap-4">
+                            {(!option.delete_media && (option.media_url || option.media_file)) ? (
+                                <div className="relative group">
+                                    <img
+                                        src={option.media_file ? URL.createObjectURL(option.media_file) : option.media_url!}
+                                        alt={`Preview ${option.content}`}
+                                        className="h-32 w-auto min-w-[100px] object-contain rounded-md border bg-muted"
+                                    />
+                                    <Button
+                                        type="button"
+                                        variant="destructive"
+                                        size="icon"
+                                        className="absolute -top-2 -right-2 h-6 w-6 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                        onClick={() => removeOptionMedia(index)}
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </div>
+                            ) : (
+                                <div className="h-32 w-32 flex items-center justify-center rounded-md border border-dashed bg-muted/50 text-muted-foreground">
+                                    <ImageIcon className="h-8 w-8 opacity-50" />
+                                </div>
+                            )}
+
+                            <div className="space-y-2 pt-2">
+                                <Input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => handleOptionFileChange(index, e)}
+                                    className="max-w-xs"
+                                />
+                                <p className="text-xs text-muted-foreground">Format: JPG, PNG, GIF. Maks: 2MB.</p>
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             ))}
         </div>
