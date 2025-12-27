@@ -58,6 +58,9 @@ class ExamFactory extends Factory
             'title' => "{$titlePrefix} {$subject->name} Kelas {$grade->name}",
             'exam_type' => $examType,
 
+            'token' => \App\Models\Exam::generateToken(),
+            'is_token_visible' => $this->faker->boolean(80), // 80% token ditampilkan
+
             'duration' => $this->faker->randomElement([60, 90, 120]), // Durasi 60/90/120 menit
 
             'passing_score' => $this->faker->randomElement([65, 70, 75]),

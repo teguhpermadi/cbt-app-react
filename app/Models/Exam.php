@@ -36,6 +36,8 @@ class Exam extends Model
         'title',
         'exam_type',        // Tipe ujian (Harian, UTS, UAS, dll.)
         'duration',         // Durasi ujian dalam menit
+        'token',            // Token ujian
+        'is_token_visible', // Status visibilitas token
 
         'is_published',     // Status ujian: draft/terbit
         'is_randomized',    // Apakah urutan soal diacak
@@ -47,6 +49,7 @@ class Exam extends Model
     protected $casts = [
         'exam_type' => ExamTypeEnum::class,
         'duration' => 'integer',
+        'is_token_visible' => 'boolean',
 
         'is_published' => 'boolean',
         'is_randomized' => 'boolean',
@@ -132,5 +135,13 @@ class Exam extends Model
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Ujian '{$this->title}' ({$this->exam_type->value}) di-{$eventName}")
             ->useLogName('exam_configuration');
+    }
+
+    /**
+     * Generate token random 6 digit angka
+     */
+    public static function generateToken(): string
+    {
+        return str_pad((string) random_int(0, 999999), 6, '0', STR_PAD_LEFT);
     }
 }
