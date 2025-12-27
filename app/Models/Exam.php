@@ -118,6 +118,11 @@ class Exam extends Model
         return $this->hasMany(ExamResult::class);
     }
 
+    public function examSessions(): HasMany
+    {
+        return $this->hasMany(ExamSession::class);
+    }
+
     // --- SPATIE CONFIGURATIONS ---
 
     public function getActivitylogOptions(): LogOptions

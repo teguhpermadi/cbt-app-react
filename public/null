@@ -1,59 +1,13 @@
-Question::find('01kd5m1pc4cqs31rznv3t8txc2');
-Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-$question->getFirstMediaUrl('question_content');
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::where('user_type','student')->get()
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::with('grades')->find();
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl();
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::with('grades')->find('01kdf336nzp1zya24s1m3v363a');
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl();
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::with('grades.subjects')->find('01kdf336nzp1zya24s1m3v363a');
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl();
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::with('grades.subject')->find('01kdf336nzp1zya24s1m3v363a');
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
+User::with('grades.subjects')->find('01kdf336nzp1zya24s1m3v363a');
 
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
-$question = Question::with('options')->find('01kd5m1pc4cqs31rznv3t8txc2');
-
-$question->options->transform(function ($option) {
-            $option->media_url = $option->getFirstMediaUrl('option_media');
-            return $option;
-        });
+User::with('grades.subjects.exams')->find('01kdf336nzp1zya24s1m3v363a');

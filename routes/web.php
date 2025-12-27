@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Student Routes
     Route::prefix('student')->name('student.')->group(function () {
         Route::get('dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+        Route::get('exams', [\App\Http\Controllers\Student\ExamController::class, 'index'])->name('exams.index');
     });
 
     // Admin Routes

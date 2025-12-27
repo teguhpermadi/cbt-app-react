@@ -58,4 +58,14 @@ class Grade extends Model
             ->setDescriptionForEvent(fn(string $eventName) => "Kelas telah di-{$eventName}")
             ->useLogName('grade');
     }
+
+    public function subjects()
+    {
+        return $this->hasMany(Subject::class);
+    }
+
+    public function exams()
+    {
+        return $this->hasMany(Exam::class);
+    }
 }
