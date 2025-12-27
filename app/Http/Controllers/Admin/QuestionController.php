@@ -16,6 +16,97 @@ use Illuminate\Support\Facades\DB;
 class QuestionController extends Controller
 {
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create(Request $request)
+    {
+        $request->validate([
+            'question_bank_id' => 'required|exists:question_banks,id',
+        ]);
+
+        return Inertia::render('admin/questions/create', [
+            'question_bank_id' => $request->question_bank_id,
+            'types' => QuestionTypeEnum::cases(),
+            'difficulties' => DifficultyLevelEnum::cases(),
+            'timers' => TimerEnum::cases(),
+            'scores' => QuestionScoreEnum::cases(),
+        ]);
+    }
+
+    /**
+     * Store a newly created resource in storage.
+     */
+    public function store(Request $request)
+    {
+        // 1. Validate Basic Question Data
+        $validated = $request->validate([
+            'question_bank_id' => 'required|exists:question_banks,id',
+            'content' => 'required|string',
+            'question_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(QuestionTypeEnum::cases(), 'value'))],
+            'difficulty_level' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(DifficultyLevelEnum::cases(), 'value'))],
+            'timer' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(TimerEnum::cases(), 'value'))],
+            'score_value' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(QuestionScoreEnum::cases(), 'value'))],
+
+            'question_media' => 'nullable|file|image|max:2048', // Max 2MB
+
+            // Options Validation
+            'options' => 'array',
+            'options.*.media_file' => 'nullable|file|image|max:2048',
+        ]);
+
+        $question = DB::transaction(function () use ($request, $validated) {
+            // 2. Create Question
+            $maxOrder = Question::where('question_bank_id', $validated['question_bank_id'])->max('order');
+
+            $question = Question::create([
+                'question_bank_id' => $validated['question_bank_id'],
+                'content' => $validated['content'],
+                'question_type' => $validated['question_type'],
+                'difficulty_level' => $validated['difficulty_level'],
+                'timer' => $validated['timer'],
+                'score_value' => $validated['score_value'],
+                'order' => $maxOrder ? $maxOrder + 1 : 1,
+                'is_active' => true,
+            ]);
+
+            // Handle Question Media
+            if ($request->hasFile('question_media')) {
+                $question->addMediaFromRequest('question_media')->toMediaCollection('question_content');
+            }
+
+            // 3. Handle Options
+            $requestOptions = collect($request->input('options', []));
+
+            foreach ($requestOptions as $index => $optData) {
+                $optionData = [
+                    'question_id' => $question->id,
+                    'option_key' => $optData['option_key'] ?? $this->generateDefaultKey($question->question_type, $index),
+                    'content' => $optData['content'] ?? '',
+                    'is_correct' => filter_var($optData['is_correct'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                    'order' => $optData['order'] ?? $index,
+                    'metadata' => $optData['metadata'] ?? null,
+                ];
+
+                $option = Option::create($optionData);
+
+                // Handle Option Media
+                // Retrieve file using dot notation for nested array
+                if ($request->hasFile("options.$index.media_file")) {
+                    $file = $request->file("options.$index.media_file");
+                    $option->addMedia($file)->toMediaCollection('option_media');
+                }
+            }
+            
+            return $question;
+        });
+
+        return to_route('admin.question-banks.edit', [
+            'question_bank' => $question->question_bank_id,
+            'scrollTo' => "question-{$question->id}"
+        ])->with('success', 'Soal berhasil dibuat.');
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(Question $question)

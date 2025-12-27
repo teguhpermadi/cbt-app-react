@@ -35,9 +35,13 @@ import { Question } from '@/components/app/questions/types';
 
 
 
+
+
 import 'katex/dist/katex.min.css';
 
 interface QuestionBank {
+
+
     id: number;
     name: string;
     subject_id: number;
@@ -170,8 +174,10 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                     {/* Header for Questions Section */}
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
-                        <Button size="sm" variant="outline">
-                            Tambah Pertanyaan
+                        <Button size="sm" variant="outline" asChild>
+                            <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                Tambah Pertanyaan
+                            </Link>
                         </Button>
                     </div>
 
@@ -203,7 +209,11 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                         <Card className="min-h-[300px] flex items-center justify-center border-dashed">
                             <CardContent className="text-center text-muted-foreground">
                                 <p>Belum ada pertanyaan di bank soal ini.</p>
-                                <Button variant="link" className="mt-2">Buat Pertanyaan Baru</Button>
+                                <Button variant="link" className="mt-2" asChild>
+                                    <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                        Buat Pertanyaan Baru
+                                    </Link>
+                                </Button>
                             </CardContent>
                         </Card>
                     )}
