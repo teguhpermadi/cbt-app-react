@@ -54,9 +54,14 @@ export default function OptionEditorTrueFalse({ options, onChange }: OptionEdito
                         className={`p-4 rounded-lg border-2 cursor-pointer transition-all relative ${option.is_correct ? 'border-primary bg-primary/5' : 'border-muted hover:border-primary/50'}`}
                         onClick={() => updateOption(index, 'is_correct', true)}
                     >
-                        <div className="flex items-center justify-between z-10 relative">
-                            <span className="font-semibold text-lg">{option.content}</span>
-                            {option.is_correct && <CheckSquare className="h-5 w-5 text-primary" />}
+                        <div className="flex items-center justify-between z-10 relative w-full gap-2">
+                            <Input
+                                value={option.content}
+                                onChange={(e) => updateOption(index, 'content', e.target.value)}
+                                onClick={(e) => e.stopPropagation()}
+                                className="font-semibold text-lg bg-transparent border-transparent hover:border-input focus:border-input px-2 shadow-none h-auto transition-colors"
+                            />
+                            {option.is_correct && <CheckSquare className="h-5 w-5 text-primary shrink-0" />}
                         </div>
                     </div>
 

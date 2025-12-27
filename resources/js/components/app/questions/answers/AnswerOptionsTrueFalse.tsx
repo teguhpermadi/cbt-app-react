@@ -55,8 +55,8 @@ export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }
 
     return (
         <div className="flex gap-4 w-full">
-            {renderOption(trueOption, "BENAR", "emerald", <Check className="w-6 h-6" />)}
-            {renderOption(falseOption, "SALAH", "red", <X className="w-6 h-6" />)}
+            {renderOption(trueOption, trueOption?.content || "BENAR", "emerald", <Check className="w-6 h-6" />)}
+            {renderOption(falseOption, falseOption?.content || "SALAH", "red", <X className="w-6 h-6" />)}
         </div>
     );
 }
