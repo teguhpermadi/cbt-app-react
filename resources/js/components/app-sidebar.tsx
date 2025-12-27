@@ -13,8 +13,8 @@ import {
 import { dashboard } from '@/routes';
 import { index as gradesIndex } from '@/routes/admin/grades';
 import { index as examsIndex } from '@/routes/admin/exams';
-import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/react';
+import { type NavItem, type SharedData } from '@/types';
+import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
@@ -33,7 +33,9 @@ const footerNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const mainNavItems: NavItem[] = [
+    const { auth } = usePage<SharedData>().props;
+
+    const adminNavItems: NavItem[] = [
         {
             title: 'Dashboard',
             href: dashboard(),
@@ -76,19 +78,42 @@ export function AppSidebar() {
         },
     ];
 
+    const studentNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: '/student/dashboard',
+            icon: LayoutGrid,
+        },
+        {
+            title: 'My Exams',
+            href: '#',
+            icon: ClipboardList,
+        },
+        {
+            title: 'Results',
+            href: '#',
+            icon: GraduationCap,
+        },
+    ];
+
+    const mainNavItems = auth.user.user_type === 'student' ? studentNavItems : adminNavItems;
+    const dashboardLink = auth.user.user_type === 'student' ? '/student/dashboard' : dashboard();
+
     return (
         <Sidebar collapsible="icon" variant="inset" className="border-r-0 bg-slate-50/50 dark:bg-slate-900/50">
             <SidebarHeader className="py-4">
                 <SidebarMenu>
                     <SidebarMenuItem>
                         <SidebarMenuButton size="lg" asChild className="hover:bg-transparent">
-                            <Link href={dashboard()} prefetch className="flex items-center gap-3">
+                            <Link href={dashboardLink} prefetch className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary shadow-lg shadow-primary/20">
                                     <AppLogoIcon className="size-6 fill-current text-primary-foreground" />
                                 </div>
                                 <div className="flex flex-col leading-none group-data-[collapsible=icon]:hidden">
                                     <span className="font-bold text-slate-900 dark:text-slate-100 uppercase tracking-tighter">CBT App</span>
-                                    <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">Dashboard</span>
+                                    <span className="text-[10px] font-bold text-primary uppercase tracking-[0.2em]">
+                                        {auth.user.user_type === 'student' ? 'Student Area' : 'Dashboard'}
+                                    </span>
                                 </div>
                             </Link>
                         </SidebarMenuButton>

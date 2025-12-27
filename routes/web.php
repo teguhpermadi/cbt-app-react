@@ -18,6 +18,11 @@ Route::get('/', function () {
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
+    // Student Routes
+    Route::prefix('student')->name('student.')->group(function () {
+        Route::get('dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+    });
+
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', UserController::class);
