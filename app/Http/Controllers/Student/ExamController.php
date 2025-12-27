@@ -31,8 +31,7 @@ class ExamController extends Controller
 
         $now = now();
 
-        $exams = Exam::query()
-            ->where('grade_id', $activeGrade->id)
+        $exams = $activeGrade->exams()
             ->where('is_published', true)
             ->where('start_time', '<=', $now)
             ->where('end_time', '>=', $now)
