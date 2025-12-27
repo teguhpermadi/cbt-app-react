@@ -31,6 +31,7 @@ declare function route(name: string, params?: any): string;
 
 import OptionsEditor from '@/components/app/questions/option-editors/OptionsEditor';
 import { Option } from '@/components/app/questions/option-editors/types';
+import { generateDefaultOptions } from '@/components/app/questions/option-editors/utils';
 
 interface Question {
     id: string;
@@ -84,8 +85,31 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
     const { data, setData, post, processing, errors } = useForm(initialData);
     const [previewQuestionMedia, setPreviewQuestionMedia] = useState<string | null>(question.media_url || null);
 
+    const optionCache = useRef<Record<string, Option[]>>({});
+
+    // Initialize cache with initial options
+    useEffect(() => {
+        optionCache.current[question.question_type] = question.options;
+    }, []);
+
     const handleTypeChange = (value: string) => {
-        setData('question_type', value);
+        // Save current options to cache before switching
+        optionCache.current[data.question_type] = data.options;
+
+        let newOptions: Option[];
+
+        // Check if we have cached options for the new type
+        if (optionCache.current[value]) {
+            newOptions = optionCache.current[value];
+        } else {
+            newOptions = generateDefaultOptions(value);
+        }
+
+        setData(data => ({
+            ...data,
+            question_type: value,
+            options: newOptions
+        }));
     };
 
     const submit = (e: React.FormEvent) => {
