@@ -30,6 +30,7 @@ class QuestionController extends Controller
             'difficulties' => DifficultyLevelEnum::cases(),
             'timers' => TimerEnum::cases(),
             'scores' => QuestionScoreEnum::cases(),
+            'order' => $request->order,
         ]);
     }
 
@@ -58,6 +59,18 @@ class QuestionController extends Controller
             // 2. Create Question
             $maxOrder = Question::where('question_bank_id', $validated['question_bank_id'])->max('order');
 
+            // Determine Order
+            $forceOrder = request()->input('order');
+            if ($forceOrder) {
+                // Shift existing questions
+                Question::where('question_bank_id', $validated['question_bank_id'])
+                    ->where('order', '>=', $forceOrder)
+                    ->increment('order');
+                $order = $forceOrder;
+            } else {
+                $order = $maxOrder ? $maxOrder + 1 : 1;
+            }
+
             $question = Question::create([
                 'question_bank_id' => $validated['question_bank_id'],
                 'content' => $validated['content'],
@@ -65,7 +78,7 @@ class QuestionController extends Controller
                 'difficulty_level' => $validated['difficulty_level'],
                 'timer' => $validated['timer'],
                 'score_value' => $validated['score_value'],
-                'order' => $maxOrder ? $maxOrder + 1 : 1,
+                'order' => $order,
                 'is_active' => true,
             ]);
 
@@ -96,7 +109,7 @@ class QuestionController extends Controller
                     $option->addMedia($file)->toMediaCollection('option_media');
                 }
             }
-            
+
             return $question;
         });
 

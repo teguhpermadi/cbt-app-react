@@ -33,6 +33,7 @@ interface QuestionFormData {
     score_value: number;
     options: Option[];
     question_media?: File | null;
+    order?: number;
 }
 
 interface Props {
@@ -41,9 +42,10 @@ interface Props {
     difficulties: EnumOption[];
     timers: EnumOption[];
     scores: EnumOption[];
+    order?: number;
 }
 
-export default function CreateQuestion({ question_bank_id, types, difficulties, timers, scores }: Props) {
+export default function CreateQuestion({ question_bank_id, types, difficulties, timers, scores, order }: Props) {
     // Default to MultipleChoice or first available type
     const defaultType = 'multiple_choice';
 
@@ -56,6 +58,7 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
         score_value: 1, // Default to 1 point
         options: generateDefaultOptions(defaultType),
         question_media: null,
+        order: order,
     };
 
     const { data, setData, post, processing, errors } = useForm(initialData);

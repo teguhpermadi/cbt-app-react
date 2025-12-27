@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, Plus } from 'lucide-react';
 import { FormEventHandler } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -140,6 +140,25 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
         });
     };
 
+    const InsertQuestionIndicator = ({ order }: { order: number }) => (
+        <div className="group relative h-8 -my-4 z-10 flex items-center justify-center cursor-pointer">
+            {/* Hover Area Helper - makes it easier to trigger */}
+            <div className="absolute inset-0 z-0" />
+
+            {/* Visual Line */}
+            <div className="absolute inset-x-0 h-px bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity z-10" />
+
+            {/* Button */}
+            <Link
+                href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}&order=${order}`}
+                className="relative z-20 bg-background border rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-all shadow-sm hover:bg-primary hover:text-primary-foreground pointer-events-auto transform scale-75 group-hover:scale-100 duration-200"
+                title="Sisipkan Pertanyaan Disini"
+            >
+                <Plus className="h-4 w-4" />
+            </Link>
+        </div>
+    );
+
     return (
         <AppShell variant="header">
             <Head title={`Edit ${questionBank.name}`} />
@@ -192,15 +211,17 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                                 strategy={verticalListSortingStrategy}
                             >
                                 <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
-                                    {sortedQuestions.map((question) => (
-                                        <SortableQuestionCard
-                                            key={question.id}
-                                            id={`question-${question.id}`}
-                                            question={question}
-                                            onUpdate={handleQuestionUpdate}
-                                            onDelete={handleQuestionDelete}
-                                            onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
-                                        />
+                                    {sortedQuestions.map((question, index) => (
+                                        <div key={question.id}>
+                                            <SortableQuestionCard
+                                                id={`question-${question.id}`}
+                                                question={question}
+                                                onUpdate={handleQuestionUpdate}
+                                                onDelete={handleQuestionDelete}
+                                                onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
+                                            />
+                                            <InsertQuestionIndicator order={index + 2} />
+                                        </div>
                                     ))}
                                 </div>
                             </SortableContext>
