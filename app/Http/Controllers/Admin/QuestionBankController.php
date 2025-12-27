@@ -130,7 +130,7 @@ class QuestionBankController extends Controller
 
         $questionBank->update($validated);
 
-        return redirect()->back()
+        return redirect()->route('admin.question-banks.index')
             ->with('success', 'Bank Soal berhasil diperbarui.');
     }
 

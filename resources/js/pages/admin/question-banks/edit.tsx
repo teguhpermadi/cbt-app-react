@@ -2,8 +2,26 @@ import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Settings } from 'lucide-react';
 import { FormEventHandler } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -49,12 +67,18 @@ interface QuestionBank {
     is_public: boolean;
 }
 
+interface Subject {
+    id: number;
+    name: string;
+}
+
 interface EditProps {
     questionBank: QuestionBank;
     questions?: Question[];
+    subjects: Subject[];
 }
 
-export default function Edit({ questionBank, questions = [] }: EditProps) {
+export default function Edit({ questionBank, questions = [], subjects }: EditProps) {
     const { data, setData, put, processing, errors, isDirty } = useForm({
         name: questionBank.name,
         subject_id: questionBank.subject_id,
@@ -180,6 +204,65 @@ export default function Edit({ questionBank, questions = [] }: EditProps) {
                     />
                     {errors.name && <div className="text-sm text-red-500 mt-1">{errors.name}</div>}
                 </div>
+
+                <Dialog>
+                    <DialogTrigger asChild>
+                        <Button variant="outline" size="icon">
+                            <Settings className="h-4 w-4" />
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Pengaturan Bank Soal</DialogTitle>
+                            <DialogDescription>
+                                Ubah detail konfigurasi untuk bank soal ini.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label htmlFor="subject">Mata Pelajaran</Label>
+                                <Select
+                                    value={data.subject_id.toString()}
+                                    onValueChange={(value) => setData('subject_id', parseInt(value))}
+                                >
+                                    <SelectTrigger id="subject">
+                                        <SelectValue placeholder="Pilih Mata Pelajaran" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {subjects.map((subject) => (
+                                            <SelectItem key={subject.id} value={subject.id.toString()}>
+                                                {subject.name}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                {errors.subject_id && <div className="text-sm text-red-500">{errors.subject_id}</div>}
+                            </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="description">Deskripsi</Label>
+                                <Textarea
+                                    id="description"
+                                    value={data.description}
+                                    onChange={(e) => setData('description', e.target.value)}
+                                    placeholder="Deskripsi singkat bank soal..."
+                                />
+                                {errors.description && <div className="text-sm text-red-500">{errors.description}</div>}
+                            </div>
+                            <div className="flex items-center justify-between rounded-lg border p-4">
+                                <div className="space-y-0.5">
+                                    <Label className="text-base">Publik</Label>
+                                    <div className="text-sm text-muted-foreground">
+                                        Izinkan bank soal ini diakses oleh guru lain.
+                                    </div>
+                                </div>
+                                <Switch
+                                    checked={data.is_public}
+                                    onCheckedChange={(checked) => setData('is_public', checked)}
+                                />
+                            </div>
+                        </div>
+                    </DialogContent>
+                </Dialog>
 
                 <Button onClick={submit} disabled={processing || !isDirty}>
                     <Save className="mr-2 h-4 w-4" />
