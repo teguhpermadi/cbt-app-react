@@ -39,6 +39,11 @@ class QuestionFactory extends Factory
     public function configure(): static
     {
         return $this->afterCreating(function (Question $question) {
+            // Attach media to question if GD is available
+            if (extension_loaded('gd')) {
+                $this->attachDummyMedia($question, 'question_content', "Question");
+            }
+
             $this->createOptionsForQuestion($question);
         });
     }
@@ -119,7 +124,14 @@ class QuestionFactory extends Factory
             ];
         }
 
-        Option::createMultipleChoiceOptions($question->id, $options);
+        $createdOptions = Option::createMultipleChoiceOptions($question->id, $options);
+
+        if (extension_loaded('gd')) {
+            foreach ($createdOptions as $option) {
+                // Attach media to all options
+                $this->attachDummyMedia($option, 'option_media', "Option {$option->option_key}");
+            }
+        }
     }
 
     /**
@@ -138,7 +150,13 @@ class QuestionFactory extends Factory
             ];
         }
 
-        Option::createMultipleChoiceOptions($question->id, $options);
+        $createdOptions = Option::createMultipleChoiceOptions($question->id, $options);
+
+        if (extension_loaded('gd')) {
+            foreach ($createdOptions as $option) {
+                $this->attachDummyMedia($option, 'option_media', "Option {$option->option_key}");
+            }
+        }
     }
 
     /**
@@ -147,7 +165,14 @@ class QuestionFactory extends Factory
     private function createTrueFalseOptions(Question $question): void
     {
         $correctAnswer = $this->faker->boolean();
-        Option::createTrueFalseOptions($question->id, $correctAnswer);
+        // Returns a collection
+        $createdOptions = Option::createTrueFalseOptions($question->id, $correctAnswer);
+
+        if (extension_loaded('gd')) {
+            foreach ($createdOptions as $option) {
+                $this->attachDummyMedia($option, 'option_media', "Option {$option->option_key}");
+            }
+        }
     }
 
     /**
@@ -166,7 +191,13 @@ class QuestionFactory extends Factory
             ];
         }
 
-        Option::createMatchingOptions($question->id, $pairs);
+        $createdOptions = Option::createMatchingOptions($question->id, $pairs);
+
+        if (extension_loaded('gd')) {
+            foreach ($createdOptions as $option) {
+                $this->attachDummyMedia($option, 'option_media', "Match {$option->option_key}");
+            }
+        }
     }
 
     /**
@@ -181,7 +212,13 @@ class QuestionFactory extends Factory
             'Panggang selama 30 menit.',
         ];
 
-        Option::createOrderingOptions($question->id, $steps);
+        $createdOptions = Option::createOrderingOptions($question->id, $steps);
+
+        if (extension_loaded('gd')) {
+            foreach ($createdOptions as $option) {
+                $this->attachDummyMedia($option, 'option_media', "Order {$option->option_key}");
+            }
+        }
     }
 
     /**
@@ -199,11 +236,58 @@ class QuestionFactory extends Factory
         ];
 
         $selected = $this->faker->randomElement($answers);
-        Option::createNumericalInputOption(
+        $option = Option::createNumericalInputOption(
             $question->id,
             $selected['answer'],
             $selected['tolerance'],
             $selected['unit']
         );
+
+        if (extension_loaded('gd')) {
+            $this->attachDummyMedia($option, 'option_media', "Num {$option->option_key}");
+        }
+    }
+
+    /**
+     * Generate and attach a dummy image using GD
+     */
+    private function attachDummyMedia($model, string $collectionName, string $text): void
+    {
+        $width = 400;
+        $height = 300;
+        $image = imagecreatetruecolor($width, $height);
+
+        // Random background color
+        $bgColor = imagecolorallocate($image, rand(50, 200), rand(50, 200), rand(50, 200));
+        imagefill($image, 0, 0, $bgColor);
+
+        // Text color (White)
+        $textColor = imagecolorallocate($image, 255, 255, 255);
+        $font = 5; // Largest built-in font
+
+        // Centering text
+        $charWidth = imagefontwidth($font);
+        $charHeight = imagefontheight($font);
+        $textLen = strlen($text);
+
+        $x = ($width - ($textLen * $charWidth)) / 2;
+        $y = ($height - $charHeight) / 2;
+
+        imagestring($image, $font, $x, $y, $text, $textColor);
+
+        // Save to temp file
+        $tempPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . uniqid('media_', true) . '.jpg';
+        imagejpeg($image, $tempPath);
+        imagedestroy($image);
+
+        // Attach to model using Spatie Media Library
+        try {
+            $model->addMedia($tempPath)
+                ->preservingOriginal() // Keep the temp file for a moment if needed, but Spatie will copy it
+                ->toMediaCollection($collectionName);
+        } catch (\Exception $e) {
+            // Log error or ignore
+            // Log::error("Failed to attach media: " . $e->getMessage());
+        }
     }
 }
