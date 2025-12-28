@@ -22,6 +22,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::prefix('student')->name('student.')->group(function () {
         Route::get('dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
         Route::get('exams', [\App\Http\Controllers\Student\ExamController::class, 'index'])->name('exams.index');
+        Route::get('exams/{exam}', [\App\Http\Controllers\Student\ExamController::class, 'show'])->name('exams.show');
+        Route::post('exams/{exam}/start', [\App\Http\Controllers\Student\ExamController::class, 'start'])->name('exams.start');
     });
 
     // Admin Routes

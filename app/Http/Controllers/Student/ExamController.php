@@ -61,8 +61,45 @@ class ExamController extends Controller
                 ];
             });
 
-        return Inertia::render('Student/Exam/Index', [
+        return Inertia::render('student/exams/index', [
             'exams' => $exams,
         ]);
+    }
+
+
+    /**
+     * Display the specified resource.
+     */
+    public function show(Exam $exam)
+    {
+        $exam->load(['subject', 'grade', 'teacher']);
+
+        return Inertia::render('student/exams/show', [
+            'exam' => $exam,
+            'student' => auth()->user(),
+        ]);
+    }
+
+    /**
+     * Validate token and start the exam.
+     */
+    public function start(Request $request, Exam $exam)
+    {
+        // 1. Validasi Token jika token tidak visible
+        if (!$exam->is_token_visible) {
+            $request->validate([
+                'token' => 'required|string',
+            ]);
+
+            if ($request->token !== $exam->token) {
+                return back()->withErrors(['token' => 'Token ujian tidak valid.']);
+            }
+        }
+
+        // 2. Cek apakah user sudah punya sesi ujian yang belum selesai
+        // Logic ini bisa dikembangkan nanti untuk redirect ke halaman ujian
+
+        // Sementara return success atau redirect ke halaman soal (belum dibuat)
+        return redirect()->back()->with('success', 'Token valid! Ujian akan segera dimulai...');
     }
 }

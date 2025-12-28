@@ -1,13 +1,2 @@
 User::where('user_type','student')->get()
 
-User::with('grades')->find();
-
-User::with('grades')->find('01kdf336nzp1zya24s1m3v363a');
-
-User::with('grades.subjects')->find('01kdf336nzp1zya24s1m3v363a');
-
-User::with('grades.subject')->find('01kdf336nzp1zya24s1m3v363a');
-
-User::with('grades.subjects')->find('01kdf336nzp1zya24s1m3v363a');
-
-User::with('grades.subjects.exams')->find('01kdf336nzp1zya24s1m3v363a');

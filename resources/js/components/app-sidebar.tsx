@@ -85,8 +85,8 @@ export function AppSidebar() {
             icon: LayoutGrid,
         },
         {
-            title: 'My Exams',
-            href: '#',
+            title: 'Ujian Saya',
+            href: '/student/exams',
             icon: ClipboardList,
         },
         {
