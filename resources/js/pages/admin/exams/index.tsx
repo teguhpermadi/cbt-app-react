@@ -252,131 +252,6 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Exam Management</h1>
                         <p className="text-muted-foreground font-medium">Manage exams, schedules, and settings.</p>
                     </div>
-                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
-                                <Plus className="size-4" />
-                                Create New Exam
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-4xl rounded-3xl border-none shadow-2xl">
-                            <form onSubmit={submitCreate}>
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-bold">Create Exam</DialogTitle>
-                                    <DialogDescription>Fill in the details to create a new exam.</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                                    {/* Column 1 */}
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label>Title</Label>
-                                            <Input value={createForm.data.title} onChange={(e) => createForm.setData('title', e.target.value)} placeholder="e.g. Mid-term Physics" />
-                                            <InputError message={createForm.errors.title} />
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Academic Year</Label>
-                                                <Select onValueChange={(v) => createForm.setData('academic_year_id', v)} defaultValue={createForm.data.academic_year_id}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Academic Year" /></SelectTrigger>
-                                                    <SelectContent>{academicYears.map(ay => <SelectItem key={ay.id} value={ay.id}>{ay.year}</SelectItem>)}</SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Grade</Label>
-                                                <Select onValueChange={(v) => createForm.setData('grade_id', v)} value={createForm.data.grade_id}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Grade" /></SelectTrigger>
-                                                    <SelectContent>{grades.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Subject</Label>
-                                                <Select onValueChange={(v) => createForm.setData('subject_id', v)} value={createForm.data.subject_id} disabled={!createForm.data.grade_id}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Subject" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {createFilteredSubjects.length > 0 ? (
-                                                            createFilteredSubjects.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)
-                                                        ) : (
-                                                            <div className="p-2 text-sm text-muted-foreground">No subjects for this grade</div>
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Question Bank</Label>
-                                                <Select onValueChange={(v) => createForm.setData('question_bank_id', v)} value={createForm.data.question_bank_id} disabled={!createForm.data.subject_id}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Question Bank" /></SelectTrigger>
-                                                    <SelectContent>
-                                                        {createFilteredQuestionBanks.length > 0 ? (
-                                                            createFilteredQuestionBanks.map((qb: any) => <SelectItem key={qb.id} value={qb.id}>{qb.name}</SelectItem>)
-                                                        ) : (
-                                                            <div className="p-2 text-sm text-muted-foreground">No question banks for this subject</div>
-                                                        )}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-
-                                            <div className="space-y-2">
-                                                <Label>Teacher</Label>
-                                                <Select onValueChange={(v) => createForm.setData('teacher_id', v)} value={createForm.data.teacher_id}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Teacher" /></SelectTrigger>
-                                                    <SelectContent>{teachers.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
-                                                </Select>
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Exam Type</Label>
-                                                <Select onValueChange={(v) => createForm.setData('exam_type', v)} value={createForm.data.exam_type}>
-                                                    <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                                                    <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
-                                                </Select>
-                                            </div>
-                                        </div>
-
-                                    </div>
-                                    {/* Column 2 */}
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Start Time</Label>
-                                                <Input type="datetime-local" value={createForm.data.start_time} onChange={(e) => createForm.setData('start_time', e.target.value)} />
-                                                <InputError message={createForm.errors.start_time} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>End Time</Label>
-                                                <Input type="datetime-local" value={createForm.data.end_time} onChange={(e) => createForm.setData('end_time', e.target.value)} />
-                                                <InputError message={createForm.errors.end_time} />
-                                            </div>
-                                        </div>
-                                        <div className="grid grid-cols-2 gap-4">
-                                            <div className="space-y-2">
-                                                <Label>Duration (minutes)</Label>
-                                                <Input type="number" value={createForm.data.duration} onChange={(e) => createForm.setData('duration', parseInt(e.target.value))} />
-                                                <InputError message={createForm.errors.duration} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Passing Score</Label>
-                                                <Input type="number" value={createForm.data.passing_score} onChange={(e) => createForm.setData('passing_score', parseInt(e.target.value))} />
-                                                <InputError message={createForm.errors.passing_score} />
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center space-x-2 pt-4">
-                                            <Checkbox id="is_randomized" checked={createForm.data.is_randomized} onCheckedChange={(c) => createForm.setData('is_randomized', !!c)} />
-                                            <label htmlFor="is_randomized">Randomize Questions</label>
-                                        </div>
-                                        <div className="flex items-center space-x-2">
-                                            <Checkbox id="is_published" checked={createForm.data.is_published} onCheckedChange={(c) => createForm.setData('is_published', !!c)} />
-                                            <label htmlFor="is_published">Publish Exam</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button type="submit" className="w-full" disabled={createForm.processing}>Create Exam</Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
@@ -491,109 +366,56 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                             <DialogTitle className="text-xl font-bold">Edit Exam</DialogTitle>
                             <DialogDescription>Update details for {editingExam?.title}.</DialogDescription>
                         </DialogHeader>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
-                            {/* Column 1 */}
-                            <div className="space-y-4">
-                                <div className="space-y-2">
-                                    <Label>Title</Label>
-                                    <Input value={editForm.data.title} onChange={(e) => editForm.setData('title', e.target.value)} />
-                                    <InputError message={editForm.errors.title} />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Academic Year</Label>
-                                        <Select onValueChange={(v) => editForm.setData('academic_year_id', v)} value={editForm.data.academic_year_id}>
-                                            <SelectTrigger><SelectValue placeholder="Select Academic Year" /></SelectTrigger>
-                                            <SelectContent>{academicYears.map(ay => <SelectItem key={ay.id} value={ay.id}>{ay.year}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Grade</Label>
-                                        <Select onValueChange={(v) => editForm.setData('grade_id', v)} value={editForm.data.grade_id}>
-                                            <SelectTrigger><SelectValue placeholder="Select Grade" /></SelectTrigger>
-                                            <SelectContent>{grades.map(g => <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Subject</Label>
-                                        <Select onValueChange={(v) => editForm.setData('subject_id', v)} value={editForm.data.subject_id} disabled={!editForm.data.grade_id}>
-                                            <SelectTrigger><SelectValue placeholder="Select Subject" /></SelectTrigger>
-                                            <SelectContent>
-                                                {editFilteredSubjects.length > 0 ? (
-                                                    editFilteredSubjects.map((s: any) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)
-                                                ) : (
-                                                    <div className="p-2 text-sm text-muted-foreground">No subjects for this grade</div>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Question Bank</Label>
-                                        <Select onValueChange={(v) => editForm.setData('question_bank_id', v)} value={editForm.data.question_bank_id} disabled={!editForm.data.subject_id}>
-                                            <SelectTrigger><SelectValue placeholder="Select Question Bank" /></SelectTrigger>
-                                            <SelectContent>
-                                                {editFilteredQuestionBanks.length > 0 ? (
-                                                    editFilteredQuestionBanks.map((qb: any) => <SelectItem key={qb.id} value={qb.id}>{qb.name}</SelectItem>)
-                                                ) : (
-                                                    <div className="p-2 text-sm text-muted-foreground">No question banks for this subject</div>
-                                                )}
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-4">
-
-                                    <div className="space-y-2">
-                                        <Label>Teacher</Label>
-                                        <Select onValueChange={(v) => editForm.setData('teacher_id', v)} value={editForm.data.teacher_id}>
-                                            <SelectTrigger><SelectValue placeholder="Select Teacher" /></SelectTrigger>
-                                            <SelectContent>{teachers.map(t => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Exam Type</Label>
-                                        <Select onValueChange={(v) => editForm.setData('exam_type', v)} value={editForm.data.exam_type}>
-                                            <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                                            <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-
+                        <div className="grid gap-4 py-4">
+                            <div className="space-y-2">
+                                <Label>Title</Label>
+                                <Input value={editForm.data.title} onChange={(e) => editForm.setData('title', e.target.value)} />
+                                <InputError message={editForm.errors.title} />
                             </div>
-                            {/* Column 2 */}
-                            <div className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Start Time</Label>
-                                        <Input type="datetime-local" value={editForm.data.start_time ? new Date(editForm.data.start_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('start_time', e.target.value)} />
-                                        <InputError message={editForm.errors.start_time} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>End Time</Label>
-                                        <Input type="datetime-local" value={editForm.data.end_time ? new Date(editForm.data.end_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('end_time', e.target.value)} />
-                                        <InputError message={editForm.errors.end_time} />
-                                    </div>
+
+                            <div className="space-y-2">
+                                <Label>Exam Type</Label>
+                                <Select onValueChange={(v) => editForm.setData('exam_type', v)} value={editForm.data.exam_type}>
+                                    <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                                    <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <InputError message={editForm.errors.exam_type} />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Start Time</Label>
+                                    <Input type="datetime-local" value={editForm.data.start_time ? new Date(editForm.data.start_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('start_time', e.target.value)} />
+                                    <InputError message={editForm.errors.start_time} />
                                 </div>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label>Duration (minutes)</Label>
-                                        <Input type="number" value={editForm.data.duration} onChange={(e) => editForm.setData('duration', parseInt(e.target.value))} />
-                                        <InputError message={editForm.errors.duration} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Passing Score</Label>
-                                        <Input type="number" value={editForm.data.passing_score} onChange={(e) => editForm.setData('passing_score', parseInt(e.target.value))} />
-                                        <InputError message={editForm.errors.passing_score} />
-                                    </div>
+                                <div className="space-y-2">
+                                    <Label>End Time</Label>
+                                    <Input type="datetime-local" value={editForm.data.end_time ? new Date(editForm.data.end_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('end_time', e.target.value)} />
+                                    <InputError message={editForm.errors.end_time} />
                                 </div>
-                                <div className="flex items-center space-x-2 pt-4">
-                                    <Checkbox id="edit_is_randomized" checked={editForm.data.is_randomized} onCheckedChange={(c) => editForm.setData('is_randomized', !!c)} />
-                                    <label htmlFor="edit_is_randomized">Randomize Questions</label>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Duration (minutes)</Label>
+                                    <Input type="number" value={editForm.data.duration} onChange={(e) => editForm.setData('duration', parseInt(e.target.value))} />
+                                    <InputError message={editForm.errors.duration} />
                                 </div>
-                                <div className="flex items-center space-x-2">
-                                    <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)} />
-                                    <label htmlFor="edit_is_published">Publish Exam</label>
+                                <div className="space-y-2">
+                                    <Label>Passing Score</Label>
+                                    <Input type="number" value={editForm.data.passing_score} onChange={(e) => editForm.setData('passing_score', parseInt(e.target.value))} />
+                                    <InputError message={editForm.errors.passing_score} />
                                 </div>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="edit_is_randomized" checked={editForm.data.is_randomized} onCheckedChange={(c) => editForm.setData('is_randomized', !!c)} />
+                                <label htmlFor="edit_is_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Questions</label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)} />
+                                <label htmlFor="edit_is_published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Publish Exam</label>
                             </div>
                         </div>
                         <DialogFooter>

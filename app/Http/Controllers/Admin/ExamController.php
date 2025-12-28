@@ -61,9 +61,18 @@ class ExamController extends Controller
      */
     public function update(Request $request, Exam $exam)
     {
-        $this->validateExam($request);
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'exam_type' => ['required', Rule::in(ExamTypeEnum::cases())],
+            'duration' => 'required|integer|min:1',
+            'passing_score' => 'required|integer|min:0|max:100',
+            'start_time' => 'required|date',
+            'end_time' => 'required|date|after:start_time',
+            'is_published' => 'required|boolean',
+            'is_randomized' => 'required|boolean',
+        ]);
 
-        $exam->update($request->all());
+        $exam->update($validated);
 
         return redirect()->back()->with('success', 'Exam updated successfully.');
     }
