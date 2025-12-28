@@ -20,6 +20,8 @@ class ExamResultDetail extends Model
         'correction_notes',     // Catatan/Feedback dari guru untuk soal Essay
         'answered_at',          // Waktu soal ini dijawab/diubah terakhir kali
         'time_spent',           // Waktu yang dihabiskan untuk soal ini (dalam detik)
+        'question_number',      // Nomor urut soal dalam sesi (randomized order)
+        'is_flagged',           // Status ragu-ragu
     ];
 
     protected $casts = [
@@ -28,6 +30,8 @@ class ExamResultDetail extends Model
         'score_earned' => 'float',
         'answered_at' => 'datetime',
         'time_spent' => 'integer',
+        'question_number' => 'integer',
+        'is_flagged' => 'boolean',
     ];
 
     // --- RELATIONS ---

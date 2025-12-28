@@ -1,0 +1,507 @@
+
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { Head, router } from '@inertiajs/react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+    Clock,
+    ChevronLeft,
+    ChevronRight,
+    Flag,
+    CheckCircle2,
+    AlertCircle,
+    Menu,
+    Save
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import axios from 'axios';
+import { saveAnswer as saveAnswerRoute, finish as finishRoute } from '@/routes/student/exams';
+
+interface Question {
+    id: string; // ExamQuestion ID
+    detail_id: string; // ExamResultDetail ID
+    number: number;
+    content: string;
+    type: string;
+    options: any; // Can be array or object depending on type
+    student_answer: any;
+    is_flagged: boolean;
+}
+
+interface Props {
+    exam: {
+        id: string;
+        title: string;
+        duration: number;
+    };
+    session: {
+        id: string;
+        end_time: string;
+    };
+    questions: Question[];
+}
+
+export default function ExamTake({ exam, session, questions }: Props) {
+    // -- State --
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [answers, setAnswers] = useState<Record<string, any>>({});
+    const [flagged, setFlagged] = useState<Record<string, boolean>>({});
+    const [timeLeft, setTimeLeft] = useState<number>(0);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // Time Tracking
+    const activeQuestionStartTime = useRef<number>(Date.now());
+
+    // Initialize state from props
+    useEffect(() => {
+        const initialAnswers: Record<string, any> = {};
+        const initialFlags: Record<string, boolean> = {};
+
+        questions.forEach(q => {
+            if (q.student_answer !== null && q.student_answer !== undefined) {
+                initialAnswers[q.detail_id] = q.student_answer;
+            }
+            initialFlags[q.detail_id] = q.is_flagged;
+        });
+
+        setAnswers(initialAnswers);
+        setFlagged(initialFlags);
+
+        activeQuestionStartTime.current = Date.now();
+
+        const end = new Date(session.end_time).getTime();
+        const now = new Date().getTime();
+        setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
+
+    }, [questions, session.end_time]);
+
+    // Timer Interval
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 0) {
+                    clearInterval(timer);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(timer);
+    }, []);
+
+    // Format time
+    const formatTime = (seconds: number) => {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = seconds % 60;
+        return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    // -- Actions --
+
+    // Autosave & Track Time function
+    const saveToDB = useCallback(async (detailId: string, payload: any, forceDuration: boolean = false) => {
+        const now = Date.now();
+        const durationMs = now - activeQuestionStartTime.current;
+        const durationSec = Math.round(durationMs / 1000);
+
+        if (durationSec < 0 && !forceDuration) return;
+
+        // Reset start time immediately to avoid double counting
+        activeQuestionStartTime.current = now;
+
+        try {
+            await axios.post(saveAnswerRoute.url({ exam: exam.id }), {
+                detail_id: detailId,
+                duration: durationSec,
+                ...payload
+            });
+        } catch (error) {
+            console.error("Autosave failed", error);
+        }
+    }, [exam.id]);
+
+
+    // Handle Answer Change
+    const handleAnswerChange = (value: any) => {
+        const currentQ = questions[currentIndex];
+
+        setAnswers(prev => ({
+            ...prev,
+            [currentQ.detail_id]: value
+        }));
+
+        saveToDB(currentQ.detail_id, { answer: value });
+    };
+
+    // Handle Toggle Flag
+    const handleToggleFlag = () => {
+        const currentQ = questions[currentIndex];
+        const newFlagState = !flagged[currentQ.detail_id];
+
+        setFlagged(prev => ({
+            ...prev,
+            [currentQ.detail_id]: newFlagState
+        }));
+
+        saveToDB(currentQ.detail_id, { is_flagged: newFlagState });
+    };
+
+    // Handle Navigation
+    const changeQuestion = (index: number) => {
+        if (index < 0 || index >= questions.length) return;
+
+        const currentQ = questions[currentIndex];
+        const currentAns = answers[currentQ.detail_id];
+        const currentFlag = flagged[currentQ.detail_id];
+
+        // Save current state + time spent on current question
+        saveToDB(currentQ.detail_id, {
+            answer: currentAns ?? null,
+            is_flagged: currentFlag
+        });
+
+        // Switch to new question
+        setCurrentIndex(index);
+    };
+
+    // Render Question Options
+    const renderOptions = (question: Question) => {
+        const currentAnswer = answers[question.detail_id];
+
+        switch (question.type) {
+            case 'multiple_choice':
+            case 'true_false':
+                return (
+                    <RadioGroup
+                        value={currentAnswer as string}
+                        onValueChange={handleAnswerChange}
+                        className="space-y-3"
+                    >
+                        {Object.entries(question.options || {}).map(([key, opt]: [string, any]) => (
+                            <div key={key} className={cn(
+                                "flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors",
+                                currentAnswer === key ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-slate-200 dark:border-slate-800"
+                            )}>
+                                <RadioGroupItem value={key} id={`opt-${key}`} />
+                                <Label htmlFor={`opt-${key}`} className="flex-1 cursor-pointer font-normal">
+                                    <div className="flex gap-2 text-slate-700 dark:text-slate-300">
+                                        <span className="font-bold text-slate-500">{key}.</span>
+                                        <div dangerouslySetInnerHTML={{ __html: opt.content }} />
+                                    </div>
+                                </Label>
+                            </div>
+                        ))}
+                    </RadioGroup>
+                );
+
+            case 'multiple_selection':
+                const selectedKeys = Array.isArray(currentAnswer) ? currentAnswer : [];
+                const toggleSelection = (key: string) => {
+                    let newSelection;
+                    if (selectedKeys.includes(key)) {
+                        newSelection = selectedKeys.filter(k => k !== key);
+                    } else {
+                        newSelection = [...selectedKeys, key];
+                    }
+                    handleAnswerChange(newSelection);
+                };
+
+                return (
+                    <div className="space-y-3">
+                        {Object.entries(question.options || {}).map(([key, opt]: [string, any]) => (
+                            <div key={key}
+                                onClick={() => toggleSelection(key)}
+                                className={cn(
+                                    "flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors",
+                                    selectedKeys.includes(key) ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-slate-200 dark:border-slate-800"
+                                )}>
+                                <Checkbox checked={selectedKeys.includes(key)} id={`opt-${key}`} />
+                                <Label htmlFor={`opt-${key}`} className="flex-1 cursor-pointer font-normal ml-2">
+                                    <div className="flex gap-2 text-slate-700 dark:text-slate-300">
+                                        <span className="font-bold text-slate-500">{key}.</span>
+                                        <div dangerouslySetInnerHTML={{ __html: opt.content }} />
+                                    </div>
+                                </Label>
+                            </div>
+                        ))}
+                    </div>
+                );
+
+            case 'essay':
+            case 'numerical_input':
+                return (
+                    <div className="space-y-2">
+                        <textarea
+                            className="w-full min-h-[150px] p-4 border rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                            placeholder="Ketik jawaban Anda di sini..."
+                            value={currentAnswer as string || ''}
+                            onChange={(e) => {
+                                setAnswers(prev => ({ ...prev, [question.detail_id]: e.target.value }));
+                            }}
+                            onBlur={(e) => handleAnswerChange(e.target.value)}
+                        />
+                    </div>
+                );
+
+            default:
+                return (
+                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5" />
+                        Tipe soal <strong>{question.type}</strong> akan segera didukung.
+                    </div>
+                );
+        }
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+            <Head title={`Ujian: ${exam.title}`} />
+
+            {/* Header */}
+            <header className="sticky top-0 z-30 w-full border-b bg-white dark:bg-slate-900 shadow-sm">
+                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <div className="font-bold text-lg truncate max-w-[200px] md:max-w-md text-slate-800 dark:text-slate-100">
+                            {exam.title}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <div className={cn(
+                            "flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-bold text-xl border shadow-sm",
+                            timeLeft < 300 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-slate-100 text-slate-700 border-slate-200"
+                        )}>
+                            <Clock className="w-5 h-5" />
+                            {formatTime(timeLeft)}
+                        </div>
+
+                        <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="icon" className="md:hidden">
+                                    <Menu className="w-5 h-5" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
+                                <QuestionNavigator
+                                    questions={questions}
+                                    currentIndex={currentIndex}
+                                    answers={answers}
+                                    flagged={flagged}
+                                    onSelect={(idx) => {
+                                        changeQuestion(idx);
+                                        setIsSidebarOpen(false);
+                                    }}
+                                />
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+                </div>
+            </header>
+
+            <div className="flex-1 container mx-auto px-4 py-6 flex gap-6 max-w-7xl">
+                {/* Main Content */}
+                <main className="flex-1 w-full min-w-0">
+                    <Card className="h-full flex flex-col shadow-md border-slate-200 dark:border-slate-800">
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
+                            <div className="flex items-center gap-3">
+                                <Badge variant="secondary" className="text-base px-4 py-1 font-bold bg-slate-100 text-slate-700 border-slate-200">
+                                    SOAL NO. {currentIndex + 1}
+                                </Badge>
+
+                                <Button
+                                    variant={flagged[questions[currentIndex].detail_id] ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={handleToggleFlag}
+                                    className={cn(
+                                        "gap-2 h-9 px-4",
+                                        flagged[questions[currentIndex].detail_id] ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600" : "text-slate-600"
+                                    )}
+                                >
+                                    <Flag className={cn("w-4 h-4", flagged[questions[currentIndex].detail_id] && "fill-current")} />
+                                    {flagged[questions[currentIndex].detail_id] ? "Ragu-ragu Terpasang" : "Ragu-ragu?"}
+                                </Button>
+                            </div>
+                        </CardHeader>
+
+                        <ScrollArea className="flex-1 bg-white dark:bg-slate-900">
+                            <CardContent className="p-8 md:p-10 space-y-10">
+                                {/* Question Content */}
+                                <div className="text-lg leading-relaxed text-slate-800 dark:text-slate-200">
+                                    <div dangerouslySetInnerHTML={{ __html: questions[currentIndex].content }} className="exam-content" />
+                                </div>
+
+                                <Separator className="bg-slate-100 dark:bg-slate-800" />
+
+                                {/* Options */}
+                                <div className="space-y-4">
+                                    <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Pilih Jawaban:</p>
+                                    {renderOptions(questions[currentIndex])}
+                                </div>
+                            </CardContent>
+                        </ScrollArea>
+
+                        <CardFooter className="border-t p-6 flex justify-between bg-slate-50 dark:bg-slate-900/50">
+                            <Button
+                                variant="outline"
+                                size="lg"
+                                onClick={() => changeQuestion(currentIndex - 1)}
+                                disabled={currentIndex === 0}
+                                className="gap-2 px-6"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                                <span className="hidden sm:inline">Sebelumnya</span>
+                            </Button>
+
+                            <div className="flex gap-2">
+                                {currentIndex === questions.length - 1 ? (
+                                    <Button
+                                        size="lg"
+                                        className="bg-green-600 hover:bg-green-700 text-white px-8 font-bold"
+                                        onClick={() => {
+                                            if (confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
+                                                router.post(finishRoute.url({ exam: exam.id }));
+                                            }
+                                        }}
+                                    >
+                                        <CheckCircle2 className="w-5 h-5 mr-2" />
+                                        Selesai & Kumpulkan
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        size="lg"
+                                        onClick={() => changeQuestion(currentIndex + 1)}
+                                        className="gap-2 px-8 bg-blue-600 hover:bg-blue-700"
+                                    >
+                                        <span className="hidden sm:inline">Selanjutnya</span>
+                                        <ChevronRight className="w-5 h-5" />
+                                    </Button>
+                                )}
+                            </div>
+                        </CardFooter>
+                    </Card>
+                </main>
+
+                {/* Sidebar (Desktop) */}
+                <aside className="hidden lg:block w-80 shrink-0">
+                    <div className="sticky top-24">
+                        <Card className="border-slate-200 dark:border-slate-800 shadow-lg bg-white dark:bg-slate-900 overflow-hidden">
+                            <CardHeader className="bg-slate-50 dark:bg-slate-800/50 border-b py-4">
+                                <div className="flex items-center justify-between">
+                                    <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                                        <Menu className="w-4 h-4" />
+                                        Navigasi Soal
+                                    </CardTitle>
+                                    <Badge variant="outline" className="bg-white dark:bg-slate-900">
+                                        {Object.keys(answers).length}/{questions.length}
+                                    </Badge>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-5">
+                                <QuestionNavigator
+                                    questions={questions}
+                                    currentIndex={currentIndex}
+                                    answers={answers}
+                                    flagged={flagged}
+                                    onSelect={changeQuestion}
+                                />
+                            </CardContent>
+                            <CardFooter className="border-t p-5 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-4">
+                                <div className="w-full space-y-2">
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-blue-600"></div>
+                                            <span className="text-slate-600 dark:text-slate-400">Terjawab</span>
+                                        </div>
+                                        <span className="font-bold text-slate-800 dark:text-slate-200">{Object.keys(answers).length}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-yellow-500"></div>
+                                            <span className="text-slate-600 dark:text-slate-400">Ragu-ragu</span>
+                                        </div>
+                                        <span className="font-bold text-slate-800 dark:text-slate-200">{Object.values(flagged).filter(Boolean).length}</span>
+                                    </div>
+                                    <div className="flex items-center justify-between text-xs">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700"></div>
+                                            <span className="text-slate-600 dark:text-slate-400">Belum Dijawab</span>
+                                        </div>
+                                        <span className="font-bold text-slate-800 dark:text-slate-200">{questions.length - Object.keys(answers).length}</span>
+                                    </div>
+                                </div>
+
+                                <Separator className="my-1" />
+
+                                <Button
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-11"
+                                    onClick={() => {
+                                        if (confirm("Selesaikan ujian sekarang?")) {
+                                            router.post(finishRoute.url({ exam: exam.id }));
+                                        }
+                                    }}
+                                >
+                                    <Save className="w-4 h-4 mr-2" />
+                                    Akhiri Ujian
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    );
+}
+
+// Subcomponent for Grid
+function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect }: {
+    questions: Question[],
+    currentIndex: number,
+    answers: Record<string, any>,
+    flagged: Record<string, boolean>,
+    onSelect: (index: number) => void
+}) {
+    return (
+        <ScrollArea className="h-[400px] pr-2">
+            <div className="grid grid-cols-5 gap-2.5">
+                {questions.map((q, idx) => {
+                    const isAnswered = answers[q.detail_id] !== null && answers[q.detail_id] !== undefined && (typeof answers[q.detail_id] !== 'string' || answers[q.detail_id].trim() !== '');
+                    const isFlagged = flagged[q.detail_id];
+                    const isActive = idx === currentIndex;
+
+                    return (
+                        <button
+                            key={q.detail_id}
+                            onClick={() => onSelect(idx)}
+                            className={cn(
+                                "h-11 w-full rounded-lg text-sm font-bold transition-all border-2 flex items-center justify-center relative",
+                                isActive
+                                    ? "bg-white dark:bg-slate-900 border-blue-600 text-blue-600 shadow-md ring-2 ring-blue-600/20"
+                                    : isFlagged
+                                        ? "bg-yellow-500 border-yellow-500 text-white hover:bg-yellow-600"
+                                        : isAnswered
+                                            ? "bg-blue-600 border-blue-600 text-white hover:bg-blue-700"
+                                            : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:bg-slate-200"
+                            )}
+                        >
+                            {idx + 1}
+                            {isFlagged && !isActive && (
+                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center">
+                                    <Flag className="w-2 h-2 text-white fill-current" />
+                                </div>
+                            )}
+                        </button>
+                    );
+                })}
+            </div>
+        </ScrollArea>
+    );
+}

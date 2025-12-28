@@ -6,6 +6,8 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import { show as showRoute, index as examsIndexRoute } from '@/routes/student/exams';
+import { dashboard as dashboardRoute } from '@/routes/student';
 
 // Helper to format date
 const formatDate = (dateString: string) => {
@@ -37,11 +39,11 @@ interface Props {
 const breadcrumbs = [
     {
         title: 'Dashboard',
-        href: '/student/dashboard',
+        href: dashboardRoute.url(),
     },
     {
         title: 'Ujian Saya',
-        href: '/student/exams',
+        href: examsIndexRoute.url(),
     },
 ];
 
@@ -126,7 +128,7 @@ export default function ExamIndex({ exams, message }: Props) {
                                                         ? "bg-yellow-600 hover:bg-yellow-700"
                                                         : "bg-blue-600 hover:bg-blue-700"
                                                 )}>
-                                                    <Link href={`/student/exams/${exam.id}`}>
+                                                    <Link href={showRoute.url({ exam: exam.id })}>
                                                         {exam.hasStarted ? (
                                                             <>
                                                                 <PlayCircle className="mr-2 h-4 w-4" />
@@ -157,7 +159,7 @@ export default function ExamIndex({ exams, message }: Props) {
                             Saat ini belum ada jadwal ujian yang tersedia untuk Anda. Silakan cek kembali nanti.
                         </p>
                         <Button variant="outline" asChild>
-                            <Link href="/student/dashboard">Kembali ke Dashboard</Link>
+                            <Link href={dashboardRoute.url()}>Kembali ke Dashboard</Link>
                         </Button>
                     </div>
                 )}

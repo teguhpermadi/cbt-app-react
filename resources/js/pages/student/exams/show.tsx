@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { Lock, Clock, FileText, User, AlertTriangle, ShieldCheck } from 'lucide-react';
 import React from 'react';
+import { start as startRoute, index as examsIndexRoute } from '@/routes/student/exams';
+import { dashboard as dashboardRoute } from '@/routes/student';
 
 interface Props {
     exam: {
@@ -37,17 +39,17 @@ export default function ExamShow({ exam, student }: Props) {
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(`/student/exams/${exam.id}/start`);
+        post(startRoute.url({ exam: exam.id }));
     };
 
     const breadcrumbs = [
         {
             title: 'Dashboard',
-            href: '/student/dashboard',
+            href: dashboardRoute.url(),
         },
         {
             title: 'Ujian Saya',
-            href: '/student/exams',
+            href: examsIndexRoute.url(),
         },
         {
             title: exam.title,
