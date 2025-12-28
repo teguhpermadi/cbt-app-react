@@ -59,6 +59,28 @@ export default function ExamTake({ exam, session, questions }: Props) {
     // Time Tracking
     const activeQuestionStartTime = useRef<number>(Date.now());
 
+    // Safeguard: Check if questions exist
+    if (!questions || questions.length === 0) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+                <Card className="w-full max-w-md text-center p-6">
+                    <CardHeader>
+                        <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                        <CardTitle>Ujian Tidak Tersedia</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <p className="text-muted-foreground">
+                            Maaf, sepertinya soal ujian gagal dimuat atau belum tersedia untuk ujian ini.
+                        </p>
+                    </CardContent>
+                    <CardFooter className="justify-center">
+                        <Button onClick={() => window.location.reload()}>Refresh Halaman</Button>
+                    </CardFooter>
+                </Card>
+            </div>
+        );
+    }
+
     // Initialize state from props
     useEffect(() => {
         const initialAnswers: Record<string, any> = {};
@@ -86,8 +108,10 @@ export default function ExamTake({ exam, session, questions }: Props) {
     useEffect(() => {
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
-                if (prev <= 0) {
+                if (prev <= 1) {
                     clearInterval(timer);
+                    // AUTO SUBMIT
+                    router.post(finishRoute.url({ exam: exam.id }));
                     return 0;
                 }
                 return prev - 1;
@@ -95,7 +119,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, []);
+    }, [exam.id]);
 
     // Format time
     const formatTime = (seconds: number) => {
@@ -104,6 +128,12 @@ export default function ExamTake({ exam, session, questions }: Props) {
         const s = seconds % 60;
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
+
+    // Check if all questions are answered
+    const isAllAnswered = questions.every(q => {
+        const ans = answers[q.detail_id];
+        return ans !== null && ans !== undefined && (typeof ans !== 'string' || ans.trim() !== '');
+    });
 
     // -- Actions --
 
@@ -365,7 +395,11 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                 {currentIndex === questions.length - 1 ? (
                                     <Button
                                         size="lg"
-                                        className="bg-green-600 hover:bg-green-700 text-white px-8 font-bold"
+                                        className={cn(
+                                            "px-8 font-bold",
+                                            isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                                        )}
+                                        disabled={!isAllAnswered}
                                         onClick={() => {
                                             if (confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
                                                 router.post(finishRoute.url({ exam: exam.id }));
@@ -373,7 +407,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                         }}
                                     >
                                         <CheckCircle2 className="w-5 h-5 mr-2" />
-                                        Selesai & Kumpulkan
+                                        {isAllAnswered ? "Selesai & Kumpulkan" : "Jawab Semua Soal"}
                                     </Button>
                                 ) : (
                                     <Button
@@ -442,7 +476,11 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                 <Separator className="my-1" />
 
                                 <Button
-                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-bold h-11"
+                                    className={cn(
+                                        "w-full font-bold h-11",
+                                        isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                                    )}
+                                    disabled={!isAllAnswered}
                                     onClick={() => {
                                         if (confirm("Selesaikan ujian sekarang?")) {
                                             router.post(finishRoute.url({ exam: exam.id }));
@@ -450,7 +488,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     }}
                                 >
                                     <Save className="w-4 h-4 mr-2" />
-                                    Akhiri Ujian
+                                    {isAllAnswered ? "Akhiri Ujian" : "Jawab Semua Soal"}
                                 </Button>
                             </CardFooter>
                         </Card>
