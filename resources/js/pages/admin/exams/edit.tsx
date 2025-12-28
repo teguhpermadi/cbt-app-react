@@ -118,7 +118,7 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
                     </div>
                 </div>
 
-                <Tabs defaultValue="settings" className="w-full">
+                <Tabs defaultValue="monitor" className="w-full">
                     <TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
                         <TabsTrigger value="monitor" className="gap-2">
                             <Monitor className="h-4 w-4" />
