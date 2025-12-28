@@ -25,6 +25,7 @@ class ExamResultDetail extends Model
     ];
 
     protected $casts = [
+        'student_answer' => 'array',  // Cast ke array agar otomatis di-serialize ke JSON
         'is_correct' => 'boolean',
         'score_earned' => 'float',
         'answered_at' => 'datetime',

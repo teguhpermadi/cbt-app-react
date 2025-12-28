@@ -19,12 +19,12 @@ class UserSeeder extends Seeder
             $admin->assignRole('admin');
         }
 
-        $teachers = User::factory(10)->state(['user_type' => 'teacher'])->create();
+        $teachers = User::factory(5)->state(['user_type' => 'teacher'])->create();
         foreach ($teachers as $teacher) {
             $teacher->assignRole('teacher');
         }
 
-        $students = User::factory(50)->state(['user_type' => 'student'])->create();
+        $students = User::factory(10)->state(['user_type' => 'student'])->create();
         foreach ($students as $student) {
             $student->assignRole('student');
         }
