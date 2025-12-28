@@ -219,7 +219,9 @@ class ExamController extends Controller
                     'content' => $q->content,
                     'type' => $q->question_type,
                     'options' => json_decode($q->options ?? '[]'), // Ensure it's decoded
-                    'student_answer' => $q->student_answer,
+                    'student_answer' => (is_string($q->student_answer) && in_array(substr($q->student_answer, 0, 1), ['{', '[', '"']))
+                        ? json_decode($q->student_answer)
+                        : $q->student_answer,
                     'is_flagged' => (bool) $q->is_flagged,
                 ];
             });
@@ -236,6 +238,8 @@ class ExamController extends Controller
 
     public function saveAnswer(Request $request, Exam $exam)
     {
+        \Illuminate\Support\Facades\Log::info('SaveAnswer Request:', $request->all());
+
         $request->validate([
             'detail_id' => 'required|exists:exam_result_details,id',
             'duration' => 'required|numeric|min:0', // Duration in seconds
@@ -245,17 +249,21 @@ class ExamController extends Controller
 
         $detail = \App\Models\ExamResultDetail::findOrFail($request->detail_id);
 
+        \Illuminate\Support\Facades\Log::info('Found Detail:', ['id' => $detail->id, 'current_answer' => $detail->student_answer]);
+
         // Security check: ensure this detail belongs to current user's active session
         if ($detail->examSession->user_id !== \Illuminate\Support\Facades\Auth::id()) {
+            \Illuminate\Support\Facades\Log::warning('Unauthorized save attempt', ['user_id' => \Illuminate\Support\Facades\Auth::id(), 'detail_id' => $detail->id]);
             abort(403);
         }
 
         $updateData = [
-            'time_spent' => \Illuminate\Support\Facades\DB::raw("time_spent + " . (int)$request->duration),
+            'time_spent' => $detail->time_spent + (int)$request->duration,
         ];
 
         if ($request->has('answer')) {
-            $updateData['student_answer'] = $request->answer;
+            // Always json_encode since student_answer is a JSON column in PostgreSQL
+            $updateData['student_answer'] = json_encode($request->answer);
             $updateData['answered_at'] = now();
         }
 
@@ -263,7 +271,11 @@ class ExamController extends Controller
             $updateData['is_flagged'] = $request->is_flagged;
         }
 
-        $detail->update($updateData);
+        \Illuminate\Support\Facades\Log::info('Update Data:', $updateData);
+
+        $result = $detail->update($updateData);
+
+        \Illuminate\Support\Facades\Log::info('Update Result:', ['success' => $result]);
 
         return response()->json(['success' => true]);
     }

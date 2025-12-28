@@ -25,7 +25,6 @@ class ExamResultDetail extends Model
     ];
 
     protected $casts = [
-        'student_answer' => 'array',
         'is_correct' => 'boolean',
         'score_earned' => 'float',
         'answered_at' => 'datetime',

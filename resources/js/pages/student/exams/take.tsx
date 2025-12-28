@@ -17,12 +17,11 @@ import {
     Save
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import axios from 'axios';
 import { saveAnswer as saveAnswerRoute, finish as finishRoute } from '@/routes/student/exams';
+import OptionViewer from '@/components/app/questions/option-viewers/OptionViewer';
+import ImageViewerModal from '@/components/ui/image-viewer-modal';
 
 interface Question {
     id: string; // ExamQuestion ID
@@ -33,6 +32,7 @@ interface Question {
     options: any; // Can be array or object depending on type
     student_answer: any;
     is_flagged: boolean;
+    media_url?: string;
 }
 
 interface Props {
@@ -55,6 +55,13 @@ export default function ExamTake({ exam, session, questions }: Props) {
     const [flagged, setFlagged] = useState<Record<string, boolean>>({});
     const [timeLeft, setTimeLeft] = useState<number>(0);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [imageViewerOpen, setImageViewerOpen] = useState(false);
+    const [viewingImage, setViewingImage] = useState<string>('');
+
+    const handleImageClick = (src: string) => {
+        setViewingImage(src);
+        setImageViewerOpen(true);
+    };
 
     // Time Tracking
     const activeQuestionStartTime = useRef<number>(Date.now());
@@ -148,12 +155,15 @@ export default function ExamTake({ exam, session, questions }: Props) {
         // Reset start time immediately to avoid double counting
         activeQuestionStartTime.current = now;
 
+        console.log('Sending autosave:', { detailId, payload, durationSec }); // DEBUG LOG
+
         try {
             await axios.post(saveAnswerRoute.url({ exam: exam.id }), {
                 detail_id: detailId,
                 duration: durationSec,
                 ...payload
             });
+            console.log('Autosave success'); // DEBUG LOG
         } catch (error) {
             console.error("Autosave failed", error);
         }
@@ -162,6 +172,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
 
     // Handle Answer Change
     const handleAnswerChange = (value: any) => {
+        console.log('Answer Changed:', value); // DEBUG LOG
         const currentQ = questions[currentIndex];
 
         setAnswers(prev => ({
@@ -203,93 +214,16 @@ export default function ExamTake({ exam, session, questions }: Props) {
         setCurrentIndex(index);
     };
 
-    // Render Question Options
+    // Render Question Options - Delegates to OptionViewer
     const renderOptions = (question: Question) => {
-        const currentAnswer = answers[question.detail_id];
-
-        switch (question.type) {
-            case 'multiple_choice':
-            case 'true_false':
-                return (
-                    <RadioGroup
-                        value={currentAnswer as string}
-                        onValueChange={handleAnswerChange}
-                        className="space-y-3"
-                    >
-                        {Object.entries(question.options || {}).map(([key, opt]: [string, any]) => (
-                            <div key={key} className={cn(
-                                "flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors",
-                                currentAnswer === key ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-slate-200 dark:border-slate-800"
-                            )}>
-                                <RadioGroupItem value={key} id={`opt-${key}`} />
-                                <Label htmlFor={`opt-${key}`} className="flex-1 cursor-pointer font-normal">
-                                    <div className="flex gap-2 text-slate-700 dark:text-slate-300">
-                                        <span className="font-bold text-slate-500">{key}.</span>
-                                        <div dangerouslySetInnerHTML={{ __html: opt.content }} />
-                                    </div>
-                                </Label>
-                            </div>
-                        ))}
-                    </RadioGroup>
-                );
-
-            case 'multiple_selection':
-                const selectedKeys = Array.isArray(currentAnswer) ? currentAnswer : [];
-                const toggleSelection = (key: string) => {
-                    let newSelection;
-                    if (selectedKeys.includes(key)) {
-                        newSelection = selectedKeys.filter(k => k !== key);
-                    } else {
-                        newSelection = [...selectedKeys, key];
-                    }
-                    handleAnswerChange(newSelection);
-                };
-
-                return (
-                    <div className="space-y-3">
-                        {Object.entries(question.options || {}).map(([key, opt]: [string, any]) => (
-                            <div key={key}
-                                onClick={() => toggleSelection(key)}
-                                className={cn(
-                                    "flex items-center space-x-2 border rounded-lg p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors",
-                                    selectedKeys.includes(key) ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-slate-200 dark:border-slate-800"
-                                )}>
-                                <Checkbox checked={selectedKeys.includes(key)} id={`opt-${key}`} />
-                                <Label htmlFor={`opt-${key}`} className="flex-1 cursor-pointer font-normal ml-2">
-                                    <div className="flex gap-2 text-slate-700 dark:text-slate-300">
-                                        <span className="font-bold text-slate-500">{key}.</span>
-                                        <div dangerouslySetInnerHTML={{ __html: opt.content }} />
-                                    </div>
-                                </Label>
-                            </div>
-                        ))}
-                    </div>
-                );
-
-            case 'essay':
-            case 'numerical_input':
-                return (
-                    <div className="space-y-2">
-                        <textarea
-                            className="w-full min-h-[150px] p-4 border rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
-                            placeholder="Ketik jawaban Anda di sini..."
-                            value={currentAnswer as string || ''}
-                            onChange={(e) => {
-                                setAnswers(prev => ({ ...prev, [question.detail_id]: e.target.value }));
-                            }}
-                            onBlur={(e) => handleAnswerChange(e.target.value)}
-                        />
-                    </div>
-                );
-
-            default:
-                return (
-                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 flex items-center gap-2">
-                        <AlertCircle className="w-5 h-5" />
-                        Tipe soal <strong>{question.type}</strong> akan segera didukung.
-                    </div>
-                );
-        }
+        return (
+            <OptionViewer
+                type={question.type}
+                options={question.options}
+                value={answers[question.detail_id]}
+                onChange={handleAnswerChange}
+            />
+        );
     };
 
     return (
@@ -346,19 +280,6 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                 <Badge variant="secondary" className="text-base px-4 py-1 font-bold bg-slate-100 text-slate-700 border-slate-200">
                                     SOAL NO. {currentIndex + 1}
                                 </Badge>
-
-                                <Button
-                                    variant={flagged[questions[currentIndex].detail_id] ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={handleToggleFlag}
-                                    className={cn(
-                                        "gap-2 h-9 px-4",
-                                        flagged[questions[currentIndex].detail_id] ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600" : "text-slate-600"
-                                    )}
-                                >
-                                    <Flag className={cn("w-4 h-4", flagged[questions[currentIndex].detail_id] && "fill-current")} />
-                                    {flagged[questions[currentIndex].detail_id] ? "Ragu-ragu Terpasang" : "Ragu-ragu?"}
-                                </Button>
                             </div>
                         </CardHeader>
 
@@ -366,6 +287,16 @@ export default function ExamTake({ exam, session, questions }: Props) {
                             <CardContent className="p-8 md:p-10 space-y-10">
                                 {/* Question Content */}
                                 <div className="text-lg leading-relaxed text-slate-800 dark:text-slate-200">
+                                    {questions[currentIndex].media_url && (
+                                        <div className="mb-6">
+                                            <img
+                                                src={questions[currentIndex].media_url}
+                                                alt="Question Media"
+                                                className="max-h-[300px] w-auto rounded-lg border shadow-sm cursor-pointer hover:shadow-lg transition-shadow"
+                                                onClick={() => handleImageClick(questions[currentIndex].media_url!)}
+                                            />
+                                        </div>
+                                    )}
                                     <div dangerouslySetInnerHTML={{ __html: questions[currentIndex].content }} className="exam-content" />
                                 </div>
 
@@ -389,6 +320,19 @@ export default function ExamTake({ exam, session, questions }: Props) {
                             >
                                 <ChevronLeft className="w-5 h-5" />
                                 <span className="hidden sm:inline">Sebelumnya</span>
+                            </Button>
+
+                            <Button
+                                variant={flagged[questions[currentIndex].detail_id] ? "default" : "outline"}
+                                size="lg"
+                                onClick={handleToggleFlag}
+                                className={cn(
+                                    "gap-2 px-6",
+                                    flagged[questions[currentIndex].detail_id] ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600" : "text-slate-600"
+                                )}
+                            >
+                                <Flag className={cn("w-4 h-4", flagged[questions[currentIndex].detail_id] && "fill-current")} />
+                                {flagged[questions[currentIndex].detail_id] ? "Ragu-ragu Terpasang" : "Ragu-ragu?"}
                             </Button>
 
                             <div className="flex gap-2">
@@ -495,6 +439,13 @@ export default function ExamTake({ exam, session, questions }: Props) {
                     </div>
                 </aside>
             </div>
+
+            {/* Image Viewer Modal */}
+            <ImageViewerModal
+                src={viewingImage}
+                isOpen={imageViewerOpen}
+                onClose={() => setImageViewerOpen(false)}
+            />
         </div>
     );
 }
