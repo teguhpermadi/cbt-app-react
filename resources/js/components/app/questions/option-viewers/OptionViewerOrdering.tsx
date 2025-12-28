@@ -49,7 +49,7 @@ function SortableItem({ id, content, mediaUrl }: SortableItemProps) {
                         <img
                             src={mediaUrl}
                             alt="Option Media"
-                            className="max-h-[150px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900"
+                            className="max-h-[100px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900"
                         />
                     </div>
                 )}

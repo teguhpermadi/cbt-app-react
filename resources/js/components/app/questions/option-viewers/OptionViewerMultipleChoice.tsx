@@ -46,7 +46,7 @@ export default function OptionViewerMultipleChoice({ options, value, onChange, d
                                         <img
                                             src={opt.media_url}
                                             alt="Option Media"
-                                            className="max-h-[200px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900 cursor-pointer hover:shadow-lg transition-shadow"
+                                            className="max-h-[100px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900 cursor-pointer hover:shadow-lg transition-shadow"
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 setViewingImage(opt.media_url);
