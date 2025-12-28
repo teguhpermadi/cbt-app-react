@@ -1,2 +1,4 @@
 User::where('user_type','student')->get()
 
+Grade::get()
+Grade::with('students')->get()

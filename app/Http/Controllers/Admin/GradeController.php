@@ -16,6 +16,7 @@ class GradeController extends Controller
     public function index()
     {
         $grades = Grade::with('academicYear')
+            ->withCount('students')
             ->latest()
             ->paginate(10);
 

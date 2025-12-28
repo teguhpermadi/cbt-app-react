@@ -28,6 +28,8 @@ import Pagination from '@/components/Pagination';
 import GradeController from '@/actions/App/Http/Controllers/Admin/GradeController';
 import { index } from '@/routes/admin/grades';
 import { dashboard } from '@/routes';
+import { Users } from 'lucide-react';
+import ManageStudentsModal from './ManageStudentsModal';
 
 interface Grade {
     id: string;
@@ -37,6 +39,7 @@ interface Grade {
         id: string;
         year: string;
     };
+    students_count: number;
 }
 
 interface CreateGradeForm {
@@ -67,7 +70,9 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Index({ grades, academicYears }: IndexProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isManageStudentsOpen, setIsManageStudentsOpen] = useState(false);
     const [editingGrade, setEditingGrade] = useState<Grade | null>(null);
+    const [managingGrade, setManagingGrade] = useState<Grade | null>(null);
 
     const createForm = useForm<CreateGradeForm>({
         name: '',
@@ -118,6 +123,11 @@ export default function Index({ grades, academicYears }: IndexProps) {
         if (confirm('Are you sure you want to delete this grade?')) {
             deleteForm.delete(GradeController.destroy(id).url);
         }
+    };
+
+    const openManageStudents = (grade: Grade) => {
+        setManagingGrade(grade);
+        setIsManageStudentsOpen(true);
     };
 
     return (
@@ -190,6 +200,7 @@ export default function Index({ grades, academicYears }: IndexProps) {
                                     <th className="px-6 py-4">Grade Name</th>
                                     <th className="px-6 py-4">Level</th>
                                     <th className="px-6 py-4">Academic Year</th>
+                                    <th className="px-6 py-4">Students</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -208,8 +219,22 @@ export default function Index({ grades, academicYears }: IndexProps) {
                                                     {grade.academic_year?.year || 'N/A'}
                                                 </span>
                                             </td>
+                                            <td className="px-6 py-4">
+                                                <Badge variant="outline" className="font-mono">
+                                                    {grade.students_count}
+                                                </Badge>
+                                            </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-9 w-9 rounded-xl hover:bg-emerald-50 hover:text-emerald-600 dark:hover:bg-emerald-900/30 transition-all font-bold"
+                                                        onClick={() => openManageStudents(grade)}
+                                                        title="Manage Students"
+                                                    >
+                                                        <Users className="size-4" />
+                                                    </Button>
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"
@@ -288,6 +313,12 @@ export default function Index({ grades, academicYears }: IndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ManageStudentsModal
+                grade={managingGrade}
+                open={isManageStudentsOpen}
+                onOpenChange={setIsManageStudentsOpen}
+            />
         </AppLayout >
     );
 }

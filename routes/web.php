@@ -33,6 +33,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
         Route::resource('academic-years', AcademicYearController::class);
         Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
+        Route::prefix('grades/{grade}')->name('grades.')->group(function () {
+            Route::get('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'index'])->name('students.index');
+            Route::post('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'store'])->name('students.store');
+            Route::delete('students/{student}', [\App\Http\Controllers\Admin\GradeStudentController::class, 'destroy'])->name('students.destroy');
+        });
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
         Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
         Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');

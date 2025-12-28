@@ -186,7 +186,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                                 </SelectTrigger>
                                                 <SelectContent className="rounded-xl border-none shadow-xl">
                                                     {academicYears.filter(Boolean).map(ay => (
-                                                        <SelectItem key={ay.id} value={ay.id}>{ay.name}</SelectItem>
+                                                        <SelectItem key={ay.id} value={ay.id}>{ay.year} - {ay.semester}</SelectItem>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
