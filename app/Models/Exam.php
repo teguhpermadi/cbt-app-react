@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\ExamTypeEnum;
+use App\Enums\TimerTypeEnum;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +42,9 @@ class Exam extends Model
 
         'is_published',     // Status ujian: draft/terbit
         'is_randomized',    // Apakah urutan soal diacak
+        'is_answer_randomized', // Apakah urutan jawaban diacak
+        'max_attempts',     // Jumlah maksimal upaya siswa (null = unlimited)
+        'timer_type',       // Jenis timer: strict/flexible
         'passing_score',    // Nilai minimum kelulusan
         'start_time',       // Waktu mulai ujian
         'end_time',         // Waktu berakhir ujian
@@ -53,6 +57,9 @@ class Exam extends Model
 
         'is_published' => 'boolean',
         'is_randomized' => 'boolean',
+        'is_answer_randomized' => 'boolean',
+        'max_attempts' => 'integer',
+        'timer_type' => TimerTypeEnum::class,
         'start_time' => 'datetime',
         'end_time' => 'datetime',
     ];

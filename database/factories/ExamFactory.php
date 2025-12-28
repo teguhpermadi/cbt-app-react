@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\ExamTypeEnum;
+use App\Enums\TimerTypeEnum;
 use App\Models\AcademicYear;
 use App\Models\Grade;
 use App\Models\Subject;
@@ -67,6 +68,9 @@ class ExamFactory extends Factory
 
             'is_published' => $this->faker->boolean(70), // 70% sudah terbit
             'is_randomized' => $this->faker->boolean(80), // 80% urutan diacak
+            'is_answer_randomized' => $this->faker->boolean(60), // 60% jawaban diacak
+            'max_attempts' => $this->faker->randomElement([null, 1, 2, 3]), // null = unlimited
+            'timer_type' => $this->faker->randomElement(TimerTypeEnum::cases()),
 
             'start_time' => $startTime,
             'end_time' => $endTime,

@@ -31,6 +31,7 @@ import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController'
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 
 
 interface Exam {
@@ -40,6 +41,9 @@ interface Exam {
     duration: number;
     is_published: boolean;
     is_randomized: boolean;
+    is_answer_randomized: boolean;
+    max_attempts: number | null;
+    timer_type: string;
     passing_score: number;
     start_time: string;
     end_time: string;
@@ -64,6 +68,9 @@ interface CreateExamForm {
     duration: number;
     is_published: boolean;
     is_randomized: boolean;
+    is_answer_randomized: boolean;
+    max_attempts: number | null;
+    timer_type: string;
     passing_score: number;
     start_time: string;
     end_time: string;
@@ -79,6 +86,7 @@ interface IndexProps {
     subjects: any[];
     teachers: any[];
     examTypes: string[];
+    timerTypes: Array<{ value: string, label: string, description: string }>;
     questionBanks: any[];
 }
 
@@ -87,7 +95,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Exam Management', href: examsIndexRoute.url() },
 ];
 
-export default function Index({ exams, academicYears, grades, subjects, teachers, examTypes, questionBanks }: IndexProps) {
+export default function Index({ exams, academicYears, grades, subjects, teachers, examTypes, timerTypes, questionBanks }: IndexProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingExam, setEditingExam] = useState<Exam | null>(null);
@@ -103,6 +111,9 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         duration: 60,
         is_published: false,
         is_randomized: true,
+        is_answer_randomized: false,
+        max_attempts: null,
+        timer_type: 'flexible',
         passing_score: 75,
         start_time: '',
         end_time: '',
@@ -119,6 +130,9 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         duration: 0,
         is_published: false,
         is_randomized: false,
+        is_answer_randomized: false,
+        max_attempts: null,
+        timer_type: 'flexible',
         passing_score: 0,
         start_time: '',
         end_time: '',
@@ -412,6 +426,24 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                 <Checkbox id="edit_is_randomized" checked={editForm.data.is_randomized} onCheckedChange={(c) => editForm.setData('is_randomized', !!c)} />
                                 <label htmlFor="edit_is_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Questions</label>
                             </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="edit_is_answer_randomized" checked={editForm.data.is_answer_randomized} onCheckedChange={(c) => editForm.setData('is_answer_randomized', !!c)} />
+                                <label htmlFor="edit_is_answer_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Answer Options</label>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Max Attempts (kosongkan untuk unlimited)</Label>
+                                <Input type="number" min="1" value={editForm.data.max_attempts || ''} onChange={(e) => editForm.setData('max_attempts', e.target.value ? parseInt(e.target.value) : null)} />
+                                <InputError message={editForm.errors.max_attempts} />
+                            </div>
+
+                            <TimerTypeSelector
+                                value={editForm.data.timer_type}
+                                onValueChange={(v) => editForm.setData('timer_type', v)}
+                                timerTypes={timerTypes}
+                                error={editForm.errors.timer_type}
+                            />
 
                             <div className="flex items-center space-x-2">
                                 <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)} />

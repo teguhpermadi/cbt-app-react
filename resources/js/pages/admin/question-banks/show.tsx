@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import InputError from '@/components/input-error';
 import { useState, useEffect, useMemo } from 'react';
+import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 import 'katex/dist/katex.min.css';
 
 interface QuestionBank {
@@ -54,6 +55,9 @@ interface CreateExamFormData {
     duration: number;
     is_published: boolean;
     is_randomized: boolean;
+    is_answer_randomized: boolean;
+    max_attempts: number | null;
+    timer_type: string;
     passing_score: number;
     start_time: string;
     end_time: string;
@@ -87,6 +91,9 @@ export default function Show({ questionBank, questions }: ShowProps) {
         duration: 60,
         is_published: true, // Default true
         is_randomized: true,
+        is_answer_randomized: false,
+        max_attempts: null,
+        timer_type: 'flexible',
         passing_score: 70, // Default 70
         start_time: getDefaultStartTime(),
         end_time: getDefaultEndTime(),
@@ -441,7 +448,40 @@ export default function Show({ questionBank, questions }: ShowProps) {
                                             Acak Urutan Soal
                                         </label>
                                     </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="is_answer_randomized"
+                                            checked={createForm.data.is_answer_randomized}
+                                            onCheckedChange={(c) => createForm.setData('is_answer_randomized', !!c)}
+                                        />
+                                        <label
+                                            htmlFor="is_answer_randomized"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Acak Urutan Jawaban
+                                        </label>
+                                    </div>
                                 </div>
+
+                                <div className="space-y-2">
+                                    <Label>Max Attempts (kosongkan untuk unlimited)</Label>
+                                    <Input
+                                        type="number"
+                                        min="1"
+                                        value={createForm.data.max_attempts || ''}
+                                        onChange={(e) => createForm.setData('max_attempts', e.target.value ? parseInt(e.target.value) : null)}
+                                        placeholder="Unlimited"
+                                    />
+                                    <InputError message={createForm.errors.max_attempts} />
+                                </div>
+
+                                <TimerTypeSelector
+                                    value={createForm.data.timer_type}
+                                    onValueChange={(v) => createForm.setData('timer_type', v)}
+                                    timerTypes={formData?.timerTypes}
+                                    error={createForm.errors.timer_type}
+                                />
 
                                 {/* Read-only fields */}
                                 <div className="border-t pt-4 space-y-2">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ExamTypeEnum;
+use App\Enums\TimerTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Models\AcademicYear;
 use App\Models\Exam;
@@ -38,6 +39,7 @@ class ExamController extends Controller
             'subjects' => $subjects,
             'teachers' => $teachers,
             'examTypes' => ExamTypeEnum::cases(),
+            'timerTypes' => TimerTypeEnum::cases(),
             'questionBanks' => $questionBanks,
         ]);
     }
@@ -59,6 +61,11 @@ class ExamController extends Controller
             'subjects' => $subjects,
             'teachers' => $teachers,
             'examTypes' => array_map(fn($case) => $case->value, ExamTypeEnum::cases()),
+            'timerTypes' => array_map(fn($case) => [
+                'value' => $case->value,
+                'label' => $case->getLabel(),
+                'description' => $case->getDescription(),
+            ], TimerTypeEnum::cases()),
             'questionBanks' => $questionBanks,
         ]);
     }
@@ -91,6 +98,9 @@ class ExamController extends Controller
             'end_time' => 'required|date|after:start_time',
             'is_published' => 'required|boolean',
             'is_randomized' => 'required|boolean',
+            'is_answer_randomized' => 'nullable|boolean',
+            'max_attempts' => 'nullable|integer|min:1',
+            'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);
 
         $exam->update($validated);
@@ -141,6 +151,9 @@ class ExamController extends Controller
             'end_time' => 'required|date|after:start_time',
             'is_published' => 'required|boolean',
             'is_randomized' => 'required|boolean',
+            'is_answer_randomized' => 'nullable|boolean',
+            'max_attempts' => 'nullable|integer|min:1',
+            'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);
     }
 }
