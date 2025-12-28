@@ -49,7 +49,9 @@ class ExamController extends Controller
     {
         $this->validateExam($request);
 
-        Exam::create($request->all());
+        $data = $request->all();
+        $data['token'] = Exam::generateToken();
+        Exam::create($data);
 
         return redirect()->back()->with('success', 'Exam created successfully.');
     }
@@ -73,6 +75,24 @@ class ExamController extends Controller
     {
         $exam->delete();
         return redirect()->back()->with('success', 'Exam deleted successfully.');
+    }
+
+    public function regenerateToken(Exam $exam)
+    {
+        $exam->update([
+            'token' => Exam::generateToken(),
+        ]);
+
+        return redirect()->back()->with('success', 'Token regenerated successfully.');
+    }
+
+    public function toggleTokenVisibility(Exam $exam)
+    {
+        $exam->update([
+            'is_token_visible' => !$exam->is_token_visible,
+        ]);
+
+        return redirect()->back()->with('success', 'Token visibility toggled successfully.');
     }
 
     private function validateExam(Request $request)

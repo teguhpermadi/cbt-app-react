@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { Head, useForm, router } from '@inertiajs/react';
+import { Edit, Plus, Trash2, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -13,6 +13,7 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog";
+import { cn } from '@/lib/utils';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -48,6 +49,8 @@ interface Exam {
     subject: { id: string; name: string; };
     teacher: { id: string; name: string; };
     question_bank: { id: string; name: string; };
+    token: string;
+    is_token_visible: boolean;
 }
 
 interface CreateExamForm {
@@ -162,6 +165,20 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         if (confirm('Are you sure you want to delete this exam?')) {
             deleteForm.delete(ExamController.destroy({ exam: id }).url);
         }
+    };
+
+    const handleRegenerateToken = (id: string) => {
+        if (confirm('Are you sure you want to regenerate the token? The old token will be invalid.')) {
+            router.put(`/admin/exams/${id}/regenerate-token`, {}, {
+                preserveScroll: true,
+            });
+        }
+    };
+
+    const handleToggleVisibility = (id: string) => {
+        router.put(`/admin/exams/${id}/toggle-token-visibility`, {}, {
+            preserveScroll: true,
+        });
     };
 
     // --- Chained Select Logic for Create Form ---
@@ -368,6 +385,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                             <thead className="border-b bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
                                 <tr>
                                     <th className="px-6 py-4">Title</th>
+                                    <th className="px-6 py-4">Token</th>
                                     <th className="px-6 py-4">Subject</th>
                                     <th className="px-6 py-4">Grade</th>
                                     <th className="px-6 py-4">Teacher</th>
@@ -385,6 +403,40 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                 <div className="text-xs text-muted-foreground">{exam.exam_type}</div>
                                                 <br />
                                                 <div className="text-xs text-muted-foreground">{exam.question_bank?.name || 'N/A'}</div>
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-2">
+                                                    <code className="bg-slate-100 dark:bg-slate-900 px-2 py-1 rounded text-sm font-mono tracking-wider">
+                                                        {exam.token}
+                                                    </code>
+                                                    <div className="flex gap-1">
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className={cn(
+                                                                "h-6 w-6 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800",
+                                                                exam.is_token_visible ? "text-blue-600" : "text-slate-400"
+                                                            )}
+                                                            onClick={() => handleToggleVisibility(exam.id)}
+                                                            title={exam.is_token_visible ? "Visible to Students" : "Hidden from Students"}
+                                                        >
+                                                            {exam.is_token_visible ? (
+                                                                <Eye className="size-3" />
+                                                            ) : (
+                                                                <EyeOff className="size-3" />
+                                                            )}
+                                                        </Button>
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-6 w-6 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800"
+                                                            onClick={() => handleRegenerateToken(exam.id)}
+                                                            title="Regenerate Token"
+                                                        >
+                                                            <RefreshCw className="size-3" />
+                                                        </Button>
+                                                    </div>
+                                                </div>
                                             </td>
                                             <td className="px-6 py-4">{exam.subject?.name || 'N/A'}</td>
                                             <td className="px-6 py-4">{exam.grade?.name || 'N/A'}</td>
