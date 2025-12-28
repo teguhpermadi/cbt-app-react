@@ -197,32 +197,24 @@ class ExamController extends Controller
         // Fetch questions ordered by 'question_number' persisted in ExamResultDetail
         // We join with exam_questions to get the content snapshot
         $questions = \App\Models\ExamResultDetail::where('exam_session_id', $session->id)
-            ->join('exam_questions', 'exam_result_details.exam_question_id', '=', 'exam_questions.id')
-            ->select(
-                'exam_result_details.id as detail_id',
-                'exam_result_details.student_answer',
-                'exam_result_details.question_number',
-                'exam_result_details.is_flagged',
-                'exam_questions.id as question_id',
-                'exam_questions.content',
-                'exam_questions.options',
-                'exam_questions.question_type',
-                'exam_questions.question_number as original_number'
-            )
-            ->orderBy('exam_result_details.question_number')
+            ->with('examQuestion') // Eager load exam question relationship
+            ->orderBy('question_number')
             ->get()
-            ->map(function ($q) {
+            ->map(function ($detail) {
+                $examQuestion = $detail->examQuestion;
+
                 return [
-                    'id' => $q->question_id, // This is the ExamQuestion ID
-                    'detail_id' => $q->detail_id,
-                    'number' => $q->question_number,
-                    'content' => $q->content,
-                    'type' => $q->question_type,
-                    'options' => json_decode($q->options ?? '[]'), // Ensure it's decoded
-                    'student_answer' => (is_string($q->student_answer) && in_array(substr($q->student_answer, 0, 1), ['{', '[', '"']))
-                        ? json_decode($q->student_answer)
-                        : $q->student_answer,
-                    'is_flagged' => (bool) $q->is_flagged,
+                    'id' => $examQuestion->id, // This is the ExamQuestion ID
+                    'detail_id' => $detail->id,
+                    'number' => $detail->question_number,
+                    'content' => $examQuestion->content,
+                    'type' => $examQuestion->question_type,
+                    'options' => is_array($examQuestion->options) ? $examQuestion->options : json_decode($examQuestion->options ?? '[]'),
+                    'student_answer' => (is_string($detail->student_answer) && in_array(substr($detail->student_answer, 0, 1), ['{', '[', '"']))
+                        ? json_decode($detail->student_answer)
+                        : $detail->student_answer,
+                    'is_flagged' => (bool) $detail->is_flagged,
+                    'media_url' => $examQuestion->media_path ? asset('storage/' . $examQuestion->media_path) : null,
                 ];
             });
 

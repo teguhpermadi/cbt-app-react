@@ -116,6 +116,7 @@ class Question extends Model implements HasMedia
                 'key' => $option->option_key,
                 'content' => $option->content,
                 'media' => $option->getMediaUrl(), // URL media jika ada
+                'media_url' => $option->getMediaUrl(), // Also add media_url for frontend consistency
                 'type' => $option->getMetadata('type'), // Untuk matching (left/right)
             ];
 
