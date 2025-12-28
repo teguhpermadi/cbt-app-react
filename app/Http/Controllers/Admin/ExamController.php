@@ -170,13 +170,13 @@ class ExamController extends Controller
         // or just show all sessions if multiple attempts are allowed.
         // For monitoring, usually seeing the latest status of each student is preferred.
 
-        $sessions = \App\Models\ExamSession::with(['user:id,name,email,avatar', 'exam'])
+        $sessions = \App\Models\ExamSession::with(['user:id,name,email', 'exam'])
             ->where('exam_id', $exam->id)
             ->latest()
             ->get();
 
         // We might also want to get the total number of students expected (from the grade)
-        $totalStudents = \App\Models\User::where('grade_id', $exam->grade_id)
+        $totalStudents = $exam->grade->students()
             ->where('user_type', 'student')
             ->count();
 

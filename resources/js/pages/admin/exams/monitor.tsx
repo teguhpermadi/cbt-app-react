@@ -3,7 +3,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, router } from '@inertiajs/react'; // Add router import
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { RefreshCw, CheckCircle, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,7 +16,7 @@ interface ExamSession {
         id: string;
         name: string;
         email: string;
-        // avatar?: string;
+
     };
     is_finished: boolean;
     start_time: string;
@@ -58,14 +57,7 @@ export default function MonitorPage({ exam, sessions, total_students, participat
         return () => clearInterval(interval);
     }, []);
 
-    const getInitials = (name: string) => {
-        return name
-            .split(' ')
-            .map((n) => n[0])
-            .join('')
-            .toUpperCase()
-            .substring(0, 2);
-    };
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
@@ -139,15 +131,9 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                         sessions.map((session) => (
                                             <TableRow key={session.id}>
                                                 <TableCell className="font-medium">
-                                                    <div className="flex items-center gap-2">
-                                                        <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={session.user.avatar} alt={session.user.name} />
-                                                            <AvatarFallback>{getInitials(session.user.name)}</AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <div className="font-semibold">{session.user.name}</div>
-                                                            <div className="text-xs text-muted-foreground">{session.user.email}</div>
-                                                        </div>
+                                                    <div>
+                                                        <div className="font-semibold">{session.user.name}</div>
+                                                        <div className="text-xs text-muted-foreground">{session.user.email}</div>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
