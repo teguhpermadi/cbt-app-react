@@ -150,7 +150,7 @@ export default function Show({ questionBank, questions }: ShowProps) {
             <Head title={questionBank.name} />
 
             {/* Header Bar */}
-            <div className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
+            <div className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
                 <Button variant="ghost" size="icon" asChild>
                     <Link href={QuestionBankController.index().url}>
                         <ArrowLeft className="h-5 w-5" />

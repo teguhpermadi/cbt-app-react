@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, useForm, router } from '@inertiajs/react';
-import { Edit, Plus, Trash2, Eye, EyeOff, RefreshCw } from 'lucide-react';
+import { Edit, Plus, Trash2, Eye, EyeOff, RefreshCw, Monitor } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -342,9 +342,9 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                         size="icon"
                                                         variant="ghost"
                                                         className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
-                                                        onClick={() => openEdit(exam)}
+                                                        onClick={() => router.visit(ExamController.edit({ exam: exam.id }).url)}
                                                     >
-                                                        <Edit className="size-4" />
+                                                        <Monitor className="size-4" />
                                                     </Button>
                                                     <Button
                                                         size="icon"
@@ -372,90 +372,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                 <Pagination links={exams.links} />
             </div>
 
-            {/* Edit Modal */}
-            <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent key={editingExam?.id} className="sm:max-w-4xl rounded-3xl border-none shadow-2xl">
-                    <form onSubmit={submitEdit}>
-                        <DialogHeader>
-                            <DialogTitle className="text-xl font-bold">Edit Exam</DialogTitle>
-                            <DialogDescription>Update details for {editingExam?.title}.</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label>Title</Label>
-                                <Input value={editForm.data.title} onChange={(e) => editForm.setData('title', e.target.value)} />
-                                <InputError message={editForm.errors.title} />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Exam Type</Label>
-                                <Select onValueChange={(v) => editForm.setData('exam_type', v)} value={editForm.data.exam_type}>
-                                    <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
-                                    <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
-                                </Select>
-                                <InputError message={editForm.errors.exam_type} />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Start Time</Label>
-                                    <Input type="datetime-local" value={editForm.data.start_time ? new Date(editForm.data.start_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('start_time', e.target.value)} />
-                                    <InputError message={editForm.errors.start_time} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>End Time</Label>
-                                    <Input type="datetime-local" value={editForm.data.end_time ? new Date(editForm.data.end_time).toISOString().slice(0, 16) : ''} onChange={(e) => editForm.setData('end_time', e.target.value)} />
-                                    <InputError message={editForm.errors.end_time} />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Duration (minutes)</Label>
-                                    <Input type="number" value={editForm.data.duration} onChange={(e) => editForm.setData('duration', parseInt(e.target.value))} />
-                                    <InputError message={editForm.errors.duration} />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Passing Score</Label>
-                                    <Input type="number" value={editForm.data.passing_score} onChange={(e) => editForm.setData('passing_score', parseInt(e.target.value))} />
-                                    <InputError message={editForm.errors.passing_score} />
-                                </div>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="edit_is_randomized" checked={editForm.data.is_randomized} onCheckedChange={(c) => editForm.setData('is_randomized', !!c)} />
-                                <label htmlFor="edit_is_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Questions</label>
-                            </div>
-
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="edit_is_answer_randomized" checked={editForm.data.is_answer_randomized} onCheckedChange={(c) => editForm.setData('is_answer_randomized', !!c)} />
-                                <label htmlFor="edit_is_answer_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Answer Options</label>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Max Attempts (kosongkan untuk unlimited)</Label>
-                                <Input type="number" min="1" value={editForm.data.max_attempts || ''} onChange={(e) => editForm.setData('max_attempts', e.target.value ? parseInt(e.target.value) : null)} />
-                                <InputError message={editForm.errors.max_attempts} />
-                            </div>
-
-                            <TimerTypeSelector
-                                value={editForm.data.timer_type}
-                                onValueChange={(v) => editForm.setData('timer_type', v)}
-                                timerTypes={timerTypes}
-                                error={editForm.errors.timer_type}
-                            />
-
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="edit_is_published" checked={editForm.data.is_published} onCheckedChange={(c) => editForm.setData('is_published', !!c)} />
-                                <label htmlFor="edit_is_published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Publish Exam</label>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button type="submit" className="w-full" disabled={editForm.processing}>Save Changes</Button>
-                        </DialogFooter>
-                    </form>
-                </DialogContent>
-            </Dialog>
+            {/* Modal removed. Navigate to edit page for editing. */}
         </AppLayout >
     );
 }

@@ -85,6 +85,31 @@ class ExamController extends Controller
     }
 
     /**
+     * Show the form for editing the specified resource.
+     */
+    public function edit(Exam $exam)
+    {
+        $exam->load(['academicYear', 'grade', 'subject', 'teacher', 'questionBank']);
+
+        $academicYears = AcademicYear::active()->get();
+        $grades = Grade::all();
+        $subjects = Subject::all();
+        $teachers = User::where('user_type', 'teacher')->get();
+        $questionBanks = QuestionBank::all();
+
+        return Inertia::render('admin/exams/edit', [
+            'exam' => $exam,
+            'academicYears' => $academicYears,
+            'grades' => $grades,
+            'subjects' => $subjects,
+            'teachers' => $teachers,
+            'examTypes' => ExamTypeEnum::cases(),
+            'timerTypes' => TimerTypeEnum::cases(),
+            'questionBanks' => $questionBanks,
+        ]);
+    }
+
+    /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, Exam $exam)
