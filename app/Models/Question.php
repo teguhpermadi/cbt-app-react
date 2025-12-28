@@ -111,12 +111,14 @@ class Question extends Model implements HasMedia
         }
 
         foreach ($this->options as $option) {
+            $mediaUrl = $option->getFirstMediaUrl('option_media');
+
             $optionData = [
                 'id' => $option->id, // Sertakan ID asli untuk referensi
                 'key' => $option->option_key,
                 'content' => $option->content,
-                'media' => $option->getMediaUrl(), // URL media jika ada
-                'media_url' => $option->getMediaUrl(), // Also add media_url for frontend consistency
+                'media' => $mediaUrl ?: $option->media_path, // URL media jika ada
+                'media_url' => $mediaUrl ?: ($option->media_path ? asset('storage/' . $option->media_path) : null),
                 'type' => $option->getMetadata('type'), // Untuk matching (left/right)
             ];
 

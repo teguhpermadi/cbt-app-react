@@ -125,6 +125,7 @@ class ExamController extends Controller
                     'score_value' => $question->score_value->value, // Assuming enum value logic
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
+                    'media_path' => $question->getFirstMediaUrl('question_content') ?: $question->media_path,
                 ]);
             }
         }
@@ -202,6 +203,12 @@ class ExamController extends Controller
             ->get()
             ->map(function ($detail) {
                 $examQuestion = $detail->examQuestion;
+
+                \Illuminate\Support\Facades\Log::info('ExamQuestion Media Debug:', [
+                    'question_id' => $examQuestion->id,
+                    'media_path' => $examQuestion->media_path,
+                    'options' => $examQuestion->options,
+                ]);
 
                 return [
                     'id' => $examQuestion->id, // This is the ExamQuestion ID

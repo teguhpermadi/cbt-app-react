@@ -1,1 +1,8 @@
 Grade::with('students')->get()
+$user = \Illuminate\Support\Facades\Auth::user();
+
+        $session = \App\Models\ExamSession::where('exam_id', '01kdf33fngjhczm8qk3k45eftt')
+            ->where('user_id', $user->id)
+            ->where('is_finished', false)
+            ->firstOrFail();
+Exam::find('01kdf33fngjhczm8qk3k45eftt')
