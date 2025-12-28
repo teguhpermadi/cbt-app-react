@@ -43,6 +43,27 @@ class ExamController extends Controller
     }
 
     /**
+     * Show the form for creating a new resource.
+     */
+    public function create()
+    {
+        $academicYears = AcademicYear::active()->get();
+        $grades = Grade::all();
+        $subjects = Subject::all();
+        $teachers = User::where('user_type', 'teacher')->get();
+        $questionBanks = QuestionBank::all();
+
+        return response()->json([
+            'academicYears' => $academicYears,
+            'grades' => $grades,
+            'subjects' => $subjects,
+            'teachers' => $teachers,
+            'examTypes' => array_map(fn($case) => $case->value, ExamTypeEnum::cases()),
+            'questionBanks' => $questionBanks,
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
