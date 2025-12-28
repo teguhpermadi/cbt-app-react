@@ -160,6 +160,34 @@ class ExamController extends Controller
         return redirect()->back()->with('success', 'Token visibility toggled successfully.');
     }
 
+    public function monitor(Exam $exam)
+    {
+        // Fetch specific fields to optimize performance
+        $exam->load('grade', 'subject', 'academicYear');
+
+        // Get all sessions for this exam with student info
+        // We might want to group by user to show the latest status per student, 
+        // or just show all sessions if multiple attempts are allowed.
+        // For monitoring, usually seeing the latest status of each student is preferred.
+
+        $sessions = \App\Models\ExamSession::with(['user:id,name,email,avatar', 'exam'])
+            ->where('exam_id', $exam->id)
+            ->latest()
+            ->get();
+
+        // We might also want to get the total number of students expected (from the grade)
+        $totalStudents = \App\Models\User::where('grade_id', $exam->grade_id)
+            ->where('user_type', 'student')
+            ->count();
+
+        return Inertia::render('admin/exams/monitor', [
+            'exam' => $exam,
+            'sessions' => $sessions,
+            'total_students' => $totalStudents,
+            'participated_count' => $sessions->unique('user_id')->count(),
+        ]);
+    }
+
     private function validateExam(Request $request)
     {
         return $request->validate([

@@ -43,6 +43,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         });
         Route::put('exams/{exam}/regenerate-token', [\App\Http\Controllers\Admin\ExamController::class, 'regenerateToken'])->name('exams.regenerate-token');
         Route::put('exams/{exam}/toggle-token-visibility', [\App\Http\Controllers\Admin\ExamController::class, 'toggleTokenVisibility'])->name('exams.toggle-token-visibility');
+        Route::get('exams/{exam}/monitor', [\App\Http\Controllers\Admin\ExamController::class, 'monitor'])->name('exams.monitor');
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
         Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
         Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');

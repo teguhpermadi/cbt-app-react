@@ -29,6 +29,8 @@ import Pagination from '@/components/Pagination';
 import { dashboard } from '@/routes';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
+// @ts-ignore
+const route = window.route;
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
@@ -342,15 +344,26 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                         size="icon"
                                                         variant="ghost"
                                                         className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
-                                                        onClick={() => router.visit(ExamController.edit({ exam: exam.id }).url)}
+                                                        onClick={() => router.visit(ExamController.monitor(exam.id).url)}
+                                                        title="Monitor Exam"
                                                     >
                                                         <Monitor className="size-4" />
                                                     </Button>
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"
+                                                        className="h-9 w-9 rounded-xl hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/30 transition-all font-bold"
+                                                        onClick={() => router.visit(ExamController.edit(exam.id).url)}
+                                                        title="Edit Exam"
+                                                    >
+                                                        <Edit className="size-4" />
+                                                    </Button>
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
                                                         className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all font-bold"
                                                         onClick={() => handleDelete(exam.id)}
+                                                        title="Delete Exam"
                                                     >
                                                         <Trash2 className="size-4" />
                                                     </Button>
