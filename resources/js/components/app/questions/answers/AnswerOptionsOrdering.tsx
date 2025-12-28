@@ -50,7 +50,7 @@ export default function AnswerOptionsOrdering({ options, showKeyAnswer = true }:
                                     <img
                                         src={option.media_url || option.media_path || ''}
                                         alt="Visual"
-                                        className="w-full h-auto object-cover"
+                                        className="max-h-[100px] max-w-full object-cover"
                                     />
                                 </div>
                             )}

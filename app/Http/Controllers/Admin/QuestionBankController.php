@@ -76,6 +76,32 @@ class QuestionBankController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(QuestionBank $questionBank)
+    {
+        // Load relasi
+        $questionBank->load(['subject.grade', 'teacher', 'questions.options']);
+
+        // Inject Media URLs untuk questions dan options
+        $questionBank->questions->transform(function ($question) {
+            $question->media_url = $question->getFirstMediaUrl('question_content');
+
+            $question->options->transform(function ($option) {
+                $option->media_url = $option->getFirstMediaUrl('option_media');
+                return $option;
+            });
+
+            return $question;
+        });
+
+        return Inertia::render('admin/question-banks/show', [
+            'questionBank' => $questionBank,
+            'questions' => $questionBank->questions,
+        ]);
+    }
+
+    /**
      * Show the form for editing the specified resource.
      */
     public function edit(QuestionBank $questionBank)

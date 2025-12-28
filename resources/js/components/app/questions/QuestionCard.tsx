@@ -119,7 +119,7 @@ export default function QuestionCard({
                             <img
                                 src={question.media_url}
                                 alt="Question Media"
-                                className="max-h-[300px] max-w-full rounded-md object-contain border bg-slate-50 dark:bg-slate-900"
+                                className="max-h-[100px] max-w-full rounded-md object-contain border bg-slate-50 dark:bg-slate-900"
                             />
                         </div>
                     )}

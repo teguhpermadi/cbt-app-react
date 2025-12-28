@@ -3,7 +3,7 @@ import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { Plus, Edit, Trash2, BookOpen } from 'lucide-react';
+import { Plus, Edit, Trash2, BookOpen, Eye } from 'lucide-react';
 
 import Pagination from '@/components/Pagination';
 
@@ -41,7 +41,7 @@ interface IndexProps {
 }
 
 export default function Index({ questionBanks, filters }: IndexProps) {
-    const handleDelete = (id) => {
+    const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to delete this question bank?')) {
             // Using QuestionBankController.destroy(id)
             router.delete(QuestionBankController.destroy(id).url);
@@ -95,6 +95,14 @@ export default function Index({ questionBanks, filters }: IndexProps) {
                                             </td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-9 w-9 rounded-xl hover:bg-green-50 hover:text-green-600 dark:hover:bg-green-900/30 transition-all font-bold"
+                                                        onClick={() => router.visit(QuestionBankController.show(bank.id).url)}
+                                                    >
+                                                        <Eye className="size-4" />
+                                                    </Button>
                                                     <Button
                                                         size="icon"
                                                         variant="ghost"

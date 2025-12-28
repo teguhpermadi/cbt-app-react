@@ -45,7 +45,7 @@ export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }
                         <img
                             src={option.media_url || option.media_path || ''}
                             alt={label}
-                            className="w-full h-full object-contain"
+                            className="max-h-[100px] max-w-full object-contain"
                         />
                     </div>
                 )}

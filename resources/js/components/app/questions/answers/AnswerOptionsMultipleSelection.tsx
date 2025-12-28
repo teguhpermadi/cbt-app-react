@@ -47,7 +47,7 @@ export default function AnswerOptionsMultipleSelection({ options, showKeyAnswer 
                                     <img
                                         src={option.media_url || option.media_path || ''}
                                         alt={`Option ${option.option_key}`}
-                                        className="w-full h-auto object-cover"
+                                        className="max-h-[100px] max-w-full object-cover"
                                     />
                                 </div>
                             )}

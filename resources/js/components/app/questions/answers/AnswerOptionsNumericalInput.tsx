@@ -34,7 +34,7 @@ export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = t
                     <img
                         src={option.media_url || option.media_path || ''}
                         alt="Context"
-                        className="w-full h-auto object-cover"
+                        className="max-h-[100px] max-w-full object-cover"
                     />
                 </div>
             )}
