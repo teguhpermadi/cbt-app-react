@@ -116,22 +116,33 @@ class CalculateExamScore implements ShouldQueue
                 $totalEarnedScore += $scoreEarned;
             }
 
+            // Update ExamSession total_score
+            $session->update(['total_score' => $totalEarnedScore]);
+
             // Update or Create ExamResult
             $scorePercent = $totalMaxScore > 0 ? ($totalEarnedScore / $totalMaxScore) * 100 : 0;
 
-            ExamResult::updateOrCreate(
-                [
-                    'exam_id' => $session->exam_id,
-                    'user_id' => $session->user_id,
-                ],
-                [
-                    'exam_session_id' => $session->id,
-                    'total_score' => $totalEarnedScore,
-                    'score_percent' => $scorePercent,
-                    'is_passed' => $scorePercent >= ($session->exam->passing_score ?? 0),
-                    'result_type' => 'latest_attempt', // Or logic for best_attempt
-                ]
-            );
+            $existingResult = ExamResult::where('exam_id', $session->exam_id)
+                ->where('user_id', $session->user_id)
+                ->first();
+
+            $shouldUpdate = !$existingResult || $scorePercent > $existingResult->score_percent;
+
+            if ($shouldUpdate) {
+                ExamResult::updateOrCreate(
+                    [
+                        'exam_id' => $session->exam_id,
+                        'user_id' => $session->user_id,
+                    ],
+                    [
+                        'exam_session_id' => $session->id,
+                        'total_score' => $totalEarnedScore,
+                        'score_percent' => $scorePercent,
+                        'is_passed' => $scorePercent >= ($session->exam->passing_score ?? 0),
+                        'result_type' => $existingResult ? 'best_attempt' : 'official',
+                    ]
+                );
+            }
         });
 
         Log::info("Exam score calculated for session: {$session->id}", [

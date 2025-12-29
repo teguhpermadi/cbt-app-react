@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
 
 class ExamController extends Controller
 {
@@ -35,10 +36,20 @@ class ExamController extends Controller
             ->where('is_published', true)
             ->where('start_time', '<=', $now)
             ->where('end_time', '>=', $now)
-            // Filter ujian yang sudah selesai dikerjakan (ExamSession is_finished = true)
-            ->whereDoesntHave('examSessions', function ($query) use ($user) {
-                $query->where('user_id', $user->id)
-                    ->where('is_finished', true);
+            // Filter ujian berdasarkan jumlah upaya (max_attempts)
+            ->where(function ($query) use ($user) {
+                $query->whereDoesntHave('examSessions', function ($sub) use ($user) {
+                    $sub->where('user_id', $user->id)
+                        ->where('is_finished', true);
+                })
+                    ->orWhere(function ($sub) use ($user) {
+                        $sub->whereNotNull('max_attempts')
+                            ->whereHas('examSessions', function ($s) use ($user) {
+                                $s->where('user_id', $user->id)
+                                    ->where('is_finished', true);
+                            }, '<', DB::raw('max_attempts'));
+                    })
+                    ->orWhereNull('max_attempts');
             })
             // Load relasi session user untuk cek status progress
             ->with(['examSessions' => function ($query) use ($user) {
@@ -131,11 +142,19 @@ class ExamController extends Controller
         }
 
         // 5. Create New Session
+        $attemptCount = \App\Models\ExamSession::where('exam_id', $exam->id)
+            ->where('user_id', $user->id)
+            ->count();
+
+        if ($exam->max_attempts && $attemptCount >= $exam->max_attempts) {
+            return back()->withErrors(['error' => 'Anda telah mencapai batas maksimal pengerjaan untuk ujian ini.']);
+        }
+
         $session = \App\Models\ExamSession::create([
             'exam_id' => $exam->id,
             'user_id' => $user->id,
             'start_time' => now(),
-            'attempt_number' => 1, // Logic for multiple attempts can be added here
+            'attempt_number' => $attemptCount + 1,
             'is_finished' => false,
             'ip_address' => $request->ip(),
         ]);
