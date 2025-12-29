@@ -142,28 +142,23 @@ class CalculateExamScore implements ShouldQueue
                             $correctMatchCount = 0;
 
                             // Iterate logic to check pairs
-                            // Structure of CorrectPairs usually: check if it's associative or array of objects
-                            // Based on typical structure: ['pairs' => [['left'=>'A', 'right'=>'1'], ...]] OR ['A'=>'1', 'B'=>'2']
-                            // Assuming Key structure is simplified K=>V for checking or array of pairs.
-                            // Let's assume standard array of objects for pairs in DB/JSON usually:
-                            // [{"left": "Indo", "right": "Jkt"}, ...]
+                            foreach ($correctPairs as $key => $val) {
+                                $l = null;
+                                $r = null;
 
-                            // Re-mapping for easier check if needed, OR loop
-                            // Let's rely on the structure being array of objects as per QuestionFactory
-
-                            // Correct pairs from factory: array of ['left' => '...', 'right' => '...']
-
-                            // Student answer format usually mirrors the input.
-                            // If user sends component: usually { "left_id": "right_id" } map
-
-                            // Let's assume studentPairs is a Map (Associative Array)
-
-                            foreach ($correctPairs as $pair) {
-                                $l = $pair['left'] ?? null;
-                                $r = $pair['right'] ?? null;
+                                if (is_array($val) && isset($val['left'])) {
+                                    // Structure: [['left' => 'L1', 'right' => 'R1'], ...]
+                                    $l = $val['left'];
+                                    $r = $val['right'] ?? null;
+                                } else {
+                                    // Structure: ['L1' => 'R1', ...] (As seen in logs)
+                                    $l = $key;
+                                    $r = $val;
+                                }
 
                                 // Check if student has mapped k to v
-                                if (isset($studentPairs[$l]) && $studentPairs[$l] == $r) {
+                                // Note: Student answer is likely strictly L => R map as well
+                                if ($l && isset($studentPairs[$l]) && $studentPairs[$l] == $r) {
                                     $correctMatchCount++;
                                 }
                             }
