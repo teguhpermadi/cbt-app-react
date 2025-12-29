@@ -305,9 +305,15 @@ class ExamController extends Controller
             ->where('is_finished', false)
             ->firstOrFail();
 
+        $finishTime = now();
+        $startTime = $session->start_time;
+        // diffInMinutes might return float in some Carbon versions or configurations, ensuring int for smallint column
+        $durationTaken = $startTime ? (int) round($startTime->floatDiffInMinutes($finishTime)) : 0;
+
         $session->update([
             'is_finished' => true,
-            'end_time' => now(),
+            'finish_time' => $finishTime,
+            'duration_taken' => $durationTaken,
         ]);
 
         \App\Jobs\CalculateExamScore::dispatch($session);
