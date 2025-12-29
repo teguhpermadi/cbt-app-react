@@ -165,11 +165,14 @@ class ExamController extends Controller
         // Fetch specific fields to optimize performance
         $exam->load('grade', 'subject', 'academicYear');
 
-        // Get all sessions for this exam with student info
-        $sessions = \App\Models\ExamSession::with(['user:id,name,email', 'exam'])
+        // Get all sessions for this exam with student info, ordered by latest
+        $allSessions = \App\Models\ExamSession::with(['user:id,name,email', 'exam'])
             ->where('exam_id', $exam->id)
             ->latest()
             ->get();
+
+        // Unique sessions by user_id to show only one entry per student (the latest one)
+        $sessions = $allSessions->unique('user_id')->values();
 
         // Total students expected from the grade
         $totalStudents = $exam->grade->students()
@@ -180,7 +183,7 @@ class ExamController extends Controller
             'exam' => $exam,
             'sessions' => $sessions,
             'total_students' => $totalStudents,
-            'participated_count' => $sessions->unique('user_id')->count(),
+            'participated_count' => $sessions->count(),
         ]);
     }
 
@@ -188,8 +191,16 @@ class ExamController extends Controller
     {
         $session->load(['user', 'exam.subject', 'examResultDetails.examQuestion', 'examResult']);
 
+        // Fetch all attempts for this user and exam
+        $allSessions = \App\Models\ExamSession::with(['examResultDetails.examQuestion', 'examResult'])
+            ->where('exam_id', $session->exam_id)
+            ->where('user_id', $session->user_id)
+            ->orderBy('attempt_number', 'asc')
+            ->get();
+
         return Inertia::render('admin/exams/correction', [
             'session' => $session,
+            'all_sessions' => $allSessions,
         ]);
     }
 

@@ -81,7 +81,7 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Participants</CardTitle>
+                            <CardTitle className="text-sm font-medium">Participants</CardTitle>
                             <CheckCircle className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -90,6 +90,34 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                             </div>
                             <p className="text-xs text-muted-foreground">
                                 Students started
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
+                            <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {sessions.length}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Accumulated attempts
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Max Attempts</CardTitle>
+                            <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                {exam.max_attempts || '∞'}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                                Per student limit
                             </p>
                         </CardContent>
                     </Card>
@@ -144,7 +172,10 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                                         <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">Ongoing</Badge>
                                                     )}
                                                 </TableCell>
-                                                <TableCell>#{session.attempt_number}</TableCell>
+                                                <TableCell>
+                                                    <span className="font-medium">#{session.attempt_number}</span>
+                                                    <span className="text-muted-foreground text-xs"> / {exam.max_attempts || '∞'}</span>
+                                                </TableCell>
                                                 <TableCell>
                                                     {session.start_time ? format(new Date(session.start_time), 'MMM d, HH:mm') : '-'}
                                                     {session.finish_time && (
