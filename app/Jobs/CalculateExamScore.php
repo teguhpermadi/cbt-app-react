@@ -51,38 +51,102 @@ class CalculateExamScore implements ShouldQueue
                 if ($studentAnswer !== null) {
                     switch ($examQuestion->question_type) {
                         case QuestionTypeEnum::MultipleChoice:
+                            $numberOfOptions = $keyAnswer['option_count'] ?? 4;
+                            if ($studentAnswer === ($keyAnswer['answer'] ?? null)) {
+                                $isCorrect = true;
+                                $scoreEarned = $maxScore;
+                            } else {
+                                $isCorrect = false;
+                                // Penalty removed as per request
+                                $scoreEarned = 0;
+                            }
+                            break;
+
                         case QuestionTypeEnum::TrueFalse:
-                            $isCorrect = $studentAnswer === ($keyAnswer['answer'] ?? null);
+                            // Standard scoring, no penalty requested for T/F
+                            if ($studentAnswer === ($keyAnswer['answer'] ?? null)) {
+                                $isCorrect = true;
+                                $scoreEarned = $maxScore;
+                            } else {
+                                $isCorrect = false;
+                                $scoreEarned = 0;
+                            }
                             break;
 
                         case QuestionTypeEnum::MultipleSelection:
-                            $correctAnswers = $keyAnswer['answers'] ?? [];
-                            $studentAnswers = is_array($studentAnswer) ? $studentAnswer : [];
+                            $correctKeys = $keyAnswer['answers'] ?? [];
+                            $totalCorrectOptions = count($correctKeys);
+                            $selectedByStudent = is_array($studentAnswer) ? $studentAnswer : [];
 
-                            // Check if student selected all correct answers and no incorrect ones
-                            if (count($correctAnswers) === count($studentAnswers)) {
-                                $diff = array_diff($correctAnswers, $studentAnswers);
-                                $isCorrect = empty($diff);
-                            }
+                            // Calculate Intersect
+                            $matches = array_intersect($correctKeys, $selectedByStudent);
+                            $countRight = count($matches);
+
+                            // Calculate Wrong Selections
+                            $countWrong = count($selectedByStudent) - $countRight;
+
+                            // Net Correct Logic
+                            $netCorrect = $countRight - $countWrong;
+                            if ($netCorrect < 0) $netCorrect = 0;
+
+                            $ratio = $totalCorrectOptions > 0 ? $netCorrect / $totalCorrectOptions : 0;
+                            $scoreEarned = $ratio * $maxScore;
+
+                            $isCorrect = ($ratio == 1.0);
                             break;
 
                         case QuestionTypeEnum::Matching:
                             $correctPairs = $keyAnswer['pairs'] ?? [];
-                            $studentPairs = is_array($studentAnswer) ? $studentAnswer : [];
+                            $totalPairs = count($correctPairs);
+                            $studentPairs = is_array($studentAnswer) ? $studentAnswer : []; // [Left => Right]
 
-                            $isCorrect = true;
-                            foreach ($correctPairs as $left => $right) {
-                                if (!isset($studentPairs[$left]) || $studentPairs[$left] !== $right) {
-                                    $isCorrect = false;
-                                    break;
+                            $correctMatchCount = 0;
+
+                            // Iterate logic to check pairs
+                            // Structure of CorrectPairs usually: check if it's associative or array of objects
+                            // Based on typical structure: ['pairs' => [['left'=>'A', 'right'=>'1'], ...]] OR ['A'=>'1', 'B'=>'2']
+                            // Assuming Key structure is simplified K=>V for checking or array of pairs.
+                            // Let's assume standard array of objects for pairs in DB/JSON usually:
+                            // [{"left": "Indo", "right": "Jkt"}, ...]
+
+                            // Re-mapping for easier check if needed, OR loop
+                            // Let's rely on the structure being array of objects as per QuestionFactory
+
+                            // Correct pairs from factory: array of ['left' => '...', 'right' => '...']
+
+                            // Student answer format usually mirrors the input.
+                            // If user sends component: usually { "left_id": "right_id" } map
+
+                            // Let's assume studentPairs is a Map (Associative Array)
+
+                            foreach ($correctPairs as $pair) {
+                                $l = $pair['left'] ?? null;
+                                $r = $pair['right'] ?? null;
+
+                                // Check if student has mapped k to v
+                                if (isset($studentPairs[$l]) && $studentPairs[$l] == $r) {
+                                    $correctMatchCount++;
                                 }
                             }
+
+                            $ratio = $totalPairs > 0 ? $correctMatchCount / $totalPairs : 0;
+                            $scoreEarned = $ratio * $maxScore;
+
+                            $isCorrect = ($ratio == 1.0);
                             break;
 
                         case QuestionTypeEnum::Ordering:
                             $correctOrder = $keyAnswer['order'] ?? [];
                             $studentOrder = is_array($studentAnswer) ? $studentAnswer : [];
-                            $isCorrect = $studentOrder === $correctOrder;
+
+                            // Strict ordering check
+                            if ($studentOrder === $correctOrder) {
+                                $isCorrect = true;
+                                $scoreEarned = $maxScore;
+                            } else {
+                                $isCorrect = false;
+                                $scoreEarned = 0;
+                            }
                             break;
 
                         case QuestionTypeEnum::NumericalInput:
@@ -90,23 +154,26 @@ class CalculateExamScore implements ShouldQueue
                             $tolerance = (float)($keyAnswer['tolerance'] ?? 0);
                             $studentVal = (float)$studentAnswer;
 
-                            $isCorrect = abs($studentVal - $correctVal) <= $tolerance;
+                            if (abs($studentVal - $correctVal) <= $tolerance) {
+                                $isCorrect = true;
+                                $scoreEarned = $maxScore;
+                            } else {
+                                $isCorrect = false;
+                                $scoreEarned = 0;
+                            }
                             break;
 
                         case QuestionTypeEnum::Essay:
                             // Essay requires manual grading
-                            $isCorrect = null;
-                            $scoreEarned = 0;
+                            $isCorrect = null; // Pending
+                            $scoreEarned = 0;  // Initial score
                             break;
                     }
-                }
-
-                if ($isCorrect === true) {
-                    $scoreEarned = $maxScore;
-                } elseif ($isCorrect === false) {
+                } else {
+                    // No Answer -> No Penalty (Usually)
                     $scoreEarned = 0;
+                    $isCorrect = false;
                 }
-                // If null (essay), score stays 0 until graded
 
                 $detail->update([
                     'is_correct' => $isCorrect,
@@ -116,8 +183,16 @@ class CalculateExamScore implements ShouldQueue
                 $totalEarnedScore += $scoreEarned;
             }
 
-            // Update ExamSession total_score
-            $session->update(['total_score' => $totalEarnedScore]);
+            // Finalize Total Score (Floor at 0)
+            if ($totalEarnedScore < 0) {
+                $totalEarnedScore = 0;
+            }
+
+            // Update ExamSession total_score AND total_max_score
+            $session->update([
+                'total_score' => $totalEarnedScore,
+                'total_max_score' => $totalMaxScore
+            ]);
 
             // Update or Create ExamResult
             $scorePercent = $totalMaxScore > 0 ? ($totalEarnedScore / $totalMaxScore) * 100 : 0;

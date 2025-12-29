@@ -24,7 +24,7 @@ class ExamSessionFactory extends Factory
 
         // Data skor dummy
         $score = $this->faker->randomFloat(2, 50, 100);
-        
+
         // Cek berapa kali siswa ini sudah mencoba ujian yang sama
         $attemptNumber = ExamSession::where('exam_id', $exam->id)
             ->where('user_id', $student->id)
@@ -33,16 +33,17 @@ class ExamSessionFactory extends Factory
         return [
             'exam_id' => $exam->id,
             'user_id' => $student->id,
-            
+
             'attempt_number' => $attemptNumber,
             'total_score' => $score,
+            'total_max_score' => 100,
             'is_finished' => $this->faker->boolean(90), // Anggap 90% selesai
             'is_corrected' => $this->faker->boolean(80), // Anggap 80% sudah terkoreksi
-            
+
             'start_time' => $startTime,
             'finish_time' => $finishTime,
             'duration_taken' => $durationTaken,
-            
+
             'ip_address' => $this->faker->ipv4(),
         ];
     }

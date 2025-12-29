@@ -18,6 +18,7 @@ class ExamSession extends Model
         'user_id',             // ID Siswa
         'attempt_number',      // Percobaan ke berapa (1, 2, 3, ...)
         'total_score',         // Skor yang didapat di sesi ini
+        'total_max_score',     // Skor maksimal yang bisa didapat di sesi ini
         'is_finished',         // Sudah selesai atau masih berlangsung
         'is_corrected',        // Status koreksi (untuk soal Essay)
         'start_time',          // Waktu mulai pengerjaan
@@ -28,6 +29,7 @@ class ExamSession extends Model
 
     protected $casts = [
         'total_score' => 'float',
+        'total_max_score' => 'float',
         'is_finished' => 'boolean',
         'is_corrected' => 'boolean',
         'start_time' => 'datetime',
