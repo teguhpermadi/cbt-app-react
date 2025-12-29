@@ -28,6 +28,13 @@ class ExamResult extends Model
         'is_passed' => 'boolean',
     ];
 
+    protected $appends = ['final_score'];
+
+    public function getFinalScoreAttribute()
+    {
+        return round($this->score_percent);
+    }
+
     // --- RELATIONS ---
 
     public function exam(): BelongsTo
@@ -39,7 +46,7 @@ class ExamResult extends Model
     {
         return $this->belongsTo(\App\Models\User::class, 'user_id');
     }
-    
+
     // Relasi ke sesi pengerjaan yang dijadikan rujukan hasil resmi
     public function officialSession(): BelongsTo
     {

@@ -11,18 +11,27 @@ import { useEffect, useState } from 'react';
 import { index as examsIndexRoute } from '@/routes/admin/exams'; // Import route helper
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 
+interface ExamResult {
+    total_score: number;
+    score_percent: number;
+    final_score?: number; // Added from backend accessor
+    is_passed: boolean;
+}
+
 interface ExamSession {
     id: string;
     user: {
         id: string;
         name: string;
         email: string;
-
+        exam_results?: ExamResult[];
     };
     is_finished: boolean;
     start_time: string;
     finish_time?: string;
     total_score?: number;
+    total_max_score?: number;
+    final_score?: number; // Added from backend accessor
     attempt_number: number;
 }
 
@@ -151,7 +160,7 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                         <TableHead>Status</TableHead>
                                         <TableHead>Attempt</TableHead>
                                         <TableHead>Start Time</TableHead>
-                                        <TableHead>Score</TableHead>
+                                        <TableHead>Final Score</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -163,53 +172,59 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        sessions.map((session) => (
-                                            <TableRow key={session.id}>
-                                                <TableCell className="font-medium">
-                                                    <div>
-                                                        <div className="font-semibold">{session.user.name}</div>
-                                                        <div className="text-xs text-muted-foreground">{session.user.email}</div>
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {session.is_finished ? (
-                                                        <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">Finished</Badge>
-                                                    ) : (
-                                                        <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">Ongoing</Badge>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="font-medium">#{session.attempt_number}</span>
-                                                    <span className="text-muted-foreground text-xs"> / {exam.max_attempts || '∞'}</span>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {session.start_time ? format(new Date(session.start_time), 'MMM d, HH:mm') : '-'}
-                                                    {session.finish_time && (
-                                                        <div className="text-xs text-muted-foreground">
-                                                            Finished: {format(new Date(session.finish_time), 'HH:mm')}
+                                        sessions.map((session) => {
+                                            const finalScore = session.user.exam_results && session.user.exam_results.length > 0
+                                                ? session.user.exam_results[0].final_score
+                                                : session.final_score;
+
+                                            return (
+                                                <TableRow key={session.id}>
+                                                    <TableCell className="font-medium">
+                                                        <div>
+                                                            <div className="font-semibold">{session.user.name}</div>
+                                                            <div className="text-xs text-muted-foreground">{session.user.email}</div>
                                                         </div>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell>
-                                                    {session.total_score !== undefined && session.total_score !== null ? (
-                                                        <span className="font-bold">{session.total_score}</span>
-                                                    ) : (
-                                                        <span className="text-muted-foreground">-</span>
-                                                    )}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    {session.is_finished && (
-                                                        <Button
-                                                            variant="outline"
-                                                            size="sm"
-                                                            onClick={() => router.visit(`/admin/exams/sessions/${session.id}/correction`)}
-                                                        >
-                                                            Koreksi
-                                                        </Button>
-                                                    )}
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {session.is_finished ? (
+                                                            <Badge variant="secondary" className="bg-green-100 text-green-800 hover:bg-green-100">Finished</Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="border-blue-200 text-blue-700 bg-blue-50">Ongoing</Badge>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className="font-medium">#{session.attempt_number}</span>
+                                                        <span className="text-muted-foreground text-xs"> / {exam.max_attempts || '∞'}</span>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {session.start_time ? format(new Date(session.start_time), 'MMM d, HH:mm') : '-'}
+                                                        {session.finish_time && (
+                                                            <div className="text-xs text-muted-foreground">
+                                                                Finished: {format(new Date(session.finish_time), 'HH:mm')}
+                                                            </div>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        {finalScore !== undefined && finalScore !== null ? (
+                                                            <span className="font-bold">{finalScore}</span>
+                                                        ) : (
+                                                            <span className="text-muted-foreground">-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        {session.is_finished && (
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => router.visit(`/admin/exams/sessions/${session.id}/correction`)}
+                                                            >
+                                                                Koreksi
+                                                            </Button>
+                                                        )}
+                                                    </TableCell>
+                                                </TableRow>
+                                            )
+                                        })
                                     )}
                                 </TableBody>
                             </Table>

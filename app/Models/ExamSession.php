@@ -38,6 +38,16 @@ class ExamSession extends Model
         'attempt_number' => 'integer',
     ];
 
+    protected $appends = ['final_score'];
+
+    public function getFinalScoreAttribute()
+    {
+        if ($this->total_max_score && $this->total_max_score > 0) {
+            return round(($this->total_score / $this->total_max_score) * 100);
+        }
+        return 0;
+    }
+
     // --- RELATIONS ---
 
     public function exam(): BelongsTo

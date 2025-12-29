@@ -78,4 +78,12 @@ class User extends Authenticatable implements HasMedia
             ->withPivot('id', 'is_active', 'academic_year_id')
             ->withTimestamps();
     }
+
+    /**
+     * Get the exam results for the user.
+     */
+    public function examResults()
+    {
+        return $this->hasMany(ExamResult::class);
+    }
 }

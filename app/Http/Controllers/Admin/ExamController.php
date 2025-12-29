@@ -166,7 +166,15 @@ class ExamController extends Controller
         $exam->load('grade', 'subject', 'academicYear');
 
         // Get all sessions for this exam with student info, ordered by latest
-        $allSessions = \App\Models\ExamSession::with(['user:id,name,email', 'exam'])
+        $allSessions = \App\Models\ExamSession::with([
+            'user' => function ($query) use ($exam) {
+                $query->select('id', 'name', 'email')
+                    ->with(['examResults' => function ($q) use ($exam) {
+                        $q->where('exam_id', $exam->id);
+                    }]);
+            },
+            'exam'
+        ])
             ->where('exam_id', $exam->id)
             ->latest()
             ->get();
