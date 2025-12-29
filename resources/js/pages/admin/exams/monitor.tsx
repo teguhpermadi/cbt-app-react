@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { index as examsIndexRoute } from '@/routes/admin/exams'; // Import route helper
+import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 
 interface ExamSession {
     id: string;
@@ -64,18 +65,23 @@ export default function MonitorPage({ exam, sessions, total_students, participat
             <Head title={`Monitor - ${exam.title}`} />
 
             <div className="flex flex-col gap-6 p-6">
-                <div className="flex items-center gap-4">
-                    <Button variant="outline" size="icon" onClick={() => router.visit(examsIndexRoute.url())}>
-                        <ArrowLeft className="h-4 w-4" />
-                    </Button>
-                    <div>
-                        <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                            Monitor: {exam.title}
-                        </h1>
-                        <p className="text-muted-foreground font-medium">
-                            Live tracking of student progress.
-                        </p>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                        <Button variant="outline" size="icon" onClick={() => router.visit(examsIndexRoute.url())}>
+                            <ArrowLeft className="h-4 w-4" />
+                        </Button>
+                        <div>
+                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                                Monitor: {exam.title}
+                            </h1>
+                            <p className="text-muted-foreground font-medium">
+                                Live tracking of student progress.
+                            </p>
+                        </div>
                     </div>
+                    <Button onClick={() => router.visit(ExamController.edit(exam.id).url)}>
+                        Edit Exam
+                    </Button>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
