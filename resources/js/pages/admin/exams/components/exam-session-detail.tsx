@@ -24,6 +24,11 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
         durationString = `${diffInMinutes}m ${diffInSecondsRest}s`;
     } else if (session.duration_taken) {
         durationString = `${session.duration_taken}m`;
+    } else if (startTime && !session.is_finished) {
+        // Show elapsed time for ongoing sessions
+        const now = new Date();
+        const diffInMinutes = differenceInMinutes(now, startTime);
+        durationString = `${diffInMinutes}m (Ongoing)`;
     } else if (!session.is_finished) {
         durationString = 'Ongoing';
     }
