@@ -38,14 +38,14 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Score</CardTitle>
+                        <CardTitle className="text-sm font-medium">Final Grade</CardTitle>
                         <Badge variant={session.exam_result?.is_passed ? "default" : "destructive"}>
                             {session.exam_result?.is_passed ? "PASSED" : "FAILED"}
                         </Badge>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{session.exam_result?.total_score ?? 0}</div>
-                        <p className="text-xs text-muted-foreground">{session.exam_result?.score_percent ?? 0}% Score</p>
+                        <div className="text-2xl font-bold">{session.exam_result?.score_percent != null ? Math.round(session.exam_result.score_percent) : 0}</div>
+                        <p className="text-xs text-muted-foreground">Total Points: {session.exam_result?.total_score != null ? Math.round(session.exam_result.total_score) : 0}</p>
                     </CardContent>
                 </Card>
 
@@ -105,7 +105,7 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
                                     {detail.is_correct === true && <Badge className="bg-green-100 text-green-800"><CheckCircle className="mr-1 h-3 w-3" /> Correct</Badge>}
                                     {detail.is_correct === false && <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" /> Incorrect</Badge>}
                                     {detail.is_correct === null && <Badge variant="outline"><HelpCircle className="mr-1 h-3 w-3" /> Pending</Badge>}
-                                    <Badge variant="secondary">Score: {detail.score_earned} / {detail.exam_question.score_value}</Badge>
+                                    <Badge variant="secondary">Score: {detail.score_earned != null ? Math.round(detail.score_earned) : 0} / {detail.exam_question.score_value}</Badge>
                                 </div>
                             </div>
                             <CardDescription dangerouslySetInnerHTML={{ __html: detail.exam_question.content }} />

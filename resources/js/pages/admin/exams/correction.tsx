@@ -64,7 +64,7 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                                     <div className="flex items-center gap-2">
                                         {s.is_finished ? (
                                             <span className="text-[10px] text-muted-foreground bg-green-100 text-green-800 px-1.5 py-0.5 rounded-full">
-                                                Score: {s.exam_result?.total_score ?? '-'}
+                                                Score: {s.exam_result?.total_score != null ? Math.round(s.exam_result.total_score) : '-'}
                                             </span>
                                         ) : (
                                             <span className="text-[10px] text-muted-foreground bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded-full">
