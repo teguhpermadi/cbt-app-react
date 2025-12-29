@@ -225,4 +225,23 @@ class ExamController extends Controller
             'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);
     }
+
+    public function calculateScores(\App\Models\ExamSession $session)
+    {
+        \Illuminate\Support\Facades\Log::info("Recalculate requested for Session: {$session->id}, User: {$session->user_id}, Exam: {$session->exam_id}");
+
+        // Get all sessions for this user and exam to ensure everything is consistent
+        $sessions = \App\Models\ExamSession::where('exam_id', $session->exam_id)
+            ->where('user_id', $session->user_id)
+            ->get();
+
+        \Illuminate\Support\Facades\Log::info("Found " . $sessions->count() . " sessions for recalculation.");
+
+        foreach ($sessions as $s) {
+            \Illuminate\Support\Facades\Log::info("Dispatching CalculateExamScore for session {$s->id}");
+            \App\Jobs\CalculateExamScore::dispatch($s);
+        }
+
+        return redirect()->back()->with('success', 'Scores recalculated successfully for all attempts.');
+    }
 }

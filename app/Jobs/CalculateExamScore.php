@@ -46,13 +46,31 @@ class CalculateExamScore implements ShouldQueue
                 $isCorrect = false;
                 $scoreEarned = 0;
                 $maxScore = $examQuestion->score_value ?? 0;
+                $maxScore = $examQuestion->score_value ?? 0;
                 $totalMaxScore += $maxScore;
+
+                // FIX: Decode student answer if it's a JSON string (Double Encoding Issue)
+                if (is_string($studentAnswer)) {
+                    $decoded = json_decode($studentAnswer, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $studentAnswer = $decoded;
+                    }
+                }
 
                 if ($studentAnswer !== null) {
                     switch ($examQuestion->question_type) {
                         case QuestionTypeEnum::MultipleChoice:
                             $numberOfOptions = $keyAnswer['option_count'] ?? 4;
-                            if ($studentAnswer === ($keyAnswer['answer'] ?? null)) {
+                            $keyVal = $keyAnswer['answer'] ?? null;
+
+                            Log::info("Scoring MultipleChoice. QID: {$examQuestion->id}", [
+                                'type' => 'MultipleChoice',
+                                'student_raw' => $studentAnswer,
+                                'key_raw' => $keyVal,
+                                'match' => ($studentAnswer == $keyVal) ? 'true' : 'false'
+                            ]);
+
+                            if ($studentAnswer == $keyVal) {
                                 $isCorrect = true;
                                 $scoreEarned = $maxScore;
                             } else {
@@ -63,8 +81,17 @@ class CalculateExamScore implements ShouldQueue
                             break;
 
                         case QuestionTypeEnum::TrueFalse:
+                            $keyVal = $keyAnswer['answer'] ?? null;
+
+                            Log::info("Scoring TrueFalse. QID: {$examQuestion->id}", [
+                                'type' => 'TrueFalse',
+                                'student_raw' => $studentAnswer,
+                                'key_raw' => $keyVal,
+                                'match' => ($studentAnswer == $keyVal) ? 'true' : 'false'
+                            ]);
+
                             // Standard scoring, no penalty requested for T/F
-                            if ($studentAnswer === ($keyAnswer['answer'] ?? null)) {
+                            if ($studentAnswer == $keyVal) {
                                 $isCorrect = true;
                                 $scoreEarned = $maxScore;
                             } else {
@@ -77,6 +104,12 @@ class CalculateExamScore implements ShouldQueue
                             $correctKeys = $keyAnswer['answers'] ?? [];
                             $totalCorrectOptions = count($correctKeys);
                             $selectedByStudent = is_array($studentAnswer) ? $studentAnswer : [];
+
+                            Log::info("Scoring MultipleSelection. QID: {$examQuestion->id}", [
+                                'type' => 'MultipleSelection',
+                                'student_selection' => $selectedByStudent,
+                                'key_correct_options' => $correctKeys,
+                            ]);
 
                             // Calculate Intersect
                             $matches = array_intersect($correctKeys, $selectedByStudent);
@@ -99,6 +132,12 @@ class CalculateExamScore implements ShouldQueue
                             $correctPairs = $keyAnswer['pairs'] ?? [];
                             $totalPairs = count($correctPairs);
                             $studentPairs = is_array($studentAnswer) ? $studentAnswer : []; // [Left => Right]
+
+                            Log::info("Scoring Matching. QID: {$examQuestion->id}", [
+                                'type' => 'Matching',
+                                'student_pairs' => $studentPairs,
+                                'key_pairs' => $correctPairs,
+                            ]);
 
                             $correctMatchCount = 0;
 
@@ -139,8 +178,15 @@ class CalculateExamScore implements ShouldQueue
                             $correctOrder = $keyAnswer['order'] ?? [];
                             $studentOrder = is_array($studentAnswer) ? $studentAnswer : [];
 
-                            // Strict ordering check
-                            if ($studentOrder === $correctOrder) {
+                            Log::info("Scoring Ordering. QID: {$examQuestion->id}", [
+                                'type' => 'Ordering',
+                                'student_order' => $studentOrder,
+                                'key_order' => $correctOrder,
+                                'match' => ($studentOrder == $correctOrder) ? 'true' : 'false'
+                            ]);
+
+                            // Strict ordering check (relaxed to value equality)
+                            if ($studentOrder == $correctOrder) {
                                 $isCorrect = true;
                                 $scoreEarned = $maxScore;
                             } else {
@@ -153,6 +199,14 @@ class CalculateExamScore implements ShouldQueue
                             $correctVal = (float)($keyAnswer['answer'] ?? 0);
                             $tolerance = (float)($keyAnswer['tolerance'] ?? 0);
                             $studentVal = (float)$studentAnswer;
+
+                            Log::info("Scoring Numerical. QID: {$examQuestion->id}", [
+                                'type' => 'Numerical',
+                                'student_val' => $studentVal,
+                                'key_val' => $correctVal,
+                                'tolerance' => $tolerance,
+                                'diff' => abs($studentVal - $correctVal)
+                            ]);
 
                             if (abs($studentVal - $correctVal) <= $tolerance) {
                                 $isCorrect = true;

@@ -8,6 +8,7 @@ import { ArrowLeft, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExamSessionDetail from './components/exam-session-detail';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
+import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 
 interface CorrectionProps {
     session: any;
@@ -30,7 +31,7 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                     <Button variant="outline" size="icon" onClick={() => window.history.back()}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <div>
+                    <div className="flex-1">
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
                             Correction: {session.user.name}
                         </h1>
@@ -38,6 +39,16 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                             Review and grade student answers for {session.exam.title}.
                         </p>
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => {
+                            if (confirm('Are you sure you want to recalculate scores for all attempts?')) {
+                                router.post(ExamController.calculateScores(session.id));
+                            }
+                        }}
+                    >
+                        Recalculate Score
+                    </Button>
                 </div>
 
                 <Tabs defaultValue={session.id.toString()} className="w-full">
