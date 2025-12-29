@@ -166,16 +166,12 @@ class ExamController extends Controller
         $exam->load('grade', 'subject', 'academicYear');
 
         // Get all sessions for this exam with student info
-        // We might want to group by user to show the latest status per student, 
-        // or just show all sessions if multiple attempts are allowed.
-        // For monitoring, usually seeing the latest status of each student is preferred.
-
         $sessions = \App\Models\ExamSession::with(['user:id,name,email', 'exam'])
             ->where('exam_id', $exam->id)
             ->latest()
             ->get();
 
-        // We might also want to get the total number of students expected (from the grade)
+        // Total students expected from the grade
         $totalStudents = $exam->grade->students()
             ->where('user_type', 'student')
             ->count();
@@ -185,6 +181,15 @@ class ExamController extends Controller
             'sessions' => $sessions,
             'total_students' => $totalStudents,
             'participated_count' => $sessions->unique('user_id')->count(),
+        ]);
+    }
+
+    public function correction(\App\Models\ExamSession $session)
+    {
+        $session->load(['user', 'exam.subject', 'examResultDetails.examQuestion', 'examResult']);
+
+        return Inertia::render('admin/exams/correction', [
+            'session' => $session,
         ]);
     }
 

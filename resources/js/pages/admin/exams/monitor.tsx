@@ -118,12 +118,13 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                         <TableHead>Attempt</TableHead>
                                         <TableHead>Start Time</TableHead>
                                         <TableHead>Score</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
                                     {sessions.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                            <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
                                                 No students have started this exam yet.
                                             </TableCell>
                                         </TableRow>
@@ -157,6 +158,17 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                                                         <span className="font-bold">{session.total_score}</span>
                                                     ) : (
                                                         <span className="text-muted-foreground">-</span>
+                                                    )}
+                                                </TableCell>
+                                                <TableCell className="text-right">
+                                                    {session.is_finished && (
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            onClick={() => router.visit(`/admin/exams/sessions/${session.id}/correction`)}
+                                                        >
+                                                            Koreksi
+                                                        </Button>
                                                     )}
                                                 </TableCell>
                                             </TableRow>

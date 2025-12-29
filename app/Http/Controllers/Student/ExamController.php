@@ -291,6 +291,8 @@ class ExamController extends Controller
             'end_time' => now(),
         ]);
 
+        \App\Jobs\CalculateExamScore::dispatch($session);
+
         return redirect()->route('student.exams.index')->with('success', 'Ujian telah selesai dikumpulkan.');
     }
 }

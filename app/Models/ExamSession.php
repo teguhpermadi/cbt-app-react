@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ExamSession extends Model
 {
@@ -22,7 +23,7 @@ class ExamSession extends Model
         'start_time',          // Waktu mulai pengerjaan
         'finish_time',         // Waktu selesai pengerjaan
         'duration_taken',      // Durasi pengerjaan dalam menit
-        'ip_address',          
+        'ip_address',
     ];
 
     protected $casts = [
@@ -53,5 +54,15 @@ class ExamSession extends Model
     public function details(): HasMany
     {
         return $this->hasMany(ExamResultDetail::class, 'exam_session_id');
+    }
+
+    public function examResultDetails(): HasMany
+    {
+        return $this->hasMany(ExamResultDetail::class, 'exam_session_id');
+    }
+
+    public function examResult(): HasOne
+    {
+        return $this->hasOne(ExamResult::class, 'exam_session_id');
     }
 }
