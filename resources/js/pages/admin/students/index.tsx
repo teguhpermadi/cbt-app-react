@@ -32,6 +32,7 @@ import { dashboard } from '@/routes';
 interface Student {
     id: string;
     name: string;
+    username: string;
     email: string;
     grades: any[];
     created_at: string;
@@ -39,6 +40,7 @@ interface Student {
 
 interface CreateStudentForm {
     name: string;
+    username: string;
     email: string;
     password: string;
     grade_id: string;
@@ -47,6 +49,7 @@ interface CreateStudentForm {
 
 interface EditStudentForm {
     name: string;
+    username: string;
     email: string;
     grade_id: string;
 }
@@ -72,6 +75,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
 
     const createForm = useForm<CreateStudentForm>({
         name: '',
+        username: '',
         email: '',
         password: '',
         grade_id: '',
@@ -80,6 +84,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
 
     const editForm = useForm<EditStudentForm>({
         name: '',
+        username: '',
         email: '',
         grade_id: '',
     });
@@ -100,6 +105,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
         setEditingStudent(student);
         editForm.setData({
             name: student.name,
+            username: student.username,
             email: student.email,
             grade_id: student.grades[0]?.id || '',
         });
@@ -152,6 +158,12 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                         <Label htmlFor="st-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
                                         <Input id="st-name" value={createForm.data.name} onChange={e => createForm.setData('name', e.target.value)} placeholder="Full Name" className="rounded-xl h-11 border-slate-200" />
                                         <InputError message={createForm.errors.name} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="st-username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                        <Input id="st-username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
+                                        {/* @ts-ignore */}
+                                        <InputError message={createForm.errors.username} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="st-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
@@ -221,7 +233,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-slate-900 dark:text-slate-100">{student.name}</span>
-                                                <span className="text-xs text-muted-foreground font-medium">{student.email}</span>
+                                                <span className="text-xs text-muted-foreground font-medium">{student.username} | {student.email}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
@@ -281,6 +293,12 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                 <Label htmlFor="edit-st-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
                                 <Input id="edit-st-name" value={editForm.data.name} onChange={e => editForm.setData('name', e.target.value)} className="rounded-xl h-11 border-slate-200" />
                                 <InputError message={editForm.errors.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-st-username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                <Input id="edit-st-username" value={editForm.data.username} onChange={e => editForm.setData('username', e.target.value)} className="rounded-xl h-11 border-slate-200" />
+                                {/* @ts-ignore */}
+                                <InputError message={editForm.errors.username} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="edit-st-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>

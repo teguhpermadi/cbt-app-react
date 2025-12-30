@@ -54,6 +54,7 @@ export default function Index({ users, roles }: IndexProps) {
 
     const createForm = useForm({
         name: '',
+        username: '',
         email: '',
         password: '',
         user_type: 'teacher',
@@ -62,6 +63,7 @@ export default function Index({ users, roles }: IndexProps) {
 
     const editForm = useForm({
         name: '',
+        username: '',
         email: '',
         user_type: '',
         roles: [] as string[],
@@ -83,6 +85,7 @@ export default function Index({ users, roles }: IndexProps) {
         setEditingUser(user);
         editForm.setData({
             name: user.name,
+            username: user.username,
             email: user.email,
             user_type: user.user_type,
             roles: user.roles.map((r: any) => r.name),
@@ -138,6 +141,12 @@ export default function Index({ users, roles }: IndexProps) {
                                         <InputError message={createForm.errors.name} />
                                     </div>
                                     <div className="space-y-2">
+                                        <Label htmlFor="username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                        <Input id="username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
+                                        {/* @ts-ignore */}
+                                        <InputError message={createForm.errors.username} />
+                                    </div>
+                                    <div className="space-y-2">
                                         <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
                                         <Input id="email" type="email" value={createForm.data.email} onChange={e => createForm.setData('email', e.target.value)} placeholder="john@example.com" className="rounded-xl h-11 border-slate-200" />
                                         <InputError message={createForm.errors.email} />
@@ -190,7 +199,7 @@ export default function Index({ users, roles }: IndexProps) {
                                         <td className="px-6 py-4">
                                             <div className="flex flex-col">
                                                 <span className="font-bold text-slate-900 dark:text-slate-100">{user.name}</span>
-                                                <span className="text-xs text-muted-foreground">{user.email}</span>
+                                                <span className="text-xs text-muted-foreground">{user.username} | {user.email}</span>
                                             </div>
                                         </td>
                                         <td className="px-6 py-4 lowercase tracking-tighter">
@@ -253,6 +262,12 @@ export default function Index({ users, roles }: IndexProps) {
                                 <Label htmlFor="edit-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
                                 <Input id="edit-name" value={editForm.data.name} onChange={e => editForm.setData('name', e.target.value)} className="rounded-xl h-11 border-slate-200" />
                                 <InputError message={editForm.errors.name} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                <Input id="edit-username" value={editForm.data.username} onChange={e => editForm.setData('username', e.target.value)} className="rounded-xl h-11 border-slate-200" />
+                                {/* @ts-ignore */}
+                                <InputError message={editForm.errors.username} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="edit-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
