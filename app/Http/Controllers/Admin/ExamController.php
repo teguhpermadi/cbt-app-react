@@ -124,6 +124,7 @@ class ExamController extends Controller
             'is_published' => 'required|boolean',
             'is_randomized' => 'required|boolean',
             'is_answer_randomized' => 'nullable|boolean',
+            'show_result_on_finish' => 'nullable|boolean',
             'max_attempts' => 'nullable|integer|min:1',
             'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);
@@ -228,7 +229,9 @@ class ExamController extends Controller
             'end_time' => 'required|date|after:start_time',
             'is_published' => 'required|boolean',
             'is_randomized' => 'required|boolean',
+            'is_randomized' => 'required|boolean',
             'is_answer_randomized' => 'nullable|boolean',
+            'show_result_on_finish' => 'nullable|boolean',
             'max_attempts' => 'nullable|integer|min:1',
             'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);

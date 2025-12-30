@@ -27,6 +27,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('exams/{exam}/save-answer', [\App\Http\Controllers\Student\ExamController::class, 'saveAnswer'])->name('exams.save-answer');
         Route::post('exams/{exam}/start', [\App\Http\Controllers\Student\ExamController::class, 'start'])->name('exams.start');
         Route::post('exams/{exam}/finish', [\App\Http\Controllers\Student\ExamController::class, 'finish'])->name('exams.finish');
+        Route::get('exams/{exam}/result', [\App\Http\Controllers\Student\ExamController::class, 'result'])->name('exams.result');
+        Route::get('exams/{exam}/finished', [\App\Http\Controllers\Student\ExamController::class, 'finished'])->name('exams.finished');
     });
 
     // Admin Routes

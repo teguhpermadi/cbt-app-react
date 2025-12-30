@@ -36,6 +36,7 @@ interface CreateExamForm {
     is_published: boolean;
     is_randomized: boolean;
     is_answer_randomized: boolean; // Add this
+    show_result_on_finish: boolean; // Add this
     max_attempts: number | null;   // Add this
     timer_type: string;           // Add this
     passing_score: number;
@@ -73,6 +74,7 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
         is_published: !!exam.is_published,
         is_randomized: !!exam.is_randomized,
         is_answer_randomized: !!exam.is_answer_randomized,
+        show_result_on_finish: !!exam.show_result_on_finish,
         max_attempts: exam.max_attempts,
         timer_type: exam.timer_type?.value || exam.timer_type || 'flexible',
         passing_score: exam.passing_score || 0,
@@ -273,8 +275,12 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
                                 </div>
 
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="edit_is_answer_randomized" checked={form.data.is_answer_randomized} onCheckedChange={(c) => form.setData('is_answer_randomized', !!c)} />
                                     <label htmlFor="edit_is_answer_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Answer Options</label>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="edit_show_result_on_finish" checked={form.data.show_result_on_finish} onCheckedChange={(c) => form.setData('show_result_on_finish', !!c)} />
+                                    <label htmlFor="edit_show_result_on_finish" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Show Result on Finish</label>
                                 </div>
 
                                 <div className="flex items-center space-x-2">

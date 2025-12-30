@@ -43,11 +43,12 @@ class ExamFactory extends Factory
             ExamTypeEnum::Tryout => 'Try Out Mandiri',
         };
 
-
-
         // Waktu mulai dan berakhir ujian
         $startTime = $this->faker->dateTimeBetween('-1 week', '+1 week');
         $endTime = (clone $startTime)->modify('+1 hour'); // Durasi 1 jam default
+
+        // show result page
+        $showResultPage = $this->faker->boolean(50);
 
         return [
             'academic_year_id' => $academicYear->id,
@@ -74,6 +75,8 @@ class ExamFactory extends Factory
 
             'start_time' => $startTime,
             'end_time' => $endTime,
+
+            'show_result_on_finish' => $showResultPage,
         ];
     }
 }

@@ -43,6 +43,7 @@ class Exam extends Model
         'is_published',     // Status ujian: draft/terbit
         'is_randomized',    // Apakah urutan soal diacak
         'is_answer_randomized', // Apakah urutan jawaban diacak
+        'show_result_on_finish', // Apakah hasil ditampilkan setelah selesai
         'max_attempts',     // Jumlah maksimal upaya siswa (null = unlimited)
         'timer_type',       // Jenis timer: strict/flexible
         'passing_score',    // Nilai minimum kelulusan
@@ -58,6 +59,7 @@ class Exam extends Model
         'is_published' => 'boolean',
         'is_randomized' => 'boolean',
         'is_answer_randomized' => 'boolean',
+        'show_result_on_finish' => 'boolean',
         'max_attempts' => 'integer',
         'timer_type' => TimerTypeEnum::class,
         'start_time' => 'datetime',
