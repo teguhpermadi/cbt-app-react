@@ -39,17 +39,17 @@ export default function Login({
                         <div className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/70">
-                                    Email address
+                                    Email or Username
                                 </Label>
                                 <Input
                                     id="email"
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     required
                                     autoFocus
                                     tabIndex={1}
-                                    autoComplete="email"
-                                    placeholder="name@company.com"
+                                    autoComplete="username"
+                                    placeholder="Username or Email"
                                     className="h-11 rounded-xl border-muted-foreground/20 bg-background/50 transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                 />
                                 <InputError message={errors.email} />
