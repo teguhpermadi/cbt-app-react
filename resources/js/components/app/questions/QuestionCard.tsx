@@ -1,7 +1,8 @@
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2 } from "lucide-react";
+import { Edit, Trash2, Tag, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 import renderMathInElement from "katex/dist/contrib/auto-render";
 import { DifficultySelector } from "./DifficultySelector";
@@ -135,6 +136,64 @@ export default function QuestionCard({
             <CardFooter className="p-3 bg-slate-50/20 dark:bg-slate-900/20 border-t border-slate-100 dark:border-slate-800 flex-col items-start gap-4">
                 <div className="w-full">
                     <AnswerOptions question={question} showKeyAnswer={showKeyAnswer} />
+                </div>
+
+                <div className="w-full pt-4 border-t border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center gap-2 mb-2">
+                        <Tag className="w-4 h-4 text-muted-foreground" />
+                        <span className="text-sm font-medium text-muted-foreground">Tags</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 mb-2">
+                        {question.tags?.map((tag, index) => {
+                            // Handle Spatie Translatable Tag
+                            const tagName = typeof tag.name === 'object'
+                                ? (tag.name['en'] || tag.name['id'] || Object.values(tag.name)[0])
+                                : tag.name;
+
+                            return (
+                                <Badge key={index} variant="secondary" className="gap-1 pr-1">
+                                    {tagName}
+                                    {!readOnly && (
+                                        <button
+                                            onClick={() => {
+                                                const currentTags = question.tags?.map(t =>
+                                                    typeof t.name === 'object' ? (t.name['en'] || t.name['id'] || Object.values(t.name)[0]) : t.name
+                                                ) || [];
+                                                const newTags = currentTags.filter((_, i) => i !== index);
+                                                handleValueChange('tags', newTags);
+                                            }}
+                                            className="hover:bg-red-100 hover:text-red-600 rounded-full p-0.5 transition-colors"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    )}
+                                </Badge>
+                            );
+                        })}
+                    </div>
+                    {!readOnly && (
+                        <div className="flex w-full max-w-xs items-center space-x-2">
+                            <Input
+                                placeholder="Add tag..."
+                                className="h-8 text-sm"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const val = e.currentTarget.value.trim();
+                                        if (val) {
+                                            const currentTags = question.tags?.map(t =>
+                                                typeof t.name === 'object' ? (t.name['en'] || t.name['id'] || Object.values(t.name)[0]) : t.name
+                                            ) || [];
+                                            if (!currentTags.includes(val)) {
+                                                handleValueChange('tags', [...currentTags, val]);
+                                            }
+                                            e.currentTarget.value = '';
+                                        }
+                                    }
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
             </CardFooter>
         </Card>

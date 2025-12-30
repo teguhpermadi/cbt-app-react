@@ -19,6 +19,7 @@ export interface Question {
     question_type: string;
     media_url?: string | null; // Added media_url
     options?: Option[]; // Add options relation
+    tags?: { id: number; name: { [key: string]: string } }[];
 }
 
 export interface AnswerOptionProps {

@@ -110,6 +110,16 @@ class QuestionController extends Controller
                 }
             }
 
+            // 4. Handle Tags
+            if ($request->has('tags')) {
+                $question->attachTags($request->tags);
+            }
+
+            // 4. Handle Tags
+            if ($request->has('tags')) {
+                $question->attachTags($request->tags);
+            }
+
             return $question;
         });
 
@@ -223,6 +233,11 @@ class QuestionController extends Controller
                 } elseif (isset($optData['delete_media']) && filter_var($optData['delete_media'], FILTER_VALIDATE_BOOLEAN)) {
                     $option->clearMediaCollection('option_media');
                 }
+            }
+
+            // 4. Handle Tags
+            if ($request->has('tags')) {
+                $question->syncTags($request->tags);
             }
         });
 

@@ -149,9 +149,37 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
     };
 
     const handleQuestionUpdate = (id: string, field: string, value: any) => {
-        router.put(QuestionController.update(id).url, {
+        const question = sortedQuestions.find(q => q.id === id);
+        if (!question) return;
+
+        // Prepare payload with the updated field
+        const payload = {
+            ...question,
             [field]: value
-        }, {
+        };
+
+        // Ensure tags are formatted as array of strings (names) 
+        // because backend expects strings, but local state might have objects
+        if (payload.tags && payload.tags.length > 0) {
+            // Check if tags are objects (from database) or strings (active edit)
+            // If we are editing 'tags', 'value' is already strings.
+            // If we are editing 'content', 'payload.tags' might be objects.
+
+            if (field !== 'tags') {
+                payload.tags = payload.tags.map((t: any) => {
+                    if (typeof t === 'string') return t;
+                    // Handle Spatie translatable or simple object
+                    return typeof t.name === 'object'
+                        ? (t.name['en'] || t.name['id'] || Object.values(t.name)[0])
+                        : t.name;
+                });
+            }
+        } else {
+            // If tags is empty or undefined, ensure valid array if needed or null
+            if (!payload.tags) payload.tags = [];
+        }
+
+        router.put(QuestionController.update(id).url, payload, {
             preserveScroll: true,
             preserveState: true,
         });

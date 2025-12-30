@@ -17,10 +17,11 @@ use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Spatie\Tags\HasTags;
 
 class Question extends Model implements HasMedia
 {
-    use HasFactory, HasUlids, LogsActivity, InteractsWithMedia, SoftDeletes;
+    use HasFactory, HasUlids, LogsActivity, InteractsWithMedia, SoftDeletes, HasTags;
 
     protected $fillable = [
         'question_bank_id',
