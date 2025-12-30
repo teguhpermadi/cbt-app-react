@@ -220,7 +220,7 @@ class ExamController extends Controller
             ->with('examQuestion') // Eager load exam question relationship
             ->orderBy('question_number')
             ->get()
-            ->map(function ($detail) {
+            ->map(function ($detail) use ($exam, $session) {
                 $examQuestion = $detail->examQuestion;
 
                 \Illuminate\Support\Facades\Log::info('ExamQuestion Media Debug:', [
@@ -235,7 +235,7 @@ class ExamController extends Controller
                     'number' => $detail->question_number,
                     'content' => $examQuestion->content,
                     'type' => $examQuestion->question_type,
-                    'options' => is_array($examQuestion->options) ? $examQuestion->options : json_decode($examQuestion->options ?? '[]'),
+                    'options' => $this->prepareOptions($exam, $session, $examQuestion),
                     'student_answer' => (is_string($detail->student_answer) && in_array(substr($detail->student_answer, 0, 1), ['{', '[', '"']))
                         ? json_decode($detail->student_answer)
                         : $detail->student_answer,
@@ -319,5 +319,35 @@ class ExamController extends Controller
         \App\Jobs\CalculateExamScore::dispatch($session);
 
         return redirect()->route('student.exams.index')->with('success', 'Ujian telah selesai dikumpulkan.');
+    }
+
+    /**
+     * Prepare question options, shuffling them if necessary.
+     */
+    private function prepareOptions($exam, $session, $examQuestion): array
+    {
+        $options = is_array($examQuestion->options)
+            ? $examQuestion->options
+            : json_decode($examQuestion->options ?? '[]', true);
+
+        if ($exam->is_answer_randomized && count($options) > 1) {
+            // Use a seed for consistent randomization per session/question
+            $seed = crc32($session->id . $examQuestion->id);
+            mt_srand($seed);
+
+            $keys = array_keys($options);
+            shuffle($keys);
+
+            mt_srand(); // Reset seed to default
+
+            $shuffledOptions = [];
+            foreach ($keys as $key) {
+                $shuffledOptions[$key] = $options[$key];
+            }
+
+            return $shuffledOptions;
+        }
+
+        return $options;
     }
 }
