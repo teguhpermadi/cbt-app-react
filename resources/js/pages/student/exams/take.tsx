@@ -22,6 +22,8 @@ import axios from 'axios';
 import { saveAnswer as saveAnswerRoute, finish as finishRoute } from '@/routes/student/exams';
 import OptionViewer from '@/components/app/questions/option-viewers/OptionViewer';
 import ImageViewerModal from '@/components/ui/image-viewer-modal';
+import 'katex/dist/katex.min.css';
+import renderMathInElement from 'katex/dist/contrib/auto-render';
 
 interface Question {
     id: string; // ExamQuestion ID
@@ -65,6 +67,9 @@ export default function ExamTake({ exam, session, questions }: Props) {
 
     // Time Tracking
     const activeQuestionStartTime = useRef<number>(Date.now());
+
+    // Ref for rendering math formulas
+    const contentRef = useRef<HTMLDivElement>(null);
 
     // Safeguard: Check if questions exist
     if (!questions || questions.length === 0) {
@@ -110,6 +115,25 @@ export default function ExamTake({ exam, session, questions }: Props) {
         setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
 
     }, [questions, session.end_time]);
+
+    // Render math formulas when question content changes
+    useEffect(() => {
+        if (contentRef.current) {
+            // Clear previous content first
+            contentRef.current.innerHTML = questions[currentIndex]?.content || '';
+
+            // Then render math
+            renderMathInElement(contentRef.current, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+            });
+        }
+    }, [currentIndex, questions[currentIndex]?.content]);
 
     // Timer Interval
     useEffect(() => {
@@ -286,7 +310,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
                         <ScrollArea className="flex-1 bg-white dark:bg-slate-900">
                             <CardContent className="p-8 md:p-10 space-y-10">
                                 {/* Question Content */}
-                                <div className="text-lg leading-relaxed text-slate-800 dark:text-slate-200">
+                                <div className="text-lg leading-relaxed text-slate-800 dark:text-slate-200" key={`question-content-${currentIndex}`}>
                                     {questions[currentIndex].media_url && (
                                         <div className="mb-6">
                                             <img
@@ -297,7 +321,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                             />
                                         </div>
                                     )}
-                                    <div dangerouslySetInnerHTML={{ __html: questions[currentIndex].content }} className="exam-content" />
+                                    <div ref={contentRef} className="exam-content" />
                                 </div>
 
                                 <Separator className="bg-slate-100 dark:bg-slate-800" />
