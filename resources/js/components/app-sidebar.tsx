@@ -90,8 +90,8 @@ export function AppSidebar() {
             icon: ClipboardList,
         },
         {
-            title: 'Results',
-            href: '#',
+            title: 'Riwayat Ujian',
+            href: '/student/results',
             icon: GraduationCap,
         },
     ];

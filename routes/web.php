@@ -27,7 +27,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('exams/{exam}/save-answer', [\App\Http\Controllers\Student\ExamController::class, 'saveAnswer'])->name('exams.save-answer');
         Route::post('exams/{exam}/start', [\App\Http\Controllers\Student\ExamController::class, 'start'])->name('exams.start');
         Route::post('exams/{exam}/finish', [\App\Http\Controllers\Student\ExamController::class, 'finish'])->name('exams.finish');
-        Route::get('exams/{exam}/result', [\App\Http\Controllers\Student\ExamController::class, 'result'])->name('exams.result');
+
+        // Results Routes
+        Route::get('results', [\App\Http\Controllers\Student\ExamResultController::class, 'index'])->name('results.index');
+        Route::get('exams/{exam}/result', [\App\Http\Controllers\Student\ExamResultController::class, 'show'])->name('exams.result'); // Keeps backward compatibility
+        Route::get('results/session/{session}', [\App\Http\Controllers\Student\ExamResultController::class, 'showSession'])->name('results.show');
+
         Route::get('exams/{exam}/finished', [\App\Http\Controllers\Student\ExamController::class, 'finished'])->name('exams.finished');
     });
 

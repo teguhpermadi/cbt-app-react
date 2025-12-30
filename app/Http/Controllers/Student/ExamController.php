@@ -325,47 +325,7 @@ class ExamController extends Controller
         return redirect()->route('student.exams.finished', $exam->id);
     }
 
-    public function result(Exam $exam)
-    {
-        // Check if exam allows showing results
-        if (!$exam->show_result_on_finish) {
-            return redirect()->route('student.exams.finished', $exam->id);
-        }
 
-        $session = \App\Models\ExamSession::where('exam_id', $exam->id)
-            ->where('user_id', \Illuminate\Support\Facades\Auth::id())
-            ->where('is_finished', true)
-            ->latest()
-            ->firstOrFail();
-
-        // Load necessary relations for result display
-        $session->load('examResult', 'examResultDetails.examQuestion');
-
-        // Prepare data for result page
-        $questions = $session->examResultDetails->map(function ($detail) {
-            $question = $detail->examQuestion;
-            return [
-                'id' => $question->id,
-                'number' => $detail->question_number,
-                'content' => $question->content,
-                'key_answer' => $question->key_answer, // Assuming simple key answer for now, might need processing
-                'student_answer' => $detail->student_answer,
-                'is_correct' => $detail->is_correct,
-                'score_earned' => $detail->score_earned,
-                'max_score' => $question->score_value->value ?? 0, // Fallback if enum not loaded properly
-                'type' => $question->question_type,
-                'media_url' => $question->media_path ? asset('storage/' . $question->media_path) : null,
-                'explanation' => $question->explanation ?? null, // If explanation exists
-            ];
-        });
-
-        return Inertia::render('student/exams/result', [
-            'exam' => $exam,
-            'session' => $session,
-            'questions' => $questions,
-            'total_score' => $session->examResult->total_score ?? 0,
-        ]);
-    }
 
     public function finished(Exam $exam)
     {
