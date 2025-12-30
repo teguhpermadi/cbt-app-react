@@ -28,6 +28,8 @@ import Pagination from '@/components/Pagination';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
 import { index } from '@/routes/admin/students';
 import { dashboard } from '@/routes';
+import ImportStudentModal from './import-student-modal';
+import { FileSpreadsheet } from 'lucide-react';
 
 interface Student {
     id: string;
@@ -70,6 +72,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function Index({ students, grades, academicYears }: IndexProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [isImportOpen, setIsImportOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingStudent, setEditingStudent] = useState<any>(null);
 
@@ -140,80 +143,91 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                         <p className="text-muted-foreground font-medium">Manage student accounts and grade assignments.</p>
                     </div>
 
-                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
-                                <UserPlus className="size-4" />
-                                Enroll New Student
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
-                            <form onSubmit={submitCreate}>
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-bold">Enroll Student</DialogTitle>
-                                    <DialogDescription>Create a new student account and assign a grade.</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="st-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
-                                        <Input id="st-name" value={createForm.data.name} onChange={e => createForm.setData('name', e.target.value)} placeholder="Full Name" className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.name} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="st-username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
-                                        <Input id="st-username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
-                                        {/* @ts-ignore */}
-                                        <InputError message={createForm.errors.username} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="st-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
-                                        <Input id="st-email" type="email" value={createForm.data.email} onChange={e => createForm.setData('email', e.target.value)} placeholder="student@school.com" className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.email} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="st-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
-                                        <Input id="st-password" type="password" value={createForm.data.password} onChange={e => createForm.setData('password', e.target.value)} className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.password} />
-                                    </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            className="rounded-xl flex items-center gap-2 border-slate-200 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                            onClick={() => setIsImportOpen(true)}
+                        >
+                            <FileSpreadsheet className="size-4 text-green-600" />
+                            Import Excel
+                        </Button>
+
+                        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
+                                    <UserPlus className="size-4" />
+                                    Enroll New Student
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
+                                <form onSubmit={submitCreate}>
+                                    <DialogHeader>
+                                        <DialogTitle className="text-xl font-bold">Enroll Student</DialogTitle>
+                                        <DialogDescription>Create a new student account and assign a grade.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade</Label>
-                                            <Select onValueChange={(val) => createForm.setData('grade_id', val)}>
-                                                <SelectTrigger className="rounded-xl h-11 border-slate-200">
-                                                    <SelectValue placeholder="Grade" />
-                                                </SelectTrigger>
-                                                <SelectContent className="rounded-xl border-none shadow-xl">
-                                                    {grades.filter(Boolean).map(g => (
-                                                        <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={createForm.errors.grade_id} />
+                                            <Label htmlFor="st-name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
+                                            <Input id="st-name" value={createForm.data.name} onChange={e => createForm.setData('name', e.target.value)} placeholder="Full Name" className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.name} />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Year</Label>
-                                            <Select onValueChange={(val) => createForm.setData('academic_year_id', val)} defaultValue={createForm.data.academic_year_id}>
-                                                <SelectTrigger className="rounded-xl h-11 border-slate-200">
-                                                    <SelectValue placeholder="Year" />
-                                                </SelectTrigger>
-                                                <SelectContent className="rounded-xl border-none shadow-xl">
-                                                    {academicYears.filter(Boolean).map(ay => (
-                                                        <SelectItem key={ay.id} value={ay.id}>{ay.year} - {ay.semester}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                            <InputError message={createForm.errors.academic_year_id} />
+                                            <Label htmlFor="st-username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                            <Input id="st-username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
+                                            {/* @ts-ignore */}
+                                            <InputError message={createForm.errors.username} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="st-email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
+                                            <Input id="st-email" type="email" value={createForm.data.email} onChange={e => createForm.setData('email', e.target.value)} placeholder="student@school.com" className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.email} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="st-password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
+                                            <Input id="st-password" type="password" value={createForm.data.password} onChange={e => createForm.setData('password', e.target.value)} className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.password} />
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade</Label>
+                                                <Select onValueChange={(val) => createForm.setData('grade_id', val)}>
+                                                    <SelectTrigger className="rounded-xl h-11 border-slate-200">
+                                                        <SelectValue placeholder="Grade" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="rounded-xl border-none shadow-xl">
+                                                        {grades.filter(Boolean).map(g => (
+                                                            <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError message={createForm.errors.grade_id} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Year</Label>
+                                                <Select onValueChange={(val) => createForm.setData('academic_year_id', val)} defaultValue={createForm.data.academic_year_id}>
+                                                    <SelectTrigger className="rounded-xl h-11 border-slate-200">
+                                                        <SelectValue placeholder="Year" />
+                                                    </SelectTrigger>
+                                                    <SelectContent className="rounded-xl border-none shadow-xl">
+                                                        {academicYears.filter(Boolean).map(ay => (
+                                                            <SelectItem key={ay.id} value={ay.id}>{ay.year} - {ay.semester}</SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                                <InputError message={createForm.errors.academic_year_id} />
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
-                                        Enroll Student
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                                    <DialogFooter>
+                                        <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
+                                            Enroll Student
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
@@ -328,6 +342,11 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            <ImportStudentModal
+                isOpen={isImportOpen}
+                onClose={() => setIsImportOpen(false)}
+            />
         </AppLayout >
     );
 }
