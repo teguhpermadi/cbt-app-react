@@ -74,7 +74,7 @@ class GradeStudentController extends Controller
         // 4. Check if student already has a grade in this active academic year
         // We query the pivot table or the user's grades filtered by the active academic year
         $existingGrade = $user->grades()
-            ->where('academic_year_id', $activeAcademicYear->id)
+            ->where('grade_user.academic_year_id', $activeAcademicYear->id)
             ->exists();
 
         if ($existingGrade) {

@@ -38,9 +38,10 @@ interface ManageStudentsModalProps {
     grade: Grade | null;
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    onStudentAdded?: () => void;
 }
 
-export default function ManageStudentsModal({ grade, open, onOpenChange }: ManageStudentsModalProps) {
+export default function ManageStudentsModal({ grade, open, onOpenChange, onStudentAdded }: ManageStudentsModalProps) {
     const [loading, setLoading] = useState(false);
     const [students, setStudents] = useState<User[]>([]);
     const [availableStudents, setAvailableStudents] = useState<User[]>([]);
@@ -82,6 +83,7 @@ export default function ManageStudentsModal({ grade, open, onOpenChange }: Manag
             });
             await fetchData();
             setSelectedStudentId('');
+            onStudentAdded?.(); // Trigger reload di parent
         } catch (err: any) {
             console.error(err);
             setError(err.response?.data?.message || err.response?.data?.errors?.user_id?.[0] || 'Failed to assign student.');
@@ -97,6 +99,7 @@ export default function ManageStudentsModal({ grade, open, onOpenChange }: Manag
         try {
             await axios.delete(GradeStudentController.destroy({ grade: grade.id, student: studentId }).url);
             await fetchData();
+            onStudentAdded?.(); // Trigger reload di parent
         } catch (err: any) {
             console.error(err);
             setError('Failed to remove student.');
@@ -168,7 +171,7 @@ export default function ManageStudentsModal({ grade, open, onOpenChange }: Manag
                                     disabled={loading || !selectedStudentId}
                                     className="rounded-xl font-bold shadow-md"
                                 >
-                                    Add Use
+                                    Add
                                 </Button>
                             </div>
                         </div>

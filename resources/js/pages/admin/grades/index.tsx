@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
+import { Head, useForm, router } from '@inertiajs/react';
 import { BookText, Edit, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -318,6 +318,7 @@ export default function Index({ grades, academicYears }: IndexProps) {
                 grade={managingGrade}
                 open={isManageStudentsOpen}
                 onOpenChange={setIsManageStudentsOpen}
+                onStudentAdded={() => router.reload({ only: ['grades'] })}
             />
         </AppLayout >
     );
