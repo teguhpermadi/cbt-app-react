@@ -1,8 +1,11 @@
+import React, { useEffect, useRef } from 'react';
 import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Home, ArrowLeft } from 'lucide-react';
+import 'katex/dist/katex.min.css';
+import renderMathInElement from 'katex/dist/contrib/auto-render';
 
 interface ResultProps {
     exam: any;
@@ -86,7 +89,7 @@ export default function Result({ exam, session, questions, total_score }: Result
                             </CardHeader>
                             <CardContent className="pt-4 space-y-4">
                                 {/* Question Content */}
-                                <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: q.content }} />
+                                <MathContent content={q.content} className="prose prose-sm max-w-none" />
 
                                 {q.media_url && (
                                     <div className="rounded-lg overflow-hidden border">
@@ -125,4 +128,24 @@ export default function Result({ exam, session, questions, total_score }: Result
             </div>
         </div>
     );
+}
+
+function MathContent({ content, className }: { content: string, className?: string }) {
+    const ref = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        if (ref.current) {
+            renderMathInElement(ref.current, {
+                delimiters: [
+                    { left: '$$', right: '$$', display: true },
+                    { left: '$', right: '$', display: false },
+                    { left: '\\(', right: '\\)', display: false },
+                    { left: '\\[', right: '\\]', display: true }
+                ],
+                throwOnError: false
+            });
+        }
+    }, [content]);
+
+    return <div ref={ref} className={className} dangerouslySetInnerHTML={{ __html: content || '' }} />;
 }
