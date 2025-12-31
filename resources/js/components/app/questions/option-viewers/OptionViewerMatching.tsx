@@ -14,6 +14,10 @@ import {
     Edge,
     Node,
     ReactFlowProvider,
+    BaseEdge,
+    EdgeLabelRenderer,
+    getBezierPath,
+    EdgeProps,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
@@ -76,11 +80,6 @@ function RightNode({ data }: NodeProps) {
                 )}
                 <div className="text-sm" dangerouslySetInnerHTML={{ __html: data.content as string }} />
             </div>
-            {data.pairId && (
-                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
-                    {data.pairId as string}
-                </div>
-            )}
         </div>
     );
 }
@@ -88,6 +87,74 @@ function RightNode({ data }: NodeProps) {
 const nodeTypes = {
     leftNode: LeftNode,
     rightNode: RightNode,
+};
+
+function ButtonEdge({
+    id,
+    sourceX,
+    sourceY,
+    targetX,
+    targetY,
+    sourcePosition,
+    targetPosition,
+    style = {},
+    markerEnd,
+    data,
+}: EdgeProps) {
+    const [edgePath, labelX, labelY] = getBezierPath({
+        sourceX,
+        sourceY,
+        sourcePosition,
+        targetX,
+        targetY,
+        targetPosition,
+    });
+
+    const onEdgeClick = (evt: React.MouseEvent) => {
+        evt.stopPropagation();
+        if (data?.onDelete && typeof data.onDelete === 'function') {
+            (data.onDelete as () => void)();
+        }
+    };
+
+    // Only show button if onDelete is provided (meaning not disabled)
+    const showButton = data?.onDelete && !data?.disabled;
+
+    return (
+        <>
+            <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} />
+            {showButton && (
+                <EdgeLabelRenderer>
+                    <div
+                        style={{
+                            position: 'absolute',
+                            transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
+                            fontSize: 12,
+                            pointerEvents: 'all',
+                        }}
+                        className="nodrag nopan"
+                    >
+                        <button
+                            className="px-2 py-1 rounded-full bg-red-500 text-white hover:bg-red-600 shadow-sm flex items-center gap-1 border border-white transition-colors text-[10px] font-bold uppercase tracking-wider"
+                            onClick={onEdgeClick}
+                            type="button"
+                            aria-label="Delete connection"
+                            title="Hapus Koneksi"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 6 6 18" /><path d="m6 6 12 12" />
+                            </svg>
+                            Delete
+                        </button>
+                    </div>
+                </EdgeLabelRenderer>
+            )}
+        </>
+    );
+}
+
+const edgeTypes = {
+    'button-edge': ButtonEdge,
 };
 
 // Helper for Colors
@@ -109,11 +176,16 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
+    const deleteConnection = useCallback((sourceId: string) => {
+        if (disabled) return;
+        const newPairs = { ...value };
+        delete newPairs[sourceId];
+        onChange(newPairs);
+    }, [disabled, value, onChange]);
+
     // Initialize from options
     useEffect(() => {
         if (!options) return;
-
-        console.log('Matching options:', options); // DEBUG
 
         // Check if options have metadata.side, otherwise split by key pattern (L1, R1, etc)
         const leftOptions = Object.entries(options).filter(([key, opt]: [string, any]) => {
@@ -168,16 +240,20 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                     id: `e-${leftKey}-${rightKey}`,
                     source: leftKey,
                     target: rightKey,
-                    type: 'default',
+                    type: 'button-edge',
                     animated: true,
                     style: { strokeWidth: 4 },
                     markerEnd: { type: MarkerType.ArrowClosed },
+                    data: {
+                        onDelete: () => deleteConnection(leftKey),
+                        disabled: disabled
+                    }
                 });
             }
         });
 
         setEdges(newEdges);
-    }, [options, value]);
+    }, [options, value, disabled, deleteConnection]);
 
     const onConnect = useCallback((params: Connection) => {
         if (disabled) return;
@@ -185,7 +261,17 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
         setEdges((eds) => {
             // Remove existing connections from same source
             const filtered = eds.filter(e => e.source !== params.source);
-            return addEdge({ ...params, animated: true, style: { strokeWidth: 2 } }, filtered);
+            return addEdge({
+                ...params,
+                type: 'button-edge',
+                animated: true,
+                style: { strokeWidth: 4 },
+                markerEnd: { type: MarkerType.ArrowClosed },
+                data: {
+                    onDelete: () => deleteConnection(params.source || ''),
+                    disabled: disabled
+                }
+            }, filtered);
         });
 
         // Update answer value
@@ -205,6 +291,7 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
+                edgeTypes={edgeTypes}
                 nodesDraggable={false}
                 panOnDrag={false}
                 zoomOnScroll={false}
