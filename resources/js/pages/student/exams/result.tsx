@@ -112,14 +112,12 @@ export default function Result({ exam, session, questions, total_score }: Result
                                         </div>
                                     </div>
 
-                                    {q.type !== 'essay' && (
-                                        <div className="space-y-2">
-                                            <span className="text-xs font-semibold text-slate-500 uppercase">Kunci Jawaban</span>
-                                            <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800 text-sm">
-                                                {typeof q.key_answer === 'object' ? JSON.stringify(q.key_answer) : q.key_answer}
-                                            </div>
+                                    <div className="space-y-2">
+                                        <span className="text-xs font-semibold text-slate-500 uppercase">Kunci Jawaban</span>
+                                        <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800 text-sm">
+                                            {typeof q.key_answer === 'object' ? JSON.stringify(q.key_answer) : q.key_answer}
                                         </div>
-                                    )}
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
