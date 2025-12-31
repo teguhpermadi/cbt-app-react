@@ -194,8 +194,15 @@ class ExamController extends Controller
 
         $session = \App\Models\ExamSession::where('exam_id', $exam->id)
             ->where('user_id', $user->id)
-            ->where('is_finished', false)
+            ->latest()
             ->firstOrFail();
+
+        if ($session->is_finished) {
+            if ($exam->show_result_on_finish) {
+                return redirect()->route('student.exams.result', $exam->id);
+            }
+            return redirect()->route('student.exams.finished', $exam->id);
+        }
 
         // Calculate remaining time
         $now = now();
@@ -210,8 +217,8 @@ class ExamController extends Controller
         $remainingSeconds = $now->diffInSeconds($endTime, false);
 
         if ($remainingSeconds <= 0) {
-            // Auto finish if time is up (logic to be added)
-            // For now just redirect or show message
+            // Auto finish if time is up check is done in local, but good to have safety here
+            return $this->finish($exam);
         }
 
         // Fetch questions ordered by 'question_number' persisted in ExamResultDetail
@@ -223,11 +230,12 @@ class ExamController extends Controller
             ->map(function ($detail) use ($exam, $session) {
                 $examQuestion = $detail->examQuestion;
 
-                \Illuminate\Support\Facades\Log::info('ExamQuestion Media Debug:', [
-                    'question_id' => $examQuestion->id,
-                    'media_path' => $examQuestion->media_path,
-                    'options' => $examQuestion->options,
-                ]);
+                // \Illuminate\Support\Facades\Log::info('ExamQuestion Media Debug:', [
+                //     'question_id' => $examQuestion->id,
+                //     'media_path' => $examQuestion->media_path,
+                //     'options' => $examQuestion->options,
+                //     'first_media' => $examQuestion->getFirstMediaUrl('question_content'),
+                // ]);
 
                 return [
                     'id' => $examQuestion->id, // This is the ExamQuestion ID
@@ -302,8 +310,16 @@ class ExamController extends Controller
     {
         $session = \App\Models\ExamSession::where('exam_id', $exam->id)
             ->where('user_id', \Illuminate\Support\Facades\Auth::id())
-            ->where('is_finished', false)
+            ->latest() // Use latest to get the relevant session even if finished
             ->firstOrFail();
+
+        // If already finished, just redirect
+        if ($session->is_finished) {
+            if ($exam->show_result_on_finish) {
+                return redirect()->route('student.exams.result', $exam->id);
+            }
+            return redirect()->route('student.exams.finished', $exam->id);
+        }
 
         $finishTime = now();
         $startTime = $session->start_time;

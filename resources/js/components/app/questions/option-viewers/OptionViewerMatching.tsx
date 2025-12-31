@@ -40,6 +40,10 @@ function LeftNode({ data }: NodeProps) {
             <Handle
                 type="source"
                 position={Position.Right}
+                style={{
+                    width: '1.5em',
+                    height: '1.5em',
+                }}
                 className="w-3 h-3 bg-muted-foreground border-2 border-background"
             />
         </div>
@@ -49,12 +53,16 @@ function LeftNode({ data }: NodeProps) {
 function RightNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-card w-[280px] shadow-sm",
-            data.colorClass as string
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-white dark:bg-slate-950 w-[280px] shadow-sm",
+            // data.colorClass as string // Disabled color for answers
         )}>
             <Handle
                 type="target"
                 position={Position.Left}
+                style={{
+                    width: '1.5em',
+                    height: '1.5em',
+                }}
                 className="w-3 h-3 bg-muted-foreground border-2 border-background"
             />
             <div className="text-xs font-bold text-muted-foreground mb-2">Respon</div>
@@ -162,7 +170,7 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                     target: rightKey,
                     type: 'default',
                     animated: true,
-                    style: { strokeWidth: 2 },
+                    style: { strokeWidth: 4 },
                     markerEnd: { type: MarkerType.ArrowClosed },
                 });
             }
@@ -198,11 +206,15 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
                 nodesDraggable={false}
+                panOnDrag={false}
+                zoomOnScroll={false}
+                zoomOnPinch={false}
+                zoomOnDoubleClick={false}
                 proOptions={{ hideAttribution: true }}
                 fitView
             >
                 <Background color="#94a3b8" gap={20} size={1} />
-                <Controls />
+                <Controls showInteractive={false} />
             </ReactFlow>
         </div>
     );
