@@ -558,7 +558,8 @@ class QuestionImportService
                 'order' => $index * 2,
                 'is_correct' => false,
                 'metadata' => [
-                    'type' => 'left',
+                    'side' => 'left',
+                    'pair_id' => $index + 1,
                     'match_with' => $rightKey,
                 ],
             ]);
@@ -570,8 +571,9 @@ class QuestionImportService
                 'order' => $index * 2 + 1,
                 'is_correct' => false,
                 'metadata' => [
-                    'type' => 'right',
-                    'matched_by' => $leftKey,
+                    'side' => 'right',
+                    'pair_id' => $index + 1,
+                    'match_with' => $leftKey,
                 ],
             ]);
 
