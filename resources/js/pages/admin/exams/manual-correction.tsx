@@ -16,6 +16,7 @@ import { index as examsIndexRoute } from '@/routes/admin/exams';
 import ExamManualCorrectionController from '@/actions/App/Http/Controllers/Admin/ExamManualCorrectionController';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import OptionViewer from '@/components/app/questions/option-viewers/OptionViewer';
+import MathRenderer from '@/components/app/questions/MathRenderer';
 
 interface Question {
     id: string;
@@ -220,9 +221,9 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                 {q.question_type}
                                             </Badge>
                                         </div>
-                                        <div
+                                        <MathRenderer
+                                            content={q.content}
                                             className="text-xs text-muted-foreground line-clamp-3 prose prose-sm dark:prose-invert"
-                                            dangerouslySetInnerHTML={{ __html: q.content }}
                                         />
                                         <div className="mt-2 text-xs font-medium text-right text-muted-foreground">
                                             Max Score: {q.score_value}
@@ -242,6 +243,13 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                         Grading Question #{selectedQuestion.question_number}
                                         <Badge variant="secondary">Max: {selectedQuestion.score_value}</Badge>
                                     </h2>
+
+                                    {/* <div className="mt-2 mb-4">
+                                        <MathRenderer
+                                            content={selectedQuestion.content}
+                                            className="prose prose-sm dark:prose-invert max-w-none text-sm text-foreground"
+                                        />
+                                    </div> */}
 
                                     {/* Bulk Actions */}
                                     <div className="flex items-center gap-4">
@@ -311,12 +319,12 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                                 </div>
                                                             )}
 
-                                                            {console.log('DEBUG OPTION RENDER:', {
+                                                            {/* {console.log('DEBUG OPTION RENDER:', {
                                                                 questionType: selectedQuestion.question_type,
                                                                 options: selectedQuestion.options,
                                                                 studentAnswer: answer.student_answer,
                                                                 answerType: typeof answer.student_answer
-                                                            })}
+                                                            })} */}
 
                                                             {(() => {
                                                                 // Sanitize Answer Logic
