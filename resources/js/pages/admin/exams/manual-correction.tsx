@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, CheckCircle, Save, AlertCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -59,6 +60,12 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
     // Bulk Score State
     const [bulkScore, setBulkScore] = useState<string>('');
     const [loadingAnswers, setLoadingAnswers] = useState(false); // Used for saving state now
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+    // Reset selection when question changes
+    useEffect(() => {
+        setSelectedIds([]);
+    }, [selectedQuestion?.id]);
 
     // Navigation Handler
     const handleQuestionSelect = (q: Question) => {
@@ -102,8 +109,33 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
         const score = parseFloat(bulkScore);
         if (isNaN(score)) return;
 
-        // Update local state for all currently visible answers
-        setAnswers(prev => prev.map(a => ({ ...a, score_earned: score })));
+        if (selectedIds.length === 0) {
+            toast.error("Please select at least one student to apply bulk score");
+            return;
+        }
+
+        // Update local state for selected answers only
+        setAnswers(prev => prev.map(a =>
+            selectedIds.includes(a.id) ? { ...a, score_earned: score } : a
+        ));
+
+        toast.success(`Applied score ${score} to ${selectedIds.length} students`);
+    };
+
+    const toggleSelectAll = (checked: boolean) => {
+        if (checked) {
+            setSelectedIds(answers.map(a => a.id));
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    const toggleSelectOne = (id: string, checked: boolean) => {
+        if (checked) {
+            setSelectedIds(prev => [...prev, id]);
+        } else {
+            setSelectedIds(prev => prev.filter(i => i !== id));
+        }
     };
 
     const saveAllScores = async () => {
@@ -210,16 +242,31 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                     </h2>
 
                                     {/* Bulk Actions */}
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-sm text-muted-foreground">Bulk Score:</span>
-                                        <Input
-                                            type="number"
-                                            className="w-20 h-8"
-                                            value={bulkScore}
-                                            onChange={(e) => setBulkScore(e.target.value)}
-                                            placeholder="Score"
-                                        />
-                                        <Button size="sm" variant="secondary" onClick={applyBulkScore}>Apply</Button>
+                                    <div className="flex items-center gap-4">
+                                        <div className="flex items-center space-x-2">
+                                            <Checkbox
+                                                id="select-all"
+                                                checked={answers.length > 0 && selectedIds.length === answers.length}
+                                                onCheckedChange={(c) => toggleSelectAll(!!c)}
+                                            />
+                                            <label htmlFor="select-all" className="text-sm font-medium leading-none cursor-pointer">
+                                                Select All
+                                            </label>
+                                        </div>
+
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm text-muted-foreground">Bulk Score:</span>
+                                            <Input
+                                                type="number"
+                                                className="w-20 h-8"
+                                                value={bulkScore}
+                                                onChange={(e) => setBulkScore(e.target.value)}
+                                                placeholder="Score"
+                                            />
+                                            <Button size="sm" variant="secondary" onClick={applyBulkScore} disabled={selectedIds.length === 0}>
+                                                Apply to Selected ({selectedIds.length})
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -233,8 +280,16 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                         </div>
                                     ) : (
                                         answers.map((answer) => (
-                                            <Card key={answer.id}>
-                                                <CardContent className="p-4 flex gap-6">
+                                            <Card key={answer.id} className={cn("transition-colors", selectedIds.includes(answer.id) ? "border-primary/50 bg-primary/5" : "")}>
+                                                <CardContent className="p-4 flex gap-4">
+                                                    {/* Selection Checkbox */}
+                                                    <div className="pt-1">
+                                                        <Checkbox
+                                                            checked={selectedIds.includes(answer.id)}
+                                                            onCheckedChange={(c) => toggleSelectOne(answer.id, !!c)}
+                                                        />
+                                                    </div>
+
                                                     {/* Student Info & Answer */}
                                                     <div className="flex-1 space-y-3">
                                                         <div className="flex items-center gap-2">
