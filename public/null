@@ -3,3 +3,13 @@ QuestionBank::with('questions.options')->find('01kdvzqgdyeznrh92xgwfpx082');
 
 
 
+QuestionBank::with('questions.options')->find('01kdw605e7dneq9cg2bbh8n7nh');
+
+
+
+
+QuestionBank::with('questions.options')->find('01kdpgvtkqgxwykyavb1p8v0cx');
+
+
+
+

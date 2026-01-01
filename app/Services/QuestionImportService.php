@@ -392,7 +392,7 @@ class QuestionImportService
         match ($type) {
             QuestionTypeEnum::MultipleChoice => $this->handleMultipleChoice($question, $optionsCell, $keyAnswer),
             QuestionTypeEnum::MultipleSelection => $this->handleMultipleSelection($question, $optionsCell, $keyAnswer),
-            QuestionTypeEnum::TrueFalse => $this->handleTrueFalse($question, $keyAnswer),
+            QuestionTypeEnum::TrueFalse => $this->handleTrueFalse($question, $optionsCell, $keyAnswer),
             QuestionTypeEnum::Matching => $this->handleMatching($question, $optionsCell),
             QuestionTypeEnum::Ordering => $this->handleOrdering($question, $optionsCell),
             QuestionTypeEnum::Essay => $this->handleEssay($question, $keyAnswer),
@@ -476,28 +476,55 @@ class QuestionImportService
      * Handle True/False options
      *
      * @param Question $question
-     * @param string $keyAnswer "TRUE" or "FALSE"
+     * @param array $optionsCell
+     * @param string $keyAnswer "TRUE", "FALSE" or "A", "B" etc.
      * @return void
      */
-    protected function handleTrueFalse(Question $question, string $keyAnswer): void
+    protected function handleTrueFalse(Question $question, array $optionsCell, string $keyAnswer): void
     {
-        $correctAnswer = strtoupper(trim($keyAnswer)) === 'TRUE';
+        $options = $this->splitOptions($optionsCell['text']);
+        $rawCorrectKey = strtoupper(trim($keyAnswer));
 
-        Option::create([
-            'question_id' => $question->id,
-            'option_key' => 'TRUE',
-            'content' => 'Benar',
-            'order' => 0,
-            'is_correct' => $correctAnswer === true,
-        ]);
+        // Fallback to default Benar/Salah if options cell is empty
+        if (empty($options)) {
+            $options = ['A. Benar', 'B. Salah'];
+        }
 
-        Option::create([
-            'question_id' => $question->id,
-            'option_key' => 'FALSE',
-            'content' => 'Salah',
-            'order' => 1,
-            'is_correct' => $correctAnswer === false,
-        ]);
+        // Standardize the correct key to 'T' or 'F'
+        // Map common true/false indicators to T/F
+        $standardizedCorrectKey = match ($rawCorrectKey) {
+            'A', 'TRUE', 'BENAR', 'YA', '1', 'T' => 'T',
+            'B', 'FALSE', 'SALAH', 'TIDAK', '0', 'F' => 'F',
+            default => $rawCorrectKey,
+        };
+
+        foreach ($options as $index => $optionText) {
+            // Extract content without the A. B. prefix
+            if (preg_match('/^([A-Z])\.\s*(.+)$/si', trim($optionText), $matches)) {
+                $content = trim($matches[2]);
+            } else {
+                $content = trim($optionText);
+            }
+
+            // Force key to 'T' for first option and 'F' for second option
+            $mappedKey = ($index === 0) ? 'T' : 'F';
+
+            // If there are more than 2 options (unusual for T/F), 
+            // fallback to sequential letters after F (G, H, I...)
+            if ($index > 1) {
+                $mappedKey = chr(70 + ($index - 1));
+            }
+
+            $option = Option::create([
+                'question_id' => $question->id,
+                'option_key' => $mappedKey,
+                'content' => $content,
+                'order' => $index,
+                'is_correct' => ($mappedKey === $standardizedCorrectKey),
+            ]);
+
+            $this->processPlaceholdersAndAttach($option, $optionText, $optionsCell['images'], 'option_media');
+        }
     }
 
     /**
@@ -624,8 +651,13 @@ class QuestionImportService
             return [];
         }
 
+        // Normalize text: if options start on the same line (e.g., "A. Yes B. No"),
+        // we add a newline before each option key (except the first one if it starts the string).
+        // This makes the subsequent newline split work correctly.
+        $text = preg_replace('/(?<=\S)\s+([A-Z]\.)/i', "\n$1", trim($text));
+
         // Split by newlines (handles \r\n, \r, and \n)
-        $options = preg_split('/\r\n|\r|\n/', trim($text));
+        $options = preg_split('/\r\n|\r|\n/', $text);
 
         // Filter empty lines and trim
         return array_values(array_filter(array_map('trim', $options)));
