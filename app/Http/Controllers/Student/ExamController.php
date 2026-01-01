@@ -59,7 +59,7 @@ class ExamController extends Controller
             ->get()
             ->map(function ($exam) {
                 $latestSession = $exam->examSessions->first();
-                $hasStarted = $latestSession ? true : false;
+                $hasIncompleteSession = $latestSession && !$latestSession->is_finished;
 
                 return [
                     'id' => $exam->id,
@@ -68,7 +68,7 @@ class ExamController extends Controller
                     'grade' => $exam->grade->name ?? '-',
                     'duration' => $exam->duration,
                     'endTime' => $exam->end_time->toISOString(), // Kirim format ISO untuk JS
-                    'hasStarted' => $hasStarted,
+                    'hasIncompleteSession' => $hasIncompleteSession,
                 ];
             });
 
@@ -133,7 +133,7 @@ class ExamController extends Controller
                     'content' => $question->content,
                     'options' => $question->getOptionsForExam(),
                     'key_answer' => $question->getKeyAnswerForExam(),
-                    'score_value' => $question->score_value->value, // Assuming enum value logic
+                    'score_value' => $question->score_value, // Assuming enum value logic
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
                     'media_path' => $question->getFirstMediaUrl('question_content') ?: $question->media_path,

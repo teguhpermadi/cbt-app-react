@@ -28,7 +28,7 @@ interface Exam {
     grade: string;
     duration: number;
     endTime: string;
-    hasStarted: boolean;
+    hasIncompleteSession: boolean;
 }
 
 interface Props {
@@ -114,25 +114,25 @@ export default function ExamIndex({ exams, message }: Props) {
                                                 </div>
                                             </td>
                                             <td className="p-4">
-                                                <Badge variant={exam.hasStarted ? "secondary" : "default"} className={cn(
-                                                    exam.hasStarted
+                                                <Badge variant={exam.hasIncompleteSession ? "secondary" : "default"} className={cn(
+                                                    exam.hasIncompleteSession
                                                         ? "bg-yellow-100 text-yellow-700 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400"
                                                         : "bg-green-100 text-green-700 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-400"
                                                 )}>
-                                                    {exam.hasStarted ? 'Sedang Dikerjakan' : 'Tersedia'}
+                                                    {exam.hasIncompleteSession ? 'Sedang Dikerjakan' : 'Tersedia'}
                                                 </Badge>
                                             </td>
                                             <td className="p-4 text-right">
                                                 <Button asChild size="sm" className={cn(
-                                                    exam.hasStarted
+                                                    exam.hasIncompleteSession
                                                         ? "bg-yellow-600 hover:bg-yellow-700"
                                                         : "bg-blue-600 hover:bg-blue-700"
                                                 )}>
                                                     <Link href={showRoute.url({ exam: exam.id })}>
-                                                        {exam.hasStarted ? (
+                                                        {exam.hasIncompleteSession ? (
                                                             <>
                                                                 <PlayCircle className="mr-2 h-4 w-4" />
-                                                                Lanjutkan
+                                                                Lanjutkan Ujian
                                                             </>
                                                         ) : (
                                                             <>
