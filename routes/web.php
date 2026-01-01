@@ -7,6 +7,9 @@ use Laravel\Fortify\Features;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\StudentController;
+use App\Http\Controllers\Admin\ExamController;
+use App\Http\Controllers\Admin\ExamManualCorrectionController;
+use App\Http\Controllers\Admin\GradeController;
 use App\Http\Controllers\Admin\AcademicYearController;
 
 Route::get('/', function () {
@@ -55,6 +58,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('exams/{exam}/monitor', [\App\Http\Controllers\Admin\ExamController::class, 'monitor'])->name('exams.monitor');
         Route::get('exams/sessions/{session}/correction', [\App\Http\Controllers\Admin\ExamController::class, 'correction'])->name('exams.sessions.correction');
         Route::post('exams/sessions/{session}/recalculate', [\App\Http\Controllers\Admin\ExamController::class, 'calculateScores'])->name('exams.sessions.recalculate');
+        Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
+        Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
+        Route::post('/exams/manual-correction/bulk-score', [ExamManualCorrectionController::class, 'bulkStoreScore'])->name('exams.manual-correction.bulk-score');
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
         Route::get('question-banks/template/download', [\App\Http\Controllers\Admin\QuestionBankController::class, 'downloadTemplate'])->name('question-banks.template.download');
         Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);

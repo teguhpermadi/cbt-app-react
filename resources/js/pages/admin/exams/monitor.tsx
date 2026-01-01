@@ -88,9 +88,14 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                             </p>
                         </div>
                     </div>
-                    <Button onClick={() => router.visit(ExamController.edit(exam.id).url)}>
-                        Edit Exam
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={() => router.visit(`/admin/exams/${exam.id}/manual-correction`)}>
+                            Manual Correction
+                        </Button>
+                        <Button onClick={() => router.visit(ExamController.edit(exam.id).url)}>
+                            Edit Exam
+                        </Button>
+                    </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
