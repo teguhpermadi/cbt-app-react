@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use App\Enums\DifficultyLevelEnum;
-use App\Enums\QuestionScoreEnum;
 use App\Enums\QuestionTypeEnum;
 use App\Enums\TimerEnum;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -40,7 +39,6 @@ class Question extends Model implements HasMedia
         'question_type' => QuestionTypeEnum::class,
         'difficulty_level' => DifficultyLevelEnum::class,
         'timer' => TimerEnum::class,
-        'score_value' => QuestionScoreEnum::class,
         'is_active' => 'boolean',
         'is_approved' => 'boolean', // Status persetujuan Peer Review
     ];

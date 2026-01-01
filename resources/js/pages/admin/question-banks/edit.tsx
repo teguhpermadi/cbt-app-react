@@ -50,7 +50,7 @@ import { useEffect, useState } from 'react';
 import { SortableQuestionCard } from '@/components/app/questions/SortableQuestionCard';
 import QuestionCard from '@/components/app/questions/QuestionCard';
 import { Question } from '@/components/app/questions/types';
-
+import { UploadQuestionsModal } from '@/components/admin/question-banks/upload-questions-modal';
 
 
 
@@ -304,11 +304,14 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
                     {/* Header for Questions Section */}
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
-                        <Button size="sm" variant="outline" asChild>
-                            <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
-                                Tambah Pertanyaan
-                            </Link>
-                        </Button>
+                        <div className="flex items-center gap-2">
+                            <UploadQuestionsModal questionBankId={questionBank.id} />
+                            <Button size="sm" variant="outline" asChild>
+                                <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                    Tambah Pertanyaan
+                                </Link>
+                            </Button>
+                        </div>
                     </div>
 
                     {questions.length > 0 ? (

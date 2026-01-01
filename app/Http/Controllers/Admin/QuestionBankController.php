@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\QuestionBank;
 use App\Models\Subject;
+use App\Services\QuestionImportService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
 class QuestionBankController extends Controller
@@ -169,5 +172,94 @@ class QuestionBankController extends Controller
 
         return redirect()->route('admin.question-banks.index')
             ->with('success', 'Bank Soal berhasil dihapus.');
+    }
+
+    /**
+     * Upload questions from Word document
+     */
+    public function uploadQuestions(Request $request, QuestionBank $questionBank)
+    {
+        // Validate file upload
+        $request->validate([
+            'file' => 'required|file|mimes:docx|max:10240', // Max 10MB
+        ]);
+
+        try {
+            // Get uploaded file
+            $file = $request->file('file');
+
+            // Generate unique filename to avoid conflicts
+            $fileName = time() . '_' . $file->getClientOriginalName();
+
+            // Store temporarily with proper path
+            $tempPath = $file->storeAs('temp', $fileName);
+            $fullPath = storage_path('app/' . $tempPath);
+
+            // Debug logging
+            Log::info('File upload success', [
+                'original_name' => $file->getClientOriginalName(),
+                'stored_name' => $fileName,
+                'temp_path' => $tempPath,
+                'full_path' => $fullPath,
+                'file_exists' => file_exists($fullPath),
+                'is_readable' => is_readable($fullPath),
+                'file_size' => file_exists($fullPath) ? filesize($fullPath) : 0
+            ]);
+
+            // Verify file exists before parsing
+            if (!file_exists($fullPath)) {
+                throw new \Exception("File tidak ditemukan setelah upload: {$fullPath}");
+            }
+
+            // Verify file is readable
+            if (!is_readable($fullPath)) {
+                throw new \Exception("File tidak dapat dibaca: {$fullPath}");
+            }
+
+            // Parse document using service
+            $importService = new QuestionImportService();
+            $result = $importService->parseWordDocument($fullPath, $questionBank->id);
+
+            // Delete temp file after processing
+            if (file_exists($fullPath)) {
+                unlink($fullPath);
+            }
+
+            // Prepare response message
+            if ($result['success']) {
+                $message = "Berhasil mengupload {$result['total']} soal.";
+
+                if (!empty($result['errors'])) {
+                    $message .= " " . count($result['errors']) . " baris ada error.";
+                }
+
+                return back()->with('success', $message);
+            } else {
+                return back()->withErrors([
+                    'upload' => 'Gagal mengupload soal: ' . implode(', ', $result['errors'])
+                ]);
+            }
+        } catch (\Exception $e) {
+            // Log full error for debugging
+            Log::error('Question upload error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()->withErrors([
+                'upload' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Download template for question upload
+     */
+    public function downloadTemplate()
+    {
+        $templateService = new \App\Services\QuestionTemplateService();
+        $filePath = $templateService->generateTemplate();
+
+        return response()->download($filePath, 'Template_Upload_Soal.docx');
     }
 }

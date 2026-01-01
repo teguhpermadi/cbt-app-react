@@ -1,22 +1,5 @@
-Exam::find('01kdf33fngjhczm8qk3k45eftt');
-Exam::find('01kdmjh3947x1y1fp88p3rcq4y');
-Exam::find('01kdmjh3947x1y1fp88p3rcq4y');
-QuestionBank::find('01kdjdaqcycgsm00cq8s0anyg0');
-QuestionBank::with('questions')->find('01kdjdaqcycgsm00cq8s0anyg0');
-QuestionBank::with('questions.options')->find('01kdjdaqcycgsm00cq8s0anyg0');
+QuestionBank::with('questions.options')->find('01kdvzqgdyeznrh92xgwfpx082');
 
 
-ExamSession::get();
-
-
-ExamResultDetail::get();
-
-
-
-
-Option::get();
-
-
-ExamResultDetail::get();
 
 

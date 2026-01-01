@@ -56,7 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('exams/sessions/{session}/correction', [\App\Http\Controllers\Admin\ExamController::class, 'correction'])->name('exams.sessions.correction');
         Route::post('exams/sessions/{session}/recalculate', [\App\Http\Controllers\Admin\ExamController::class, 'calculateScores'])->name('exams.sessions.recalculate');
         Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+        Route::get('question-banks/template/download', [\App\Http\Controllers\Admin\QuestionBankController::class, 'downloadTemplate'])->name('question-banks.template.download');
         Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
+        Route::post('question-banks/{questionBank}/upload-questions', [\App\Http\Controllers\Admin\QuestionBankController::class, 'uploadQuestions'])->name('question-banks.upload-questions');
         Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
         Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
     });
