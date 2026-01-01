@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\QuestionTypeEnum;
 use App\Http\Controllers\Controller;
 use App\Models\Exam;
 use App\Models\ExamQuestion;
@@ -19,7 +20,17 @@ class ExamManualCorrectionController extends Controller
         $questions = $exam->examQuestions()
             ->orderBy('question_number')
             ->select(['id', 'question_number', 'question_type', 'content', 'options', 'score_value', 'key_answer'])
-            ->get();
+            ->get()
+            ->transform(function ($q) {
+                $data = $q->toArray();
+                // Normalize key_answer for single choice types
+                if (in_array($q->question_type, [QuestionTypeEnum::MultipleChoice, QuestionTypeEnum::TrueFalse])) {
+                    if (is_array($data['key_answer']) && !empty($data['key_answer'])) {
+                        $data['key_answer'] = $data['key_answer'];
+                    }
+                }
+                return $data;
+            });
 
         // 2. Determine Selected Question
         $selectedQuestionId = $request->query('question_id');
@@ -34,7 +45,7 @@ class ExamManualCorrectionController extends Controller
         if ($selectedQuestion) {
             $sessions = ExamSession::where('exam_id', $exam->id)
                 ->with(['user', 'examResultDetails' => function ($q) use ($selectedQuestion) {
-                    $q->where('exam_question_id', $selectedQuestion->id);
+                    $q->where('exam_question_id', $selectedQuestion['id']);
                 }])
                 ->get();
 
@@ -45,8 +56,8 @@ class ExamManualCorrectionController extends Controller
                 if (!$detail) {
                     $detail = ExamResultDetail::create([
                         'exam_session_id' => $session->id,
-                        'exam_question_id' => $selectedQuestion->id,
-                        'question_number' => $selectedQuestion->question_number,
+                        'exam_question_id' => $selectedQuestion['id'],
+                        'question_number' => $selectedQuestion['question_number'],
                         'student_answer' => null,
                         'score_earned' => 0,
                         'is_correct' => false,
