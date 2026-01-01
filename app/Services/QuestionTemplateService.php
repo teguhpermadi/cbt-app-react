@@ -39,7 +39,7 @@ class QuestionTemplateService
         $section->addText('1. Isi tabel di bawah dengan soal-soal Anda', ['size' => 10]);
         $section->addText('2. Kolom yang diperlukan: Tipe Soal, Pertanyaan, Opsi, Kunci, Poin', ['size' => 10]);
         $section->addText('3. Untuk opsi, pisahkan dengan ENTER (line break)', ['size' => 10]);
-        $section->addText('4. Tipe soal yang didukung: MULTIPLE_CHOICE, MULTIPLE_SELECTION, TRUE_FALSE, MATCHING, ORDERING, ESSAY', ['size' => 10]);
+        $section->addText('4. Tipe soal yang didukung: MULTIPLE_CHOICE, MULTIPLE_SELECTION, TRUE_FALSE, MATCHING, ORDERING, ESSAY, NUMERICAL_INPUT', ['size' => 10]);
         $section->addText('5. Simpan file dan upload melalui menu Bank Soal', ['size' => 10]);
 
         $section->addTextBreak(1);
@@ -143,6 +143,16 @@ class QuestionTemplateService
         $table->addCell(2500)->addText('-');
         $table->addCell(1500)->addText('Gunakan aturan L\'Hopital atau ekspansi deret Taylor.');
         $table->addCell(800)->addText('20');
+
+        // Example 7: Numerical Input
+        $table->addRow();
+        $table->addCell(2000)->addText('NUMERICAL_INPUT');
+        $cell = $table->addCell(3500);
+        $cell->addText('Hitung nilai dari ');
+        $cell->addText('$\frac{3}{4} + \frac{2}{5}$');
+        $table->addCell(2500)->addText('-');
+        $table->addCell(1500)->addText('1.15');
+        $table->addCell(800)->addText('15');
 
         // Add empty rows for user to fill
         for ($i = 0; $i < 5; $i++) {

@@ -353,6 +353,7 @@ class QuestionImportService
             'MATCHING' => QuestionTypeEnum::Matching,
             'ORDERING' => QuestionTypeEnum::Ordering,
             'ESSAY' => QuestionTypeEnum::Essay,
+            'NUMERICAL_INPUT' => QuestionTypeEnum::NumericalInput,
             default => null,
         };
     }
@@ -396,6 +397,7 @@ class QuestionImportService
             QuestionTypeEnum::Matching => $this->handleMatching($question, $optionsCell),
             QuestionTypeEnum::Ordering => $this->handleOrdering($question, $optionsCell),
             QuestionTypeEnum::Essay => $this->handleEssay($question, $keyAnswer),
+            QuestionTypeEnum::NumericalInput => $this->handleNumericalInput($question, $optionsCell, $keyAnswer),
             default => throw new Exception("Handler untuk tipe soal {$type->value} belum diimplementasikan."),
         };
     }
@@ -617,6 +619,38 @@ class QuestionImportService
 
             $this->processPlaceholdersAndAttach($option, $itemText, $optionsCell['images'], 'option_media');
         }
+    }
+
+    /**
+     * Handle Numerical Input question
+     *
+     * @param Question $question
+     * @param array $optionsCell
+     * @param string $keyAnswer The correct numerical answer
+     * @return void
+     */
+    protected function handleNumericalInput(Question $question, array $optionsCell, string $keyAnswer): void
+    {
+        // Extract the numerical value from keyAnswer
+        // Handle cases like "5,0" vs "5.0"
+        $sanitizedValue = str_replace(',', '.', trim($keyAnswer));
+        $numericValue = is_numeric($sanitizedValue) ? (float)$sanitizedValue : 0;
+
+        $option = Option::create([
+            'question_id' => $question->id,
+            'option_key' => 'NUM',
+            'content' => (string)$numericValue,
+            'order' => 0,
+            'is_correct' => true,
+            'metadata' => [
+                'tolerance' => 0.01,
+                'unit' => null,
+                'correct_answer' => $numericValue,
+            ],
+        ]);
+
+        // Attach any images found in the options cell (though usually empty for numerical)
+        $this->processPlaceholdersAndAttach($option, $optionsCell['text'], $optionsCell['images'], 'option_media');
     }
 
     /**
