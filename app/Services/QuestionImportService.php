@@ -18,6 +18,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Element\Table;
+use PhpOffice\PhpWord\Element\Image;
+use Spatie\MediaLibrary\HasMedia;
 
 class QuestionImportService
 {
@@ -102,27 +104,19 @@ class QuestionImportService
         $sections = $phpWord->getSections();
 
         foreach ($sections as $section) {
-            $elements = $section->getElements();
-
-            foreach ($elements as $element) {
-                if ($element instanceof \PhpOffice\PhpWord\Element\Table) {
-                    $tableRows = $element->getRows();
-
-                    foreach ($tableRows as $rowIndex => $row) {
+            foreach ($section->getElements() as $element) {
+                if ($element instanceof Table) {
+                    foreach ($element->getRows() as $row) {
                         $cells = $row->getCells();
-
                         $rowValues = [];
                         foreach ($cells as $cell) {
                             $rowValues[] = $this->extractCellContent($cell);
                         }
 
-                        // Debug content
-                        // echo "  Content: " . implode(" | ", array_map(fn($t) => substr($t, 0, 20), $rowValues)) . "\n";
-
-                        if (empty(array_filter($rowValues, fn($v) => !empty(trim($v))))) {
+                        // Skip strictly empty rows
+                        if (empty(array_filter($rowValues, fn($v) => !empty(trim($v['text']))))) {
                             continue;
                         }
-
 
                         $rows[] = $rowValues;
                     }
@@ -133,15 +127,24 @@ class QuestionImportService
         return $rows;
     }
 
-    protected function extractCellContent($cell): string
+
+    /**
+     * Extract text and images from a cell
+     */
+    protected function extractCellContent($cell): array
     {
-        return trim($this->recursiveExtractText($cell));
+        $images = [];
+        $text = $this->recursiveExtractText($cell, $images);
+        return [
+            'text' => trim($text),
+            'images' => $images
+        ];
     }
 
     /**
      * Recursively extract text from any element, preserving intentional line breaks
      */
-    protected function recursiveExtractText($element): string
+    protected function recursiveExtractText($element, &$images = []): string
     {
         $text = '';
 
@@ -153,9 +156,16 @@ class QuestionImportService
             return $element->getText();
         }
 
+        if ($element instanceof Image) {
+            $index = count($images);
+            $images[] = $element;
+            // return "[IMG:{$index}]"; // Commented out per user request
+            return "";
+        }
+
         if (method_exists($element, 'getElements')) {
             foreach ($element->getElements() as $child) {
-                $text .= $this->recursiveExtractText($child);
+                $text .= $this->recursiveExtractText($child, $images);
             }
 
             // Elements that act as block containers in Word (like paragraphs/TextRuns)
@@ -163,7 +173,8 @@ class QuestionImportService
             if (
                 $element instanceof TextRun ||
                 get_class($element) === 'PhpOffice\PhpWord\Element\ListItem' ||
-                get_class($element) === 'PhpOffice\PhpWord\Element\Table'
+                get_class($element) === 'PhpOffice\PhpWord\Element\Table' ||
+                get_class($element) === 'PhpOffice\PhpWord\Element\Title'
             ) {
                 $text .= "\n";
             }
@@ -172,6 +183,98 @@ class QuestionImportService
         }
 
         return $text;
+    }
+
+    /**
+     * Process placeholders and attach images to model
+     */
+    protected function processPlaceholdersAndAttach(HasMedia $model, string $text, array $images, string $collection)
+    {
+        if (empty($images)) return;
+
+        /* 
+        // Find all placeholders [IMG:X] - Commented out per user request
+        preg_match_all('/\[IMG:(\d+)\]/', $text, $matches);
+        
+        if (empty($matches[0])) return;
+
+        foreach ($matches[1] as $index) {
+            $index = (int)$index;
+            if (isset($images[$index])) {
+                $image = $images[$index];
+                $this->attachPhpWordImage($model, $image, $collection);
+            }
+        }
+        */
+
+        // Just attach all images found if placeholders are disabled
+        foreach ($images as $image) {
+            $this->attachPhpWordImage($model, $image, $collection);
+        }
+    }
+
+    /**
+     * Attach a PHPWord Image element to a Spatie Media model
+     */
+    protected function attachPhpWordImage(HasMedia $model, Image $image, string $collection)
+    {
+        try {
+            $source = $image->getSource();
+            $binaryData = null;
+            $extension = $image->getImageExtension() ?: 'png';
+
+            // Check if source is base64 data URI
+            if (str_starts_with($source, 'data:image')) {
+                $model->addMediaFromBase64($source)
+                    ->usingFileName('image_' . uniqid() . '.' . $extension)
+                    ->toMediaCollection($collection);
+                return;
+            }
+
+            if (method_exists($image, 'getImageStringData')) {
+                $binaryData = $image->getImageStringData();
+            } elseif (file_exists($source)) {
+                $binaryData = file_get_contents($source);
+                $extension = pathinfo($source, PATHINFO_EXTENSION);
+            }
+
+            if (!$binaryData) {
+                Log::warning("Gagal mendapatkan data biner untuk gambar dari source: " . substr($source, 0, 100));
+                return;
+            }
+
+            // Fix: PHPWord sometimes returns hex-encoded string instead of raw binary
+            if (ctype_xdigit($binaryData) && strlen($binaryData) > 128) {
+                $binaryData = hex2bin($binaryData);
+            }
+
+            // Detect mime type and extension from binary data
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mimeType = $finfo->buffer($binaryData);
+
+            $extensionMap = [
+                'image/jpeg' => 'jpg',
+                'image/png' => 'png',
+                'image/gif' => 'gif',
+                'image/bmp' => 'bmp',
+                'image/x-ms-bmp' => 'bmp',
+                'image/webp' => 'webp',
+                'image/svg+xml' => 'svg',
+            ];
+
+            if (isset($extensionMap[$mimeType])) {
+                $extension = $extensionMap[$mimeType];
+            }
+
+            $filename = 'image_' . uniqid() . '.' . $extension;
+            Log::debug("Attaching image: " . $filename . " (Mime: {$mimeType}) | Size: " . strlen($binaryData) . " | Hex: " . bin2hex(substr($binaryData, 0, 16)));
+
+            $model->addMediaFromString($binaryData)
+                ->usingFileName($filename)
+                ->toMediaCollection($collection);
+        } catch (Exception $e) {
+            Log::warning("Gagal melampirkan gambar ke koleksi {$collection}: " . $e->getMessage());
+        }
     }
 
     /**
@@ -187,10 +290,14 @@ class QuestionImportService
             return null;
         }
 
-        // Fill missing columns with empty string if less than 5
-        $cells = array_pad($cells, 5, '');
-        [$typeStr, $questionText, $optionsText, $keyAnswer, $points] = $cells;
+        // Fill missing columns with empty string/images structure
+        while (count($cells) < 5) {
+            $cells[] = ['text' => '', 'images' => []];
+        }
 
+        [$typeCell, $questionCell, $optionsCell, $keyCell, $pointsCell] = $cells;
+
+        $typeStr = is_array($typeCell) ? $typeCell['text'] : $typeCell;
         $typeNormalized = strtoupper(trim($typeStr));
 
         // Skip header rows
@@ -201,10 +308,7 @@ class QuestionImportService
         // Validate question type
         $questionType = $this->parseQuestionType($typeStr);
         if (!$questionType) {
-            // If it doesn't look like a type, but also not a known header, it might be a malformed row
-            // We ignore it silently if it's likely a continued row or empty first cell
             if (empty($typeNormalized)) return null;
-
             throw new Exception("Tipe soal tidak valid: '{$typeStr}'");
         }
 
@@ -213,12 +317,15 @@ class QuestionImportService
 
             $question = $this->createQuestion([
                 'type' => $questionType,
-                'content' => $questionText,
-                'points' => is_numeric($points) ? intval($points) : 10,
+                'content' => $questionCell['text'],
+                'points' => is_numeric($pointsCell['text']) ? intval($pointsCell['text']) : 10,
             ]);
 
+            // Attach images to question
+            $this->processPlaceholdersAndAttach($question, $questionCell['text'], $questionCell['images'], 'question_content');
+
             // Create options based on type
-            $this->createOptions($question, $questionType, $optionsText, $keyAnswer);
+            $this->createOptions($question, $questionType, $optionsCell, $keyCell['text']);
 
             DB::commit();
             return $question;
@@ -280,33 +387,17 @@ class QuestionImportService
      * @param string $keyAnswer
      * @return void
      */
-    protected function createOptions(Question $question, QuestionTypeEnum $type, string $optionsText, string $keyAnswer): void
+    protected function createOptions(Question $question, QuestionTypeEnum $type, array $optionsCell, string $keyAnswer): void
     {
-        switch ($type) {
-            case QuestionTypeEnum::MultipleChoice:
-                $this->handleMultipleChoice($question, $optionsText, $keyAnswer);
-                break;
-
-            case QuestionTypeEnum::MultipleSelection:
-                $this->handleMultipleSelection($question, $optionsText, $keyAnswer);
-                break;
-
-            case QuestionTypeEnum::TrueFalse:
-                $this->handleTrueFalse($question, $keyAnswer);
-                break;
-
-            case QuestionTypeEnum::Matching:
-                $this->handleMatching($question, $optionsText);
-                break;
-
-            case QuestionTypeEnum::Ordering:
-                $this->handleOrdering($question, $optionsText);
-                break;
-
-            case QuestionTypeEnum::Essay:
-                $this->handleEssay($question, $keyAnswer);
-                break;
-        }
+        match ($type) {
+            QuestionTypeEnum::MultipleChoice => $this->handleMultipleChoice($question, $optionsCell, $keyAnswer),
+            QuestionTypeEnum::MultipleSelection => $this->handleMultipleSelection($question, $optionsCell, $keyAnswer),
+            QuestionTypeEnum::TrueFalse => $this->handleTrueFalse($question, $keyAnswer),
+            QuestionTypeEnum::Matching => $this->handleMatching($question, $optionsCell),
+            QuestionTypeEnum::Ordering => $this->handleOrdering($question, $optionsCell),
+            QuestionTypeEnum::Essay => $this->handleEssay($question, $keyAnswer),
+            default => throw new Exception("Handler untuk tipe soal {$type->value} belum diimplementasikan."),
+        };
     }
 
     /**
@@ -318,65 +409,66 @@ class QuestionImportService
      * @param string $keyAnswer
      * @return void
      */
-    protected function handleMultipleChoice(Question $question, string $optionsText, string $keyAnswer): void
+    protected function handleMultipleChoice(Question $question, array $optionsCell, string $keyAnswer): void
     {
-        $options = $this->splitOptions($optionsText);
+        $options = $this->splitOptions($optionsCell['text']);
         $correctKey = strtoupper(trim($keyAnswer));
 
-        foreach ($options as $index => $optionText) {
-            // Parse "A. Option text" format
-            if (preg_match('/^([A-Z])\.\s*(.+)$/s', trim($optionText), $matches)) {
-                $key = $matches[1];
-                $content = trim($matches[2]);
-            } else {
-                // Fallback: generate key from index
-                $key = chr(65 + $index); // A, B, C, D...
-                $content = trim($optionText);
-            }
-
-            Option::create([
-                'question_id' => $question->id,
-                'option_key' => $key,
-                'content' => $content,
-                'order' => $index,
-                'is_correct' => ($key === $correctKey),
-            ]);
+        if (count($options) < 2) {
+            throw new Exception("Soal Multiple Choice harus memiliki minimal 2 opsi jawaban.");
         }
-    }
-
-    /**
-     * Handle Multiple Selection options
-     * Format same as multiple choice, but key answer is "A, D"
-     *
-     * @param Question $question
-     * @param string $optionsText
-     * @param string $keyAnswer
-     * @return void
-     */
-    protected function handleMultipleSelection(Question $question, string $optionsText, string $keyAnswer): void
-    {
-        $options = $this->splitOptions($optionsText);
-
-        // Parse correct answers "A, D" => ['A', 'D']
-        $correctKeys = array_map('trim', explode(',', strtoupper($keyAnswer)));
-        $correctKeys = array_map('strtoupper', $correctKeys);
 
         foreach ($options as $index => $optionText) {
-            if (preg_match('/^([A-Z])\.\s*(.+)$/s', trim($optionText), $matches)) {
-                $key = $matches[1];
+            if (preg_match('/^([A-Z])\.\s*(.+)$/si', trim($optionText), $matches)) {
+                $key = strtoupper($matches[1]);
                 $content = trim($matches[2]);
             } else {
                 $key = chr(65 + $index);
                 $content = trim($optionText);
             }
 
-            Option::create([
+            $option = Option::create([
+                'question_id' => $question->id,
+                'option_key' => $key,
+                'content' => $content,
+                'order' => $index,
+                'is_correct' => ($key === $correctKey),
+            ]);
+
+            // Attach images found in this option's text
+            $this->processPlaceholdersAndAttach($option, $optionText, $optionsCell['images'], 'option_media');
+        }
+    }
+
+    protected function handleMultipleSelection(Question $question, array $optionsCell, string $keyAnswer): void
+    {
+        $options = $this->splitOptions($optionsCell['text']);
+        $correctKeys = array_map('trim', explode(',', strtoupper($keyAnswer)));
+        $correctKeys = array_map('strtoupper', $correctKeys);
+
+        if (count($options) < 2) {
+            throw new Exception("Soal Multiple Selection harus memiliki minimal 2 opsi jawaban.");
+        }
+
+        foreach ($options as $index => $optionText) {
+            if (preg_match('/^([A-Z])\.\s*(.+)$/si', trim($optionText), $matches)) {
+                $key = strtoupper($matches[1]);
+                $content = trim($matches[2]);
+            } else {
+                $key = chr(65 + $index);
+                $content = trim($optionText);
+            }
+
+            $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $key,
                 'content' => $content,
                 'order' => $index,
                 'is_correct' => in_array($key, $correctKeys),
             ]);
+
+            // Attach images found in this option's text
+            $this->processPlaceholdersAndAttach($option, $optionText, $optionsCell['images'], 'option_media');
         }
     }
 
@@ -416,31 +508,27 @@ class QuestionImportService
      * @param string $optionsText
      * @return void
      */
-    protected function handleMatching(Question $question, string $optionsText): void
+    protected function handleMatching(Question $question, array $optionsCell): void
     {
-        $pairs = $this->splitOptions($optionsText);
-        $leftIndex = 1;
-        $rightIndex = 1;
+        $pairs = $this->splitOptions($optionsCell['text']);
 
-        foreach ($pairs as $pairText) {
-            // Split by ::
+        foreach ($pairs as $index => $pairText) {
             $parts = explode('::', $pairText);
             if (count($parts) !== 2) {
-                continue; // Skip invalid pairs
+                continue;
             }
 
             $leftContent = trim($parts[0]);
             $rightContent = trim($parts[1]);
 
-            $leftKey = 'L' . $leftIndex;
-            $rightKey = 'R' . $rightIndex;
+            $leftKey = 'L' . ($index + 1);
+            $rightKey = 'R' . ($index + 1);
 
-            // Create left option
-            Option::create([
+            $leftOption = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $leftKey,
                 'content' => $leftContent,
-                'order' => ($leftIndex - 1) * 2,
+                'order' => $index * 2,
                 'is_correct' => false,
                 'metadata' => [
                     'type' => 'left',
@@ -448,12 +536,11 @@ class QuestionImportService
                 ],
             ]);
 
-            // Create right option
-            Option::create([
+            $rightOption = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $rightKey,
                 'content' => $rightContent,
-                'order' => ($leftIndex - 1) * 2 + 1,
+                'order' => $index * 2 + 1,
                 'is_correct' => false,
                 'metadata' => [
                     'type' => 'right',
@@ -461,8 +548,9 @@ class QuestionImportService
                 ],
             ]);
 
-            $leftIndex++;
-            $rightIndex++;
+            // Attach images if found in respective text parts
+            $this->processPlaceholdersAndAttach($leftOption, $leftContent, $optionsCell['images'], 'option_media');
+            $this->processPlaceholdersAndAttach($rightOption, $rightContent, $optionsCell['images'], 'option_media');
         }
     }
 
@@ -474,13 +562,12 @@ class QuestionImportService
      * @param string $optionsText
      * @return void
      */
-    protected function handleOrdering(Question $question, string $optionsText): void
+    protected function handleOrdering(Question $question, array $optionsCell): void
     {
-        $items = $this->splitOptions($optionsText);
+        $items = $this->splitOptions($optionsCell['text']);
 
         foreach ($items as $index => $itemText) {
-            // Parse "1. Item text" format
-            if (preg_match('/^(\d+)\.\s*(.+)$/s', trim($itemText), $matches)) {
+            if (preg_match('/^(\d+)\.\s*(.+)$/si', trim($itemText), $matches)) {
                 $correctPosition = intval($matches[1]);
                 $content = trim($matches[2]);
             } else {
@@ -488,7 +575,7 @@ class QuestionImportService
                 $content = trim($itemText);
             }
 
-            Option::create([
+            $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => (string)($index + 1),
                 'content' => $content,
@@ -498,6 +585,8 @@ class QuestionImportService
                     'correct_position' => $correctPosition,
                 ],
             ]);
+
+            $this->processPlaceholdersAndAttach($option, $itemText, $optionsCell['images'], 'option_media');
         }
     }
 
