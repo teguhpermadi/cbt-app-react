@@ -86,6 +86,14 @@ export function UploadQuestionsModal({ questionBankId }: UploadQuestionsModalPro
                         {errors.file && (
                             <p className="text-sm text-red-500">{errors.file}</p>
                         )}
+                        {errors.upload && (
+                            <Alert variant="destructive">
+                                <AlertCircle className="h-4 w-4" />
+                                <AlertDescription className="text-sm">
+                                    {errors.upload}
+                                </AlertDescription>
+                            </Alert>
+                        )}
                     </div>
 
                     <Alert>

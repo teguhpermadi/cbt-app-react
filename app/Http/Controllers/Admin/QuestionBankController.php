@@ -192,8 +192,8 @@ class QuestionBankController extends Controller
             $fileName = time() . '_' . $file->getClientOriginalName();
 
             // Store temporarily with proper path
-            $tempPath = $file->storeAs('temp', $fileName);
-            $fullPath = storage_path('app/' . $tempPath);
+            $tempPath = $file->storeAs('temp', $fileName, 'local');
+            $fullPath = Storage::disk('local')->path($tempPath);
 
             // Debug logging
             Log::info('File upload success', [
