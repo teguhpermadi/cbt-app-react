@@ -22,6 +22,7 @@ import {
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
 import { OptionViewerProps } from './OptionViewerSingleChoice';
+import MathRenderer from '../MathRenderer';
 
 // Custom Node Components for read-only matching display
 function LeftNode({ data }: NodeProps) {
@@ -39,7 +40,7 @@ function LeftNode({ data }: NodeProps) {
                         className="h-16 w-auto rounded-md border object-contain"
                     />
                 )}
-                <div className="text-sm" dangerouslySetInnerHTML={{ __html: data.content as string }} />
+                <MathRenderer content={data.content as string} className="text-sm" />
             </div>
             <Handle
                 type="source"
@@ -78,7 +79,7 @@ function RightNode({ data }: NodeProps) {
                         className="h-16 w-auto rounded-md border object-contain"
                     />
                 )}
-                <div className="text-sm" dangerouslySetInnerHTML={{ __html: data.content as string }} />
+                <MathRenderer content={data.content as string} className="text-sm" />
             </div>
         </div>
     );

@@ -16,6 +16,8 @@ import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
 import { AnswerOptionProps } from "../types";
 
+import MathRenderer from '../MathRenderer';
+
 // --- Custom Nodes ---
 
 function LeftOptionNode({ data }: NodeProps) {
@@ -32,7 +34,7 @@ function LeftOptionNode({ data }: NodeProps) {
             )}
 
             <div className="flex-1">
-                <div dangerouslySetInnerHTML={{ __html: data.content as string }} />
+                <MathRenderer content={data.content as string} />
                 {/* Media Preview */}
                 {(data.mediaUrl) && (
                     <div className="mt-2 rounded overflow-hidden border border-border h-12 w-auto bg-white/50 inline-block">
@@ -67,7 +69,7 @@ function RightOptionNode({ data }: NodeProps) {
             />
 
             <div className="flex-1 text-right">
-                <div dangerouslySetInnerHTML={{ __html: data.content as string }} />
+                <MathRenderer content={data.content as string} />
                 {/* Media Preview */}
                 {(data.mediaUrl) && (
                     <div className="mt-2 rounded overflow-hidden border border-border h-12 w-auto bg-white/50 inline-block">

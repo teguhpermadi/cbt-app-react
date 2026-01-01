@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { Check, X } from "lucide-react";
 import { AnswerOptionProps } from "../types";
+import MathRenderer from "../MathRenderer";
 
 export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }: AnswerOptionProps) {
     const trueOption = options.find(o => o.option_key === 'T');
@@ -27,12 +28,15 @@ export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }
                 )}>
                     {icon}
                 </div>
-                <span className={cn(
-                    "font-bold text-lg",
-                    isCorrect ? `text-${colorClass}-700 dark:text-${colorClass}-300` : "text-muted-foreground"
-                )}>
-                    {label}
-                </span>
+
+                <MathRenderer
+                    className={cn(
+                        "font-bold text-lg",
+                        isCorrect ? `text-${colorClass}-700 dark:text-${colorClass}-300` : "text-muted-foreground"
+                    )}
+                    content={option.content || label}
+                />
+
                 {isCorrect && (
                     <span className="text-xs font-semibold px-2 py-1 rounded bg-white/50 dark:bg-black/20">
                         JAWABAN BENAR
@@ -55,8 +59,8 @@ export default function AnswerOptionsTrueFalse({ options, showKeyAnswer = true }
 
     return (
         <div className="flex gap-4 w-full">
-            {renderOption(trueOption, trueOption?.content || "BENAR", "emerald", <Check className="w-6 h-6" />)}
-            {renderOption(falseOption, falseOption?.content || "SALAH", "red", <X className="w-6 h-6" />)}
+            {renderOption(trueOption, "BENAR", "emerald", <Check className="w-6 h-6" />)}
+            {renderOption(falseOption, "SALAH", "red", <X className="w-6 h-6" />)}
         </div>
     );
 }

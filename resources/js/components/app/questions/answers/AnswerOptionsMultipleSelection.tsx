@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { CheckSquare, Square } from "lucide-react";
 import { AnswerOptionProps } from "../types";
+import MathRenderer from "../MathRenderer";
 
 export default function AnswerOptionsMultipleSelection({ options, showKeyAnswer = true }: AnswerOptionProps) {
     return (
@@ -33,12 +34,12 @@ export default function AnswerOptionsMultipleSelection({ options, showKeyAnswer 
                                 </span>
                             </div>
 
-                            <div
+                            <MathRenderer
                                 className={cn(
                                     "text-sm",
                                     isCorrect && "font-medium text-emerald-900 dark:text-emerald-100"
                                 )}
-                                dangerouslySetInnerHTML={{ __html: option.content }}
+                                content={option.content}
                             />
 
                             {/* Media (URL or Path) */}

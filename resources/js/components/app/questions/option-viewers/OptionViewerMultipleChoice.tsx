@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import { OptionViewerProps } from './OptionViewerSingleChoice';
 import ImageViewerModal from '@/components/ui/image-viewer-modal';
+import MathRenderer from '../MathRenderer';
 
 export default function OptionViewerMultipleChoice({ options, value, onChange, disabled }: OptionViewerProps) {
     const selectedKeys = Array.isArray(value) ? value : [];
@@ -55,7 +56,7 @@ export default function OptionViewerMultipleChoice({ options, value, onChange, d
                                         />
                                     </div>
                                 )}
-                                <div dangerouslySetInnerHTML={{ __html: opt.content }} />
+                                <MathRenderer content={opt.content} />
                             </div>
                         </Label>
                     </div>

@@ -40,6 +40,8 @@ const getPairColor = (pairId: any) => {
     return colors[(id - 1) % colors.length];
 };
 
+import MathRenderer from '../MathRenderer';
+
 // --- Custom Node Components ---
 
 const RenderImageUploader = ({ data, id }: { data: any, id: string }) => {
@@ -113,6 +115,14 @@ function LeftEditableNode({ id, data }: NodeProps) {
                     placeholder="Teks premis..."
                     className="h-8 text-xs"
                 />
+
+                {(data.content as string) && (
+                    <div className="p-2 border rounded bg-slate-50/50 dark:bg-slate-900/50">
+                        <div className="text-[10px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">Preview:</div>
+                        <MathRenderer content={data.content as string} className="text-xs" />
+                    </div>
+                )}
+
                 <RenderImageUploader data={data} id={id} />
             </div>
 
@@ -156,6 +166,14 @@ function RightEditableNode({ id, data }: NodeProps) {
                     placeholder="Teks respon..."
                     className="h-8 text-xs"
                 />
+
+                {(data.content as string) && (
+                    <div className="p-2 border rounded bg-slate-50/50 dark:bg-slate-900/50 text-left">
+                        <div className="text-[10px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">Preview:</div>
+                        <MathRenderer content={data.content as string} className="text-xs" />
+                    </div>
+                )}
+
                 <div className="flex justify-end">
                     <RenderImageUploader data={data} id={id} />
                 </div>

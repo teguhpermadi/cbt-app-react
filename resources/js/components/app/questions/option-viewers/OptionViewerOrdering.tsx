@@ -5,6 +5,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { OptionViewerProps } from './OptionViewerSingleChoice';
+import MathRenderer from '../MathRenderer';
 
 interface SortableItemProps {
     id: string;
@@ -53,7 +54,7 @@ function SortableItem({ id, content, mediaUrl }: SortableItemProps) {
                         />
                     </div>
                 )}
-                <div className="text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: content }} />
+                <MathRenderer className="text-slate-700 dark:text-slate-300" content={content} />
             </div>
         </div>
     );

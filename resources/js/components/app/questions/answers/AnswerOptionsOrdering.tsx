@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ArrowDown, GripVertical } from "lucide-react";
 import { AnswerOptionProps } from "../types";
+import MathRenderer from "../MathRenderer";
 
 export default function AnswerOptionsOrdering({ options, showKeyAnswer = true }: AnswerOptionProps) {
     // If showKeyAnswer is true, we sort by correct position to show the target state
@@ -44,7 +45,7 @@ export default function AnswerOptionsOrdering({ options, showKeyAnswer = true }:
                         </div>
 
                         <div className="flex-1">
-                            <div className="text-sm font-medium" dangerouslySetInnerHTML={{ __html: option.content }} />
+                            <MathRenderer className="text-sm font-medium" content={option.content} />
                             {(option.media_url || option.media_path) && (
                                 <div className="mt-2 rounded-lg overflow-hidden border border-border max-w-xs">
                                     <img

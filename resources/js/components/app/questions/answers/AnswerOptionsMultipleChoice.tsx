@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { AnswerOptionProps } from "../types";
+import MathRenderer from "../MathRenderer";
 
 export default function AnswerOptionsMultipleChoice({ options, showKeyAnswer = true }: AnswerOptionProps) {
     return (
@@ -29,12 +30,12 @@ export default function AnswerOptionsMultipleChoice({ options, showKeyAnswer = t
                         </div>
 
                         <div className="flex-1 space-y-2">
-                            <div
+                            <MathRenderer
                                 className={cn(
                                     "text-sm",
                                     isCorrect && "font-medium text-emerald-900 dark:text-emerald-100"
                                 )}
-                                dangerouslySetInnerHTML={{ __html: option.content }}
+                                content={option.content}
                             />
 
                             {/* Media Preview */}

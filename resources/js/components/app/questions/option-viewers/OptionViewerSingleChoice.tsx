@@ -3,6 +3,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { cn } from '@/lib/utils';
 import ImageViewerModal from '@/components/ui/image-viewer-modal';
+import MathRenderer from '../MathRenderer';
 
 export interface OptionViewerProps {
     options: Record<string, any>;
@@ -49,7 +50,7 @@ export default function OptionViewerSingleChoice({ options, value, onChange, dis
                                         />
                                     </div>
                                 )}
-                                <div dangerouslySetInnerHTML={{ __html: opt.content }} />
+                                <MathRenderer content={opt.content} />
                             </div>
                         </Label>
                     </div>
