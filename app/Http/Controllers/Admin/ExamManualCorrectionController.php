@@ -18,7 +18,7 @@ class ExamManualCorrectionController extends Controller
         // 1. Fetch Questions
         $questions = $exam->examQuestions()
             ->orderBy('question_number')
-            ->select(['id', 'question_number', 'question_type', 'content', 'score_value', 'key_answer'])
+            ->select(['id', 'question_number', 'question_type', 'content', 'options', 'score_value', 'key_answer'])
             ->get();
 
         // 2. Determine Selected Question
@@ -74,6 +74,25 @@ class ExamManualCorrectionController extends Controller
             'selectedQuestion' => $selectedQuestion,
             'answers' => $answers,
         ]);
+    }
+
+    /**
+     * Helper method to determine if an option is correct based on key_answer
+     */
+    private function isCorrectOption($keyAnswer, $optionKey, $questionType)
+    {
+        if (!$keyAnswer) {
+            return false;
+        }
+
+        // Handle different question types
+        if (is_array($keyAnswer)) {
+            // For multiple selection, ordering, matching
+            return in_array($optionKey, $keyAnswer);
+        }
+
+        // For single choice, true/false
+        return $keyAnswer === $optionKey;
     }
 
     public function storeScore(Request $request)

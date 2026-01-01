@@ -173,7 +173,7 @@ const getPairColor = (pairId: any) => {
     return colors[(id - 1) % colors.length];
 };
 
-function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps) {
+function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: OptionViewerProps) {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -209,7 +209,7 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                 position: { x: startX, y: startY + (index * gapY) },
                 data: {
                     content: opt.content || '',
-                    mediaUrl: opt.media_url || opt.media,
+                    mediaUrl: (showMedia !== false) ? (opt.media_url || opt.media) : null,
                     colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id)
                 }
             });
@@ -222,7 +222,7 @@ function MatchingFlow({ options, value, onChange, disabled }: OptionViewerProps)
                 position: { x: rightX, y: startY + (index * gapY) },
                 data: {
                     content: opt.content || '',
-                    mediaUrl: opt.media_url || opt.media,
+                    mediaUrl: (showMedia !== false) ? (opt.media_url || opt.media) : null,
                     pairId: opt.metadata?.pair_id || opt.pair_id,
                     colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id)
                 }

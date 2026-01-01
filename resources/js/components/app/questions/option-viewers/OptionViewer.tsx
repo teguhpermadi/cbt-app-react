@@ -14,18 +14,23 @@ interface Props {
     value: any;
     onChange: (value: any) => void;
     disabled?: boolean;
+    showMedia?: boolean;
 }
 
-export default function OptionViewer({ type, options, value, onChange, disabled }: Props) {
+export default function OptionViewer({ type, options, value, onChange, disabled, showMedia = true }: Props) {
     switch (type) {
         case 'multiple_choice':
-            return <OptionViewerSingleChoice options={options} value={value} onChange={onChange} disabled={disabled} />;
+            // Ensure value is a string, not an array
+            const singleValue = Array.isArray(value) && value.length > 0 ? value[0] : value;
+            return <OptionViewerSingleChoice options={options} value={singleValue} onChange={onChange} disabled={disabled} showMedia={showMedia} />;
 
         case 'true_false':
-            return <OptionViewerTrueFalse options={options} value={value} onChange={onChange} disabled={disabled} />;
+            // True/False also uses SingleChoice viewer
+            const tfValue = Array.isArray(value) && value.length > 0 ? value[0] : value;
+            return <OptionViewerTrueFalse options={options} value={tfValue} onChange={onChange} disabled={disabled} showMedia={showMedia} />;
 
         case 'multiple_selection':
-            return <OptionViewerMultipleChoice options={options} value={value} onChange={onChange} disabled={disabled} />;
+            return <OptionViewerMultipleChoice options={options} value={value} onChange={onChange} disabled={disabled} showMedia={showMedia} />;
 
         case 'essay':
             return <OptionViewerEssay options={options} value={value} onChange={onChange} disabled={disabled} />;
@@ -34,10 +39,10 @@ export default function OptionViewer({ type, options, value, onChange, disabled 
             return <OptionViewerNumericalInput options={options} value={value} onChange={onChange} disabled={disabled} />;
 
         case 'ordering':
-            return <OptionViewerOrdering options={options} value={value} onChange={onChange} disabled={disabled} />;
+            return <OptionViewerOrdering options={options} value={value} onChange={onChange} disabled={disabled} showMedia={showMedia} />;
 
         case 'matching':
-            return <OptionViewerMatching options={options} value={value} onChange={onChange} disabled={disabled} />;
+            return <OptionViewerMatching options={options} value={value} onChange={onChange} disabled={disabled} showMedia={showMedia} />;
 
         default:
             return (

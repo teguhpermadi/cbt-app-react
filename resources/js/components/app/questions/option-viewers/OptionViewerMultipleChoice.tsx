@@ -6,7 +6,7 @@ import { OptionViewerProps } from './OptionViewerSingleChoice';
 import ImageViewerModal from '@/components/ui/image-viewer-modal';
 import MathRenderer from '../MathRenderer';
 
-export default function OptionViewerMultipleChoice({ options, value, onChange, disabled }: OptionViewerProps) {
+export default function OptionViewerMultipleChoice({ options, value, onChange, disabled, showMedia = true }: OptionViewerProps) {
     const selectedKeys = Array.isArray(value) ? value : [];
     const [imageViewerOpen, setImageViewerOpen] = useState(false);
     const [viewingImage, setViewingImage] = useState('');
@@ -31,18 +31,19 @@ export default function OptionViewerMultipleChoice({ options, value, onChange, d
                         onClick={() => toggleSelection(key)}
                         className={cn(
                             "flex items-center space-x-3 border rounded-lg p-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors",
-                            selectedKeys.includes(key) ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-slate-200 dark:border-slate-800",
-                            disabled && "opacity-50 cursor-not-allowed"
+                            selectedKeys.map(String).includes(String(key)) ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40" : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900",
+                            disabled && "cursor-default"
                         )}>
                         <Checkbox
-                            checked={selectedKeys.includes(key)}
+                            checked={selectedKeys.map(String).includes(String(key))}
                             id={`opt-${key}`}
                             disabled={disabled}
+                            className={disabled ? "data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600" : ""}
                         />
                         <Label htmlFor={`opt-${key}`} className="flex-1 cursor-pointer font-normal ml-1">
                             <div className="text-slate-700 dark:text-slate-300">
                                 {/* Media Render */}
-                                {opt.media_url && (
+                                {showMedia && opt.media_url && (
                                     <div className="mb-3">
                                         <img
                                             src={opt.media_url}

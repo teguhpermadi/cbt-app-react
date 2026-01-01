@@ -11,9 +11,10 @@ interface SortableItemProps {
     id: string;
     content: string;
     mediaUrl?: string;
+    showMedia?: boolean;
 }
 
-function SortableItem({ id, content, mediaUrl }: SortableItemProps) {
+function SortableItem({ id, content, mediaUrl, showMedia = true }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -45,7 +46,7 @@ function SortableItem({ id, content, mediaUrl }: SortableItemProps) {
                 <GripVertical className="w-5 h-5" />
             </button>
             <div className="flex-1">
-                {mediaUrl && (
+                {showMedia && mediaUrl && (
                     <div className="mb-2">
                         <img
                             src={mediaUrl}
@@ -60,7 +61,7 @@ function SortableItem({ id, content, mediaUrl }: SortableItemProps) {
     );
 }
 
-export default function OptionViewerOrdering({ options, value, onChange, disabled }: OptionViewerProps) {
+export default function OptionViewerOrdering({ options, value, onChange, disabled, showMedia = true }: OptionViewerProps) {
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -110,6 +111,7 @@ export default function OptionViewerOrdering({ options, value, onChange, disable
                                 id={key}
                                 content={option.content}
                                 mediaUrl={option.media_url}
+                                showMedia={showMedia}
                             />
                         );
                     })}

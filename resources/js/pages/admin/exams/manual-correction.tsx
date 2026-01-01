@@ -15,12 +15,14 @@ import { cn } from '@/lib/utils';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import ExamManualCorrectionController from '@/actions/App/Http/Controllers/Admin/ExamManualCorrectionController';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
+import OptionViewer from '@/components/app/questions/option-viewers/OptionViewer';
 
 interface Question {
     id: string;
     question_number: number;
     question_type: string;
     content: string;
+    options: any;
     score_value: number;
     key_answer: any;
 }
@@ -298,18 +300,53 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                         </div>
 
                                                         {/* Answer Content */}
-                                                        <div className="p-4 rounded-md bg-muted/30 border text-sm">
-                                                            {typeof answer.student_answer === 'string' ? (
-                                                                // Potentially HTML answer (Essay)
-                                                                <div dangerouslySetInnerHTML={{ __html: answer.student_answer }} />
-                                                            ) : (
-                                                                // JSON or other format
-                                                                <pre className="whitespace-pre-wrap">{JSON.stringify(answer.student_answer, null, 2)}</pre>
-                                                            )}
+                                                        <div className="space-y-3">
+                                                            <div className="flex items-center justify-between mb-2">
+                                                                <div className="text-sm font-medium text-muted-foreground">Student Answer:</div>
+                                                            </div>
 
                                                             {!answer.student_answer && (
-                                                                <span className="text-muted-foreground italic">No answer provided</span>
+                                                                <div className="p-4 rounded-md bg-muted/30 border text-sm text-muted-foreground italic mb-4">
+                                                                    No answer provided
+                                                                </div>
                                                             )}
+
+                                                            {console.log('DEBUG OPTION RENDER:', {
+                                                                questionType: selectedQuestion.question_type,
+                                                                options: selectedQuestion.options,
+                                                                studentAnswer: answer.student_answer,
+                                                                answerType: typeof answer.student_answer
+                                                            })}
+
+                                                            {(() => {
+                                                                // Sanitize Answer Logic
+                                                                let sanitizedValue = answer.student_answer;
+
+                                                                // Handle potential double-serialization or quoted strings
+                                                                if (typeof sanitizedValue === 'string') {
+                                                                    // Check if it's a JSON string representative (e.g. "\"A\"" or "[\"A\"]")
+                                                                    try {
+                                                                        const parsed = JSON.parse(sanitizedValue);
+                                                                        sanitizedValue = parsed;
+                                                                    } catch (e) {
+                                                                        // If regular string with quotes, strip them
+                                                                        if (sanitizedValue.startsWith('"') && sanitizedValue.endsWith('"')) {
+                                                                            sanitizedValue = sanitizedValue.slice(1, -1);
+                                                                        }
+                                                                    }
+                                                                }
+
+                                                                return (
+                                                                    <OptionViewer
+                                                                        type={selectedQuestion.question_type.toLowerCase()}
+                                                                        options={selectedQuestion.options}
+                                                                        value={sanitizedValue}
+                                                                        onChange={() => { }}
+                                                                        disabled={true}
+                                                                        showMedia={false}
+                                                                    />
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
 
