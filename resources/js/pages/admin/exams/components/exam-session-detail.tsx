@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, HelpCircle, Clock, Calendar, AlertCircle } from 'lucide-react';
 import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
+import MathRenderer from "@/components/app/questions/MathRenderer";
 
 interface ExamSessionDetailProps {
     session: any;
@@ -109,7 +110,9 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
                                     <Badge variant="secondary">Score: {detail.score_earned != null ? Math.round(detail.score_earned) : 0} / {detail.exam_question.score_value}</Badge>
                                 </div>
                             </div>
-                            <CardDescription dangerouslySetInnerHTML={{ __html: detail.exam_question.content }} />
+                            <CardDescription>
+                                <MathRenderer content={detail.exam_question.content} />
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="grid gap-4">
