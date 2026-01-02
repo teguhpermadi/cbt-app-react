@@ -237,9 +237,23 @@ class ExamController extends Controller
         ]);
     }
 
-    public function calculateScores(\App\Models\ExamSession $session)
+    public function calculateScores(Request $request, \App\Models\ExamSession $session)
     {
-        \Illuminate\Support\Facades\Log::info("Recalculate requested for Session: {$session->id}, User: {$session->user_id}, Exam: {$session->exam_id}");
+        $validated = $request->validate([
+            'question_type' => ['required'], // Can be string 'all' or array
+        ]);
+
+        $questionTypes = $request->input('question_type', 'all');
+
+        // Extra validation/sanitization to ensure it's 'all' or an array of strings
+        if ($questionTypes !== 'all' && !is_array($questionTypes)) {
+            // Fallback or error if strictly needed, but let's assume 'all' if valid structure missing
+            $questionTypes = 'all';
+        }
+
+        $typeLog = is_array($questionTypes) ? json_encode($questionTypes) : $questionTypes;
+
+        \Illuminate\Support\Facades\Log::info("Recalculate requested for Session: {$session->id}, User: {$session->user_id}, Exam: {$session->exam_id}, Types: {$typeLog}");
 
         // Get all sessions for this user and exam to ensure everything is consistent
         $sessions = \App\Models\ExamSession::where('exam_id', $session->exam_id)
@@ -250,9 +264,39 @@ class ExamController extends Controller
 
         foreach ($sessions as $s) {
             \Illuminate\Support\Facades\Log::info("Dispatching CalculateExamScore for session {$s->id}");
-            \App\Jobs\CalculateExamScore::dispatch($s);
+            \App\Jobs\CalculateExamScore::dispatch($s, $questionTypes);
         }
 
         return redirect()->back()->with('success', 'Scores recalculated successfully for all attempts.');
+    }
+
+    public function calculateAllScores(Request $request, \App\Models\Exam $exam)
+    {
+        $validated = $request->validate([
+            'question_type' => ['required'],
+        ]);
+
+        $questionTypes = $request->input('question_type', 'all');
+
+        if ($questionTypes !== 'all' && !is_array($questionTypes)) {
+            $questionTypes = 'all';
+        }
+
+        $typeLog = is_array($questionTypes) ? json_encode($questionTypes) : $questionTypes;
+
+        \Illuminate\Support\Facades\Log::info("Global Recalculate requested for Exam: {$exam->id}, Types: {$typeLog}");
+
+        // Fetch ALL sessions for this exam
+        // We might want to chunk this if there are thousands, but for now simple get() is fine.
+        $sessions = $exam->examSessions;
+
+        $count = $sessions->count();
+        \Illuminate\Support\Facades\Log::info("Found {$count} total sessions for exam {$exam->id}. Dispatching jobs...");
+
+        foreach ($sessions as $s) {
+            \App\Jobs\CalculateExamScore::dispatch($s, $questionTypes);
+        }
+
+        return redirect()->back()->with('success', "Score recalculation queued for all {$count} sessions.");
     }
 }

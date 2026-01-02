@@ -9,11 +9,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ExamSessionDetail from './components/exam-session-detail';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
+import { RecalculateScoreDialog } from './components/recalculate-score-dialog';
 
 interface CorrectionProps {
     session: any;
     all_sessions?: any[];
 }
+
+
 
 export default function CorrectionPage({ session, all_sessions }: CorrectionProps) {
     const breadcrumbs: BreadcrumbItem[] = [
@@ -39,16 +42,7 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                             Review and grade student answers for {session.exam.title}.
                         </p>
                     </div>
-                    <Button
-                        variant="outline"
-                        onClick={() => {
-                            if (confirm('Are you sure you want to recalculate scores for all attempts?')) {
-                                router.post(ExamController.calculateScores(session.id));
-                            }
-                        }}
-                    >
-                        Recalculate Score
-                    </Button>
+                    <RecalculateScoreDialog actionUrl={ExamController.calculateScores(session.id)} />
                 </div>
 
                 <Tabs defaultValue={session.id.toString()} className="w-full">

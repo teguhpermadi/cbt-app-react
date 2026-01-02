@@ -58,6 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('exams/{exam}/monitor', [\App\Http\Controllers\Admin\ExamController::class, 'monitor'])->name('exams.monitor');
         Route::get('exams/sessions/{session}/correction', [\App\Http\Controllers\Admin\ExamController::class, 'correction'])->name('exams.sessions.correction');
         Route::post('exams/sessions/{session}/recalculate', [\App\Http\Controllers\Admin\ExamController::class, 'calculateScores'])->name('exams.sessions.recalculate');
+        Route::post('exams/{exam}/recalculate-all', [\App\Http\Controllers\Admin\ExamController::class, 'calculateAllScores'])->name('exams.recalculate-all');
         Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
         Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
         Route::post('/exams/manual-correction/bulk-score', [ExamManualCorrectionController::class, 'bulkStoreScore'])->name('exams.manual-correction.bulk-score');

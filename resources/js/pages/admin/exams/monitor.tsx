@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import { index as examsIndexRoute } from '@/routes/admin/exams'; // Import route helper
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
+import { RecalculateScoreDialog } from './components/recalculate-score-dialog';
 
 interface ExamResult {
     total_score: number;
@@ -89,6 +90,10 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <RecalculateScoreDialog
+                            actionUrl={`/admin/exams/${exam.id}/recalculate-all`}
+                            triggerText="Recalculate All Scores"
+                        />
                         <Button variant="outline" onClick={() => router.visit(`/admin/exams/${exam.id}/manual-correction`)}>
                             Manual Correction
                         </Button>

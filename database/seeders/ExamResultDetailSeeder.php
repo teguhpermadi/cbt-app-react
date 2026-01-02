@@ -52,12 +52,12 @@ class ExamResultDetailSeeder extends Seeder
                         // Logika Multiple Choice
                         $correctKey = $keyAnswer['answer'] ?? null;
                         if ($isCorrect && $correctKey) {
-                            $studentAnswer = ['answer' => $correctKey];
+                            $studentAnswer = $correctKey;
                         } else {
                             // Ambil option random yang bukan kunci jawaban
                             $wrongOptions = array_filter(array_keys($options), fn($k) => $k !== $correctKey);
                             $selectedKey = !empty($wrongOptions) ? $faker->randomElement($wrongOptions) : $correctKey;
-                            $studentAnswer = ['answer' => $selectedKey];
+                            $studentAnswer = $selectedKey;
                         }
                         break;
 
@@ -65,11 +65,11 @@ class ExamResultDetailSeeder extends Seeder
                         // Logika True False
                         $correctKey = $keyAnswer['answer'] ?? null;
                         if ($isCorrect && $correctKey) {
-                            $studentAnswer = ['answer' => $correctKey];
+                            $studentAnswer = $correctKey;
                         } else {
                             $wrongOptions = array_filter(array_keys($options), fn($k) => $k !== $correctKey);
                             $selectedKey = !empty($wrongOptions) ? $faker->randomElement($wrongOptions) : $correctKey;
-                            $studentAnswer = ['answer' => $selectedKey];
+                            $studentAnswer = $selectedKey;
                         }
                         break;
 
@@ -77,13 +77,13 @@ class ExamResultDetailSeeder extends Seeder
                         // Logika Multiple Selection
                         $correctKeys = $keyAnswer['answers'] ?? [];
                         if ($isCorrect) {
-                            $studentAnswer = ['answers' => $correctKeys];
+                            $studentAnswer = $correctKeys;
                         } else {
                             // Campur aduk
                             $allKeys = array_keys($options);
                             // Ambil sebagian benar, sebagian salah
                             $selected = $faker->randomElements($allKeys, rand(1, count($allKeys)));
-                            $studentAnswer = ['answers' => $selected];
+                            $studentAnswer = $selected;
 
                             // Re-check correctness manual jika random ternyata benar semua
                             // (Simplifikasi: di sini kita biarkan, nanti dihitung skor)
@@ -102,16 +102,16 @@ class ExamResultDetailSeeder extends Seeder
                         // Logika Matching
                         $correctPairs = $keyAnswer['pairs'] ?? [];
                         if ($isCorrect) {
-                            $studentAnswer = ['pairs' => $correctPairs];
+                            $studentAnswer = $correctPairs;
                         } else {
                             // Acak pasangannya
                             $leftSides = array_keys($correctPairs);
                             $rightSides = array_values($correctPairs);
                             shuffle($rightSides);
                             if (!empty($leftSides) && !empty($rightSides)) {
-                                $studentAnswer = ['pairs' => array_combine($leftSides, $rightSides)];
+                                $studentAnswer = array_combine($leftSides, $rightSides);
                             } else {
-                                $studentAnswer = ['pairs' => []];
+                                $studentAnswer = [];
                             }
                             $isCorrect = false;
                         }
@@ -121,7 +121,7 @@ class ExamResultDetailSeeder extends Seeder
                         // Logika Ordering
                         $correctOrder = $keyAnswer['order'] ?? [];
                         if ($isCorrect) {
-                            $studentAnswer = ['order' => $correctOrder];
+                            $studentAnswer = $correctOrder;
                         } else {
                             $shuffled = $correctOrder;
                             shuffle($shuffled);
@@ -132,7 +132,7 @@ class ExamResultDetailSeeder extends Seeder
                                 $shuffled[0] = $shuffled[1];
                                 $shuffled[1] = $temp;
                             }
-                            $studentAnswer = ['order' => $shuffled];
+                            $studentAnswer = $shuffled;
                             $isCorrect = false;
                         }
                         break;
@@ -140,16 +140,16 @@ class ExamResultDetailSeeder extends Seeder
                     case \App\Enums\QuestionTypeEnum::NumericalInput:
                         $correctVal = $keyAnswer['answer'] ?? 0;
                         if ($isCorrect) {
-                            $studentAnswer = ['answer' => $correctVal];
+                            $studentAnswer = $correctVal;
                         } else {
                             $wrongVal = (float)$correctVal + $faker->randomFloat(1, 1, 5); // Salah dikit
-                            $studentAnswer = ['answer' => $wrongVal];
+                            $studentAnswer = $wrongVal;
                             $isCorrect = false;
                         }
                         break;
 
                     case \App\Enums\QuestionTypeEnum::Essay:
-                        $studentAnswer = ['text' => $faker->paragraph()];
+                        $studentAnswer = $faker->paragraph();
                         $isCorrect = null; // Essay butuh koreksi manual biasanya, atau null
                         $scoreEarned = 0; // Nanti dinilai guru
                         break;
