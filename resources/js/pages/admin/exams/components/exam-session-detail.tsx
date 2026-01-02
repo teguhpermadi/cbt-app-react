@@ -4,6 +4,7 @@ import { CheckCircle, XCircle, HelpCircle, Clock, Calendar, AlertCircle } from '
 import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import PreviewStudentAnswerMultipleChoice from "@/components/app/questions/results/PreviewStudentAnswerMultipleChoice";
 import PreviewStudentAnswerMultipleSelection from "@/components/app/questions/results/PreviewStudentAnswerMultipleSelection";
+import PreviewStudentAnswerMatching from "@/components/app/questions/results/PreviewStudentAnswerMatching";
 import PreviewStudentAnswerTrueFalse from "@/components/app/questions/results/PreviewStudentAnswerTrueFalse";
 import PreviewStudentAnswerOrdering from "@/components/app/questions/results/PreviewStudentAnswerOrdering";
 
@@ -156,6 +157,15 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
                                                 showKeyAnswer={true}
                                                 showStudentAnswer={true}
                                             />
+                                        ) : detail.exam_question.question_type === 'matching' ? (
+                                            <PreviewStudentAnswerMatching
+                                                options={detail.exam_question.options}
+                                                studentAnswer={detail.student_answer}
+                                                keyAnswer={detail.exam_question.key_answer}
+                                                showMedia={false}
+                                                showKeyAnswer={true}
+                                                showStudentAnswer={true}
+                                            />
                                         ) : (
                                             typeof detail.student_answer === 'object' ? JSON.stringify(detail.student_answer) : (detail.student_answer || '-')
                                         )}
@@ -194,6 +204,15 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
                                             />
                                         ) : detail.exam_question.question_type === 'ordering' ? (
                                             <PreviewStudentAnswerOrdering
+                                                options={detail.exam_question.options}
+                                                studentAnswer={detail.student_answer}
+                                                keyAnswer={detail.exam_question.key_answer}
+                                                showMedia={false}
+                                                showKeyAnswer={true}
+                                                showStudentAnswer={false}
+                                            />
+                                        ) : detail.exam_question.question_type === 'matching' ? (
+                                            <PreviewStudentAnswerMatching
                                                 options={detail.exam_question.options}
                                                 studentAnswer={detail.student_answer}
                                                 keyAnswer={detail.exam_question.key_answer}
