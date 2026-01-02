@@ -28,74 +28,75 @@ export default function PreviewStudentAnswerOrdering({
     showStudentAnswer = true,
     showKeyAnswer = true
 }: PreviewStudentAnswerOrderingProps) {
-    // Determine the order to display
-    // If showing student answer, determine based on student's array
-    // If showing key answer (and not student), determine based on key's array
-
-    let displayOrder: string[] = [];
-
-    if (showStudentAnswer && studentAnswer && Array.isArray(studentAnswer)) {
-        displayOrder = studentAnswer;
-    } else if (showKeyAnswer && keyAnswer?.order && Array.isArray(keyAnswer.order)) {
-        displayOrder = keyAnswer.order;
-    } else {
-        // Fallback: just show keys as they are in options
-        displayOrder = Object.keys(options);
-    }
-
-    // Determine correctness for coloring if showing student answer
-    const correctOrder = keyAnswer?.order || [];
+    // Always use the key answer for the display order, fallback to keys if not present
+    const displayOrder = keyAnswer?.order && Array.isArray(keyAnswer.order)
+        ? keyAnswer.order
+        : Object.keys(options);
 
     return (
         <div className="flex flex-col gap-2">
-            {displayOrder.map((key, index) => {
+            {displayOrder.map((key, correctIndex) => {
                 const option = options[key];
                 if (!option) return null;
 
-                // Check if this specific position matches the correct order's position
-                // Only relevant if we are showing student answer and we have a key to compare against
-                const isCorrectPosition = showStudentAnswer && correctOrder[index] === key;
-                const isKeyMode = showKeyAnswer && !showStudentAnswer;
+                // Find where the student placed this item
+                const studentIndex = studentAnswer?.indexOf(key) ?? -1;
+                // Student's 1-based position
+                const studentPosition = studentIndex !== -1 ? studentIndex + 1 : null;
+                const correctPosition = correctIndex + 1;
 
+                const isCorrectPosition = studentPosition === correctPosition;
+
+                // Styling
                 let borderColor = "border-border";
                 let bgColor = "bg-card";
-                let indexColor = "bg-muted text-muted-foreground";
 
-                if (showStudentAnswer) {
+                // Badge Logic
+                let badge = null;
+
+                if (showStudentAnswer && studentPosition !== null) {
+                    // We are showing student answer context
                     if (isCorrectPosition) {
-                        borderColor = "border-emerald-200 dark:border-emerald-800 pointer-events-none";
+                        borderColor = "border-emerald-200 dark:border-emerald-800";
                         bgColor = "bg-emerald-50 dark:bg-emerald-950/30";
-                        indexColor = "bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
+                        badge = (
+                            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300 flex items-center justify-center text-xs font-bold border border-emerald-200 dark:border-emerald-800 shadow-sm z-10">
+                                {studentPosition}
+                            </div>
+                        );
                     } else {
-                        // If wrong position
                         borderColor = "border-red-200 dark:border-red-800";
                         bgColor = "bg-red-50 dark:bg-red-950/30";
-                        indexColor = "bg-red-200 text-red-800 dark:bg-red-900 dark:text-red-200";
+                        badge = (
+                            <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 flex items-center justify-center text-xs font-bold border border-red-200 dark:border-red-800 shadow-sm z-10">
+                                {studentPosition}
+                            </div>
+                        );
                     }
-                } else if (isKeyMode) {
-                    // Key answer view, just show neutral or correct style
-                    borderColor = "border-emerald-200 dark:border-emerald-800";
-                    bgColor = "bg-emerald-50 dark:bg-emerald-950/30";
-                    indexColor = "bg-emerald-200 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200";
                 }
+                // typically if we are just showing key answer (showStudentAnswer = false), we just show the list in order.
+                // The list IS in order (Correct Order).
+                // So we can also show a neutral index or just the item.
 
                 return (
                     <div
-                        key={`${key}-${index}`}
+                        key={`${key}-${correctIndex}`}
                         className={cn(
-                            "flex items-center gap-3 p-3 rounded-lg border transition-all",
+                            "relative flex items-center gap-3 p-3 rounded-lg border transition-all",
                             bgColor,
                             borderColor
                         )}
                     >
+                        {/* Correct Order Index (The natural order of this list) */}
                         <div className={cn(
-                            "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold flex-shrink-0",
-                            indexColor
+                            "flex items-center justify-center w-8 h-8 rounded-full text-sm font-bold flex-shrink-0 bg-muted text-muted-foreground",
+                            // If it's a key answer view (no student answer), maybe highlight it nicely?
+                            // But usually just 1, 2, 3...
                         )}>
-                            {index + 1}
+                            {correctPosition}
                         </div>
 
-                        <div className="flex-1 min-w-0">
+                        <div className="flex-1 min-w-0 pr-8">
                             <MathRenderer
                                 className="text-sm"
                                 content={option.content}
@@ -113,10 +114,7 @@ export default function PreviewStudentAnswerOrdering({
                             )}
                         </div>
 
-                        {/* Drag Handle Icon Visual (static) */}
-                        <div className="text-muted-foreground/30">
-                            <GripVertical className="w-5 h-5" />
-                        </div>
+                        {badge}
                     </div>
                 );
             })}
