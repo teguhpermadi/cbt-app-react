@@ -372,6 +372,20 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                                     <Save className="h-4 w-4" />
                                                                 </Button>
                                                             </div>
+                                                            <div className="flex flex-wrap gap-1 mt-1">
+                                                                {Array.from({ length: selectedQuestion.score_value }, (_, i) => i + 1).map((score) => (
+                                                                    <Button
+                                                                        key={score}
+                                                                        type="button"
+                                                                        size="sm"
+                                                                        variant={answer.score_earned === score ? "default" : "outline"}
+                                                                        className="h-7 w-7 p-0 text-xs"
+                                                                        onClick={() => handleScoreChange(answer.id, score.toString())}
+                                                                    >
+                                                                        {score}
+                                                                    </Button>
+                                                                ))}
+                                                            </div>
                                                         </div>
 
                                                         <div className="space-y-2">
