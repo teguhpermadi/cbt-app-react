@@ -4,49 +4,78 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        $activeExams = [
-            [
-                'id' => '1',
-                'title' => 'Mid-term Mathematics',
-                'subject' => 'Mathematics',
-                'grade' => 'Grade 10',
-                'duration' => 90,
-                'end_time' => now()->addDays(2)->toIso8601String(),
-                'has_started' => false,
-            ],
-            [
-                'id' => '2',
-                'title' => 'Biology Quiz',
-                'subject' => 'Science',
-                'grade' => 'Grade 10',
-                'duration' => 45,
-                'end_time' => now()->addDays(1)->toIso8601String(),
-                'has_started' => true,
-            ],
-        ];
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        $recentResults = [
-            [
-                'id' => '1',
-                'title' => 'History Pop Quiz',
-                'subject' => 'History',
-                'score' => 85,
-                'date' => now()->subDays(2)->toIso8601String(),
-            ],
-            [
-                'id' => '2',
-                'title' => 'Physics Lab Test',
-                'subject' => 'Physics',
-                'score' => 65,
-                'date' => now()->subDays(5)->toIso8601String(),
-            ],
-        ];
+        // Ambil ujian aktif yang sesuai dengan grade siswa
+        // Relasi Exam -> Grade adalah Many-to-Many
+        // Siswa -> Grade juga Many-to-Many (asumsi siswa bisa punya >1 grade, misal akselerasi atau pindah)
+        // Kita cari Exam yang punya setidaknya satu grade yang sama dengan grade siswa.
+
+        $studentGradeIds = $user->grades->pluck('id');
+
+        $activeExams = \App\Models\Exam::query()
+            ->where('is_published', true)
+            // ->where('start_time', '<=', now()) // Optional: jika ingin menyembunyikan yg belum mulai
+            ->where('end_time', '>', now())
+            ->whereHas('grades', function ($query) use ($studentGradeIds) {
+                $query->whereIn('grades.id', $studentGradeIds);
+            })
+            ->with(['subject', 'grades'])
+            ->latest('start_time')
+            ->get()
+            ->map(function ($exam) use ($user) {
+                // Check if user has started
+                $session = \App\Models\ExamSession::where('exam_id', $exam->id)
+                    ->where('user_id', $user->id)
+                    ->first();
+
+                // Jika sudah selesai, mungkin tidak perlu muncul di "Active Exams"? 
+                // Atau tetap muncul tapi statusnya selesai?
+                // Mockup sebelumnya: 'has_started' => boolean.
+
+                // Logic tambahan: Kalau sudah finished, jangan tampilkan di active exams?
+                if ($session && $session->is_finished) {
+                    return null;
+                }
+
+                return [
+                    'id' => $exam->id,
+                    'title' => $exam->title,
+                    'subject' => $exam->subject->name,
+                    'grade' => $exam->grades->pluck('name')->join(', '),
+                    'duration' => $exam->duration,
+                    'end_time' => $exam->end_time,
+                    'has_started' => $session ? true : false,
+                ];
+            })
+            ->filter() // Hapus yang null (finished exams)
+            ->values();
+
+        $recentResults = \App\Models\ExamSession::query()
+            ->with(['exam.subject'])
+            ->where('user_id', $user->id)
+            ->where('is_finished', true)
+            ->latest('finish_time')
+            ->take(5)
+            ->get()
+            ->map(function ($session) {
+                return [
+                    'id' => $session->id, // Session ID for detail view
+                    'title' => $session->exam->title,
+                    'subject' => $session->exam->subject->name,
+                    // Pastikan model ExamSession memiliki accessor final_score atau hitung manual
+                    'score' => $session->final_score ?? 0,
+                    'date' => $session->finish_time,
+                ];
+            });
 
         return Inertia::render('student/dashboard', [
             'activeExams' => $activeExams,

@@ -22,7 +22,7 @@ class ExamController extends Controller
      */
     public function index()
     {
-        $exams = Exam::with(['academicYear', 'grade', 'subject', 'teacher'])
+        $exams = Exam::with(['academicYear', 'grades', 'subject', 'teacher'])
             ->latest()
             ->paginate(10);
 
@@ -77,9 +77,11 @@ class ExamController extends Controller
     {
         $this->validateExam($request);
 
-        $data = $request->all();
+        $data = $request->except('grade_ids');
         $data['token'] = Exam::generateToken();
-        Exam::create($data);
+        $exam = Exam::create($data);
+
+        $exam->grades()->sync($request->input('grade_ids', []));
 
         return redirect()->back()->with('success', 'Exam created successfully.');
     }
@@ -89,7 +91,7 @@ class ExamController extends Controller
      */
     public function edit(Exam $exam)
     {
-        $exam->load(['academicYear', 'grade', 'subject', 'teacher', 'questionBank']);
+        $exam->load(['academicYear', 'grades', 'subject', 'teacher', 'questionBank']);
 
         $academicYears = AcademicYear::active()->get();
         $grades = Grade::all();
@@ -114,22 +116,17 @@ class ExamController extends Controller
      */
     public function update(Request $request, Exam $exam)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'exam_type' => ['required', Rule::in(ExamTypeEnum::cases())],
-            'duration' => 'required|integer|min:1',
-            'passing_score' => 'required|integer|min:0|max:100',
-            'start_time' => 'required|date',
-            'end_time' => 'required|date|after:start_time',
-            'is_published' => 'required|boolean',
-            'is_randomized' => 'required|boolean',
-            'is_answer_randomized' => 'nullable|boolean',
-            'show_result_on_finish' => 'nullable|boolean',
-            'max_attempts' => 'nullable|integer|min:1',
-            'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
-        ]);
+        // Custom validation inside update since validateExam is shared but might need tweaks
+        // Actually, let's reuse validateExam but we need to handle extraction of grade_ids after validation
 
-        $exam->update($validated);
+        $validated = $this->validateExam($request);
+
+        // Remove grade_ids from validated data as it is not in exams table
+        $examData = collect($validated)->except(['grade_ids'])->toArray();
+
+        $exam->update($examData);
+
+        $exam->grades()->sync($request->input('grade_ids', []));
 
         return redirect()->back()->with('success', 'Exam updated successfully.');
     }
@@ -164,7 +161,7 @@ class ExamController extends Controller
     public function monitor(Exam $exam)
     {
         // Fetch specific fields to optimize performance
-        $exam->load('grade', 'subject', 'academicYear');
+        $exam->load('grades', 'subject', 'academicYear');
 
         // Get all sessions for this exam with student info, ordered by latest
         $allSessions = \App\Models\ExamSession::with([
@@ -183,10 +180,13 @@ class ExamController extends Controller
         // Unique sessions by user_id to show only one entry per student (the latest one)
         $sessions = $allSessions->unique('user_id')->values();
 
-        // Total students expected from the grade
-        $totalStudents = $exam->grade->students()
-            ->where('user_type', 'student')
-            ->count();
+        // Total students expected from the grades (Sum of students in all linked grades)
+        $totalStudents = 0;
+        foreach ($exam->grades as $grade) {
+            $totalStudents += $grade->students()
+                ->where('user_type', 'student')
+                ->count();
+        }
 
         return Inertia::render('admin/exams/monitor', [
             'exam' => $exam,
@@ -218,7 +218,8 @@ class ExamController extends Controller
         return $request->validate([
             'title' => 'required|string|max:255',
             'academic_year_id' => 'required|exists:academic_years,id',
-            'grade_id' => 'required|exists:grades,id',
+            'grade_ids' => 'required|array',
+            'grade_ids.*' => 'exists:grades,id',
             'subject_id' => 'required|exists:subjects,id',
             'teacher_id' => 'required|exists:users,id',
             'question_bank_id' => 'required|exists:question_banks,id',
@@ -228,7 +229,6 @@ class ExamController extends Controller
             'start_time' => 'required|date',
             'end_time' => 'required|date|after:start_time',
             'is_published' => 'required|boolean',
-            'is_randomized' => 'required|boolean',
             'is_randomized' => 'required|boolean',
             'is_answer_randomized' => 'nullable|boolean',
             'show_result_on_finish' => 'nullable|boolean',

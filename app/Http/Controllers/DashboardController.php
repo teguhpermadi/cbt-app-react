@@ -15,11 +15,13 @@ class DashboardController extends Controller
         $user = $request->user();
 
         // Ambil ID Kelas siswa dari relasi grades
-        $gradeIds = $user->grades()->pluck('grades.id');
+        $gradeIds = $user->grades->pluck('id');
 
         // 1. Ujian Aktif: Ujian untuk kelas siswa yang sudah dipublikasikan dan masih dalam rentang waktu
-        $activeExams = Exam::with(['subject', 'grade'])
-            ->whereIn('grade_id', $gradeIds)
+        $activeExams = Exam::with(['subject', 'grades'])
+            ->whereHas('grades', function ($query) use ($gradeIds) {
+                $query->whereIn('grades.id', $gradeIds);
+            })
             ->where('is_published', true)
             ->where('end_time', '>=', now())
             ->orderBy('start_time', 'asc')
@@ -29,7 +31,7 @@ class DashboardController extends Controller
                 $exam->has_started = ExamSession::where('exam_id', $exam->id)
                     ->where('user_id', $user->id)
                     ->exists();
-                
+
                 return $exam;
             });
 
@@ -37,7 +39,9 @@ class DashboardController extends Controller
         $stats = [
             'completed_exams' => ExamSession::where('user_id', $user->id)->where('is_finished', true)->count(),
             'average_score' => round(ExamSession::where('user_id', $user->id)->where('is_finished', true)->avg('total_score') ?? 0, 1),
-            'upcoming_exams' => Exam::whereIn('grade_id', $gradeIds)
+            'upcoming_exams' => Exam::whereHas('grades', function ($query) use ($gradeIds) {
+                $query->whereIn('grades.id', $gradeIds);
+            })
                 ->where('is_published', true)
                 ->where('start_time', '>', now())
                 ->count(),

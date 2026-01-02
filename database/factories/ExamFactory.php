@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Enums\ExamTypeEnum;
 use App\Enums\TimerTypeEnum;
 use App\Models\AcademicYear;
+use App\Models\Exam;
 use App\Models\Grade;
 use App\Models\Subject;
 use App\Models\User;
@@ -23,7 +24,7 @@ class ExamFactory extends Factory
         if ($questionBank) {
             // Jika ada Bank Soal, gunakan Subject dan Grade dari Bank Soal tersebut (via Subject)
             $subject = $questionBank->subject;
-            $grade = $subject->grade; // Subject punya relasi ke Grade
+            $grade = $subject->grade ?? Grade::inRandomOrder()->first() ?? Grade::factory()->create();
             $academicYear = $subject->academicYear; // Subject punya relasi ke AcademicYear
         } else {
             // Fallback: Jika tidak ada Question Bank, ambil random
@@ -52,7 +53,7 @@ class ExamFactory extends Factory
 
         return [
             'academic_year_id' => $academicYear->id,
-            'grade_id' => $grade->id,
+            // 'grade_id' => $grade->id, // Removed from column
             'subject_id' => $subject->id,
             'teacher_id' => $teacher->id,
             'question_bank_id' => $questionBank?->id,
@@ -78,5 +79,25 @@ class ExamFactory extends Factory
 
             'show_result_on_finish' => $showResultPage,
         ];
+    }
+
+    public function configure()
+    {
+        return $this->afterCreating(function (Exam $exam) {
+            // Kita perlu mengambil grade yang relevan.
+            // Di definition(), kita sudah menentukan $grade, tapi variabel itu local scope.
+            // Solusi: Kita ambil grade dari Subject, atau attach random grade.
+
+            // Jika exam dibuat dari QuestionBank, subjectnya pasti punya grade_id (tapi Subject belongsTo Grade? 
+            // Cek subject model: Subject belongsTo Grade.
+
+            $subject = $exam->subject;
+            if ($subject && $subject->grade_id) {
+                $exam->grades()->syncWithoutDetaching([$subject->grade_id]);
+            } else {
+                // Fallback
+                $exam->grades()->attach(Grade::inRandomOrder()->first());
+            }
+        });
     }
 }

@@ -66,6 +66,6 @@ class Grade extends Model
 
     public function exams()
     {
-        return $this->hasMany(Exam::class);
+        return $this->belongsToMany(Exam::class, 'exam_grade');
     }
 }

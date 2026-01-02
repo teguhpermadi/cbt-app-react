@@ -30,7 +30,7 @@ class Exam extends Model
 
     protected $fillable = [
         'academic_year_id',
-        'grade_id',
+        // 'grade_id', // Removed
         'subject_id',
         'teacher_id',       // Guru yang membuat ujian
         'question_bank_id', // Bank soal yang digunakan (opsional)
@@ -39,7 +39,6 @@ class Exam extends Model
         'duration',         // Durasi ujian dalam menit
         'token',            // Token ujian
         'is_token_visible', // Status visibilitas token
-
         'is_published',     // Status ujian: draft/terbit
         'is_randomized',    // Apakah urutan soal diacak
         'is_answer_randomized', // Apakah urutan jawaban diacak
@@ -93,9 +92,9 @@ class Exam extends Model
         return $this->belongsTo(AcademicYear::class);
     }
 
-    public function grade(): BelongsTo
+    public function grades(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->belongsTo(Grade::class);
+        return $this->belongsToMany(Grade::class, 'exam_grade');
     }
 
     public function subject(): BelongsTo

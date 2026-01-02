@@ -20,13 +20,14 @@ import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Settings, ArrowLeft, Monitor } from 'lucide-react';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 // @ts-ignore
 const route = window.route;
 
 interface CreateExamForm {
     academic_year_id: string;
-    grade_id: string;
+    grade_ids: string[];
     subject_id: string;
     teacher_id: string;
     question_bank_id: string;
@@ -64,7 +65,7 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
 
     const form = useForm<CreateExamForm>({
         academic_year_id: exam.academic_year_id || '',
-        grade_id: exam.grade_id || '',
+        grade_ids: exam.grades?.map((g: any) => g.id) || [],
         subject_id: exam.subject_id || '',
         teacher_id: exam.teacher_id || '',
         question_bank_id: exam.question_bank_id || '',
@@ -84,9 +85,9 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
 
     // --- Chained Select Logic ---
     const filteredSubjects = useMemo(() => {
-        if (!form.data.grade_id) return [];
-        return subjects.filter((s: any) => s.grade_id === form.data.grade_id);
-    }, [form.data.grade_id, subjects]);
+        if (form.data.grade_ids.length === 0) return [];
+        return subjects.filter((s: any) => form.data.grade_ids.includes(s.grade_id));
+    }, [form.data.grade_ids, subjects]);
 
     const filteredQuestionBanks = useMemo(() => {
         if (!form.data.subject_id) return [];
@@ -189,15 +190,13 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
                             <div className="grid gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label>Grade</Label>
-                                    <Select onValueChange={(v) => form.setData('grade_id', v)} value={form.data.grade_id}>
-                                        <SelectTrigger><SelectValue placeholder="Select Grade" /></SelectTrigger>
-                                        <SelectContent>
-                                            {grades.map((g: any) => (
-                                                <SelectItem key={g.id} value={g.id}>{g.name}</SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    <InputError message={form.errors.grade_id} />
+                                    <MultiSelect
+                                        options={grades.map((g: any) => ({ label: g.name, value: g.id }))}
+                                        value={form.data.grade_ids}
+                                        onChange={(v) => form.setData('grade_ids', v)}
+                                        placeholder="Select Grades"
+                                    />
+                                    <InputError message={form.errors.grade_ids} />
                                 </div>
                                 <div className="space-y-2">
                                     <Label>Subject</Label>

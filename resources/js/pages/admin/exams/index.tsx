@@ -34,6 +34,7 @@ const route = window.route;
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
+import { MultiSelect } from '@/components/ui/multi-select';
 
 
 interface Exam {
@@ -51,7 +52,9 @@ interface Exam {
     end_time: string;
     status: string;
     academic_year: { id: string; year: string; };
-    grade: { id: string; name: string; };
+    status: string;
+    academic_year: { id: string; year: string; };
+    grades: { id: string; name: string; }[];
     subject: { id: string; name: string; };
     teacher: { id: string; name: string; };
     question_bank: { id: string; name: string; };
@@ -61,7 +64,7 @@ interface Exam {
 
 interface CreateExamForm {
     academic_year_id: string;
-    grade_id: string;
+    grade_ids: string[];
     subject_id: string;
     teacher_id: string;
     question_bank_id: string;
@@ -104,7 +107,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
     const createForm = useForm<CreateExamForm>({
         academic_year_id: academicYears.find((ay: any) => ay.active)?.id || academicYears[0]?.id || '',
-        grade_id: '',
+        grade_ids: [],
         subject_id: '',
         teacher_id: '',
         question_bank_id: '',
@@ -123,7 +126,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
     const editForm = useForm<CreateExamForm>({
         academic_year_id: '',
-        grade_id: '',
+        grade_ids: [],
         subject_id: '',
         teacher_id: '',
         question_bank_id: '',
@@ -158,7 +161,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         editForm.setData({
             ...exam,
             academic_year_id: exam.academic_year?.id || '',
-            grade_id: exam.grade?.id || '',
+            grade_ids: exam.grades?.map((g: any) => g.id) || [],
             subject_id: exam.subject?.id || '',
             teacher_id: exam.teacher?.id || '',
             question_bank_id: exam.question_bank?.id || '',
@@ -199,9 +202,12 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
     // --- Chained Select Logic for Create Form ---
     const createFilteredSubjects = useMemo(() => {
-        if (!createForm.data.grade_id) return [];
-        return subjects.filter((s: any) => s.grade_id === createForm.data.grade_id);
-    }, [createForm.data.grade_id, subjects]);
+        // Allow subjects if ANY of the selected grades match (or simplistic approach: show all if grade selected, or check intersection)
+        // With Many-to-Many, subject usually belongs to ONE grade.
+        // So we should show subjects that belong to ANY of the selected grades.
+        if (createForm.data.grade_ids.length === 0) return [];
+        return subjects.filter((s: any) => createForm.data.grade_ids.includes(s.grade_id));
+    }, [createForm.data.grade_ids, subjects]);
 
     const createFilteredQuestionBanks = useMemo(() => {
         if (!createForm.data.subject_id) return [];
@@ -215,7 +221,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         if (!isValid && createForm.data.subject_id) {
             createForm.setData('subject_id', '');
         }
-    }, [createForm.data.grade_id]);
+    }, [createForm.data.grade_ids]);
 
     useEffect(() => {
         // Find if current question bank is valid for new subject
@@ -228,9 +234,9 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
     // --- Chained Select Logic for Edit Form ---
     const editFilteredSubjects = useMemo(() => {
-        if (!editForm.data.grade_id) return [];
-        return subjects.filter((s: any) => s.grade_id === editForm.data.grade_id);
-    }, [editForm.data.grade_id, subjects]);
+        if (editForm.data.grade_ids.length === 0) return [];
+        return subjects.filter((s: any) => editForm.data.grade_ids.includes(s.grade_id));
+    }, [editForm.data.grade_ids, subjects]);
 
     const editFilteredQuestionBanks = useMemo(() => {
         if (!editForm.data.subject_id) return [];
@@ -248,7 +254,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         if (currentId && !editFilteredSubjects.find(s => s.id === currentId)) {
             editForm.setData('subject_id', '');
         }
-    }, [editForm.data.grade_id]);
+    }, [editForm.data.grade_ids]);
 
     useEffect(() => {
         const currentId = editForm.data.question_bank_id;
@@ -268,6 +274,10 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                         <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">Exam Management</h1>
                         <p className="text-muted-foreground font-medium">Manage exams, schedules, and settings.</p>
                     </div>
+                    <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+                        <Plus className="h-4 w-4" />
+                        Create Exam
+                    </Button>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
@@ -330,7 +340,15 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                                                 </div>
                                             </td>
                                             <td className="px-6 py-4">{exam.subject?.name || 'N/A'}</td>
-                                            <td className="px-6 py-4">{exam.grade?.name || 'N/A'}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex flex-wrap gap-1">
+                                                    {exam.grades?.map((g) => (
+                                                        <Badge key={g.id} variant="secondary" className="text-xs">
+                                                            {g.name}
+                                                        </Badge>
+                                                    )) || 'N/A'}
+                                                </div>
+                                            </td>
                                             <td className="px-6 py-4">{exam.teacher?.name || 'N/A'}</td>
                                             <td className="px-6 py-4">{exam.duration} mins</td>
                                             <td className="px-6 py-4">
@@ -385,7 +403,167 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                 <Pagination links={exams.links} />
             </div>
 
-            {/* Modal removed. Navigate to edit page for editing. */}
+            <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Create Exam</DialogTitle>
+                        <DialogDescription>
+                            Create a new exam. Click save when you're done.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <form onSubmit={submitCreate} className="space-y-6">
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Title</Label>
+                                <Input value={createForm.data.title} onChange={(e) => createForm.setData('title', e.target.value)} placeholder="e.g. UTS Matematika" />
+                                <InputError message={createForm.errors.title} />
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label>Exam Type</Label>
+                                <Select onValueChange={(v) => createForm.setData('exam_type', v)} value={createForm.data.exam_type}>
+                                    <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                                    <SelectContent>{examTypes.map(et => <SelectItem key={et} value={et}>{et}</SelectItem>)}</SelectContent>
+                                </Select>
+                                <InputError message={createForm.errors.exam_type} />
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Academic Year</Label>
+                                <Select onValueChange={(v) => createForm.setData('academic_year_id', v)} value={createForm.data.academic_year_id}>
+                                    <SelectTrigger><SelectValue placeholder="Select Academic Year" /></SelectTrigger>
+                                    <SelectContent>
+                                        {academicYears.map((ay: any) => (
+                                            <SelectItem key={ay.id} value={ay.id}>{ay.year}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={createForm.errors.academic_year_id} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Teacher</Label>
+                                <Select onValueChange={(v) => createForm.setData('teacher_id', v)} value={createForm.data.teacher_id}>
+                                    <SelectTrigger><SelectValue placeholder="Select Teacher" /></SelectTrigger>
+                                    <SelectContent>
+                                        {teachers.map((t: any) => (
+                                            <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={createForm.errors.teacher_id} />
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Grade</Label>
+                                <MultiSelect
+                                    options={grades.map((g: any) => ({ label: g.name, value: g.id }))}
+                                    value={createForm.data.grade_ids}
+                                    onChange={(v) => createForm.setData('grade_ids', v)}
+                                    placeholder="Select Grades"
+                                />
+                                <InputError message={createForm.errors.grade_ids} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Subject</Label>
+                                <Select onValueChange={(v) => createForm.setData('subject_id', v)} value={createForm.data.subject_id} disabled={!createForm.data.grade_ids.length}>
+                                    <SelectTrigger><SelectValue placeholder="Select Subject" /></SelectTrigger>
+                                    <SelectContent>
+                                        {createFilteredSubjects.map((s: any) => (
+                                            <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={createForm.errors.subject_id} />
+                            </div>
+                        </div>
+
+                        <div className="space-y-2">
+                            <Label>Question Bank</Label>
+                            <Select onValueChange={(v) => createForm.setData('question_bank_id', v)} value={createForm.data.question_bank_id} disabled={!createForm.data.subject_id}>
+                                <SelectTrigger><SelectValue placeholder="Select Question Bank" /></SelectTrigger>
+                                <SelectContent>
+                                    {createFilteredQuestionBanks.map((qb: any) => (
+                                        <SelectItem key={qb.id} value={qb.id}>{qb.name}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                            <InputError message={createForm.errors.question_bank_id} />
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Start Time</Label>
+                                <Input type="datetime-local" value={createForm.data.start_time} onChange={(e) => createForm.setData('start_time', e.target.value)} />
+                                <InputError message={createForm.errors.start_time} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>End Time</Label>
+                                <Input type="datetime-local" value={createForm.data.end_time} onChange={(e) => createForm.setData('end_time', e.target.value)} />
+                                <InputError message={createForm.errors.end_time} />
+                            </div>
+                        </div>
+
+                        <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Duration (minutes)</Label>
+                                <Input type="number" value={createForm.data.duration} onChange={(e) => createForm.setData('duration', parseInt(e.target.value))} />
+                                <InputError message={createForm.errors.duration} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Passing Score</Label>
+                                <Input type="number" value={createForm.data.passing_score} onChange={(e) => createForm.setData('passing_score', parseInt(e.target.value))} />
+                                <InputError message={createForm.errors.passing_score} />
+                            </div>
+                        </div>
+
+                         <div className="grid gap-4 md:grid-cols-2">
+                            <div className="space-y-2">
+                                <Label>Max Attempts (Empty for unlimited)</Label>
+                                <Input type="number" min="1" value={createForm.data.max_attempts || ''} onChange={(e) => createForm.setData('max_attempts', e.target.value ? parseInt(e.target.value) : null)} />
+                                <InputError message={createForm.errors.max_attempts} />
+                            </div>
+
+                            <TimerTypeSelector
+                                value={createForm.data.timer_type}
+                                onValueChange={(v) => createForm.setData('timer_type', v)}
+                                timerTypes={timerTypes}
+                                error={createForm.errors.timer_type}
+                            />
+                        </div>
+
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="create_is_randomized" checked={createForm.data.is_randomized} onCheckedChange={(c) => createForm.setData('is_randomized', !!c)} />
+                                <label htmlFor="create_is_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Questions</label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="create_is_answer_randomized" checked={createForm.data.is_answer_randomized} onCheckedChange={(c) => createForm.setData('is_answer_randomized', !!c)} />
+                                <label htmlFor="create_is_answer_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Answer Options</label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="create_show_result_on_finish" checked={createForm.data.show_result_on_finish} onCheckedChange={(c) => createForm.setData('show_result_on_finish', !!c)} />
+                                <label htmlFor="create_show_result_on_finish" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Show Result on Finish</label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="create_is_published" checked={createForm.data.is_published} onCheckedChange={(c) => createForm.setData('is_published', !!c)} />
+                                <label htmlFor="create_is_published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Publish Exam</label>
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
+                            <Button type="submit" disabled={createForm.processing}>Create Exam</Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </AppLayout >
     );
 }

@@ -13,9 +13,7 @@ interface Exam {
     subject: {
         name: string;
     };
-    grade: {
-        name: string;
-    };
+    grade: string;
 }
 
 interface DashboardProps {
@@ -115,7 +113,7 @@ export default function Dashboard({ activeExams, stats, recentResults }: Dashboa
                                                     <span className="rounded-md bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-600 dark:bg-blue-900/40 dark:text-blue-400 uppercase tracking-tight">
                                                         {exam.subject.name}
                                                     </span>
-                                                    <span className="text-xs text-muted-foreground font-medium">• {exam.grade.name}</span>
+                                                    <span className="text-xs text-muted-foreground font-medium">• {exam.grade}</span>
                                                 </div>
                                                 <h4 className="text-lg font-bold text-slate-900 dark:text-slate-100">{exam.title}</h4>
                                                 <div className="mt-2 flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -131,8 +129,8 @@ export default function Dashboard({ activeExams, stats, recentResults }: Dashboa
                                             </div>
 
                                             <button className={`flex h-12 items-center gap-2 rounded-xl px-6 text-sm font-bold transition-all ${exam.has_started
-                                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
-                                                    : 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                                                ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                                                : 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
                                                 }`}>
                                                 {exam.has_started ? 'Continue Exam' : 'Start Exam'}
                                             </button>
