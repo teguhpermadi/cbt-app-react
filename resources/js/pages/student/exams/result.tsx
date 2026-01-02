@@ -3,9 +3,9 @@ import { Head, Link } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Home, ArrowLeft } from 'lucide-react';
-import 'katex/dist/katex.min.css';
-import renderMathInElement from 'katex/dist/contrib/auto-render';
+import { Home, ArrowLeft, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
+import MathRenderer from "@/components/app/questions/MathRenderer";
 
 interface ResultProps {
     exam: any;
@@ -52,10 +52,10 @@ export default function Result({ exam, session, questions, total_score }: Result
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="flex flex-col gap-3">
-                            <Link href="/student/dashboard">
+                            <Link href="/student/results">
                                 <Button variant="outline" className="w-full gap-2">
                                     <Home className="w-4 h-4" />
-                                    Kembali ke Dashboard
+                                    Kembali ke Riwayat Ujian
                                 </Button>
                             </Link>
                         </CardContent>
@@ -76,20 +76,23 @@ export default function Result({ exam, session, questions, total_score }: Result
                                         <span className="text-sm font-medium text-slate-500 uppercase tracking-wider">{q.type}</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <Badge variant={q.is_correct ? 'default' : q.type === 'essay' ? 'secondary' : 'destructive'}>
-                                            {q.type === 'essay' ? 'Sedang Ditinjau' : (q.is_correct ? 'Benar' : 'Salah')}
-                                        </Badge>
+                                        {q.is_correct === true && <Badge className="bg-green-100 text-green-800"><CheckCircle className="mr-1 h-3 w-3" /> Benar</Badge>}
+                                        {q.is_correct === false && q.type !== 'essay' && <Badge variant="destructive"><XCircle className="mr-1 h-3 w-3" /> Salah</Badge>}
+                                        {q.type === 'essay' && <Badge variant="secondary"><HelpCircle className="mr-1 h-3 w-3" /> Sedang Ditinjau</Badge>}
+
                                         {q.type !== 'essay' && (
-                                            <span className="text-sm font-bold text-slate-700">
+                                            <Badge variant="outline" className="font-bold border-slate-300">
                                                 +{q.score_earned} Poin
-                                            </span>
+                                            </Badge>
                                         )}
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-4 space-y-4">
                                 {/* Question Content */}
-                                <MathContent content={q.content} className="prose prose-sm max-w-none" />
+                                <div className="prose prose-sm max-w-none">
+                                    <MathRenderer content={q.content} />
+                                </div>
 
                                 {q.media_url && (
                                     <div className="rounded-lg overflow-hidden border">
@@ -101,18 +104,19 @@ export default function Result({ exam, session, questions, total_score }: Result
                                     </div>
                                 )}
 
-                                <div className="grid md:grid-cols-2 gap-4 pt-2">
-                                    <div className="space-y-2">
-                                        <span className="text-xs font-semibold text-slate-500 uppercase">Jawaban Anda</span>
-                                        <div className={`p-3 rounded-lg border text-sm ${q.is_correct ? 'bg-green-50 border-green-200 text-green-800' : (q.type === 'essay' ? 'bg-slate-50 border-slate-200' : 'bg-red-50 border-red-200 text-red-800')}`}>
-                                            {formatAnswer(q.student_answer)}
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <span className="text-xs font-semibold text-slate-500 uppercase">Kunci Jawaban</span>
-                                        <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800 text-sm">
-                                            {formatAnswer(q.key_answer)}
+                                <div className="grid gap-4 pt-2">
+                                    <div className="rounded-md border p-3 bg-muted/50">
+                                        <div className="text-xs font-semibold uppercase text-muted-foreground mb-2">Jawaban Siswa</div>
+                                        <div className="text-sm">
+                                            <PreviewStudentAnswer
+                                                type={q.type}
+                                                options={q.options}
+                                                studentAnswer={q.student_answer}
+                                                keyAnswer={q.key_answer}
+                                                showMedia={false}
+                                                showKeyAnswer={true}
+                                                showStudentAnswer={true}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -123,45 +127,4 @@ export default function Result({ exam, session, questions, total_score }: Result
             </div >
         </div >
     );
-}
-
-function formatAnswer(answer: any): React.ReactNode {
-    if (answer === null || answer === undefined) return '-';
-
-    if (typeof answer === 'object') {
-        // Handle matching pairs specific case if it looks like {L1: "...", ...}
-        // or just general object stringification
-        if (Array.isArray(answer)) {
-            return answer.join(', ');
-        }
-
-        // Pretty print object
-        return (
-            <pre className="whitespace-pre-wrap font-mono text-xs">
-                {JSON.stringify(answer, null, 2)}
-            </pre>
-        );
-    }
-
-    return String(answer);
-}
-
-function MathContent({ content, className }: { content: string, className?: string }) {
-    const ref = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (ref.current) {
-            renderMathInElement(ref.current, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '$', right: '$', display: false },
-                    { left: '\\(', right: '\\)', display: false },
-                    { left: '\\[', right: '\\]', display: true }
-                ],
-                throwOnError: false
-            });
-        }
-    }, [content]);
-
-    return <div ref={ref} className={className} dangerouslySetInnerHTML={{ __html: content || '' }} />;
 }

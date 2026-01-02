@@ -101,6 +101,7 @@ class ExamResultController extends Controller
                 'type' => $question->question_type,
                 'media_url' => $question->media_path ? asset('storage/' . $question->media_path) : null,
                 'explanation' => $question->explanation ?? null,
+                'options' => $question->options,
             ];
         });
 
