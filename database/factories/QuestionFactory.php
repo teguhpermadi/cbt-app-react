@@ -227,20 +227,22 @@ class QuestionFactory extends Factory
     private function createNumericalInputOption(Question $question): void
     {
         $answers = [
-            ['answer' => 1.15, 'tolerance' => 0.01, 'unit' => null],
-            ['answer' => 9, 'tolerance' => 0.01, 'unit' => null],
-            ['answer' => 6, 'tolerance' => 0.01, 'unit' => 'cm²'],
-            ['answer' => 1, 'tolerance' => 0.01, 'unit' => null],
-            ['answer' => 5, 'tolerance' => 0.01, 'unit' => null],
-            ['answer' => 27, 'tolerance' => 0.01, 'unit' => 'cm³'],
+            '$10$',
+            '$-5$',
+            '$\frac{1}{2}$',
+            '$1.5$',
+            '$\sqrt{25}$',
+            '$2^3$',
+            '$\pi$',
+            '$\sin(90^\circ)$',
+            '$\frac{3}{4}$',
+            '$100$',
         ];
 
         $selected = $this->faker->randomElement($answers);
         $option = Option::createNumericalInputOption(
             $question->id,
-            $selected['answer'],
-            $selected['tolerance'],
-            $selected['unit']
+            $selected
         );
 
         if (extension_loaded('gd')) {

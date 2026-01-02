@@ -273,13 +273,10 @@ class Option extends Model implements HasMedia
     /**
      * Create option untuk Numerical Input
      * 
-     * @param string $questionId
-     * @param float $correctAnswer
-     * @param float $tolerance
-     * @param string|null $unit
+     * @param string|float $correctAnswer
      * @return Option
      */
-    public static function createNumericalInputOption(string $questionId, float $correctAnswer, float $tolerance = 0, ?string $unit = null)
+    public static function createNumericalInputOption(string $questionId, string|float $correctAnswer)
     {
         return self::create([
             'question_id' => $questionId,
@@ -288,8 +285,6 @@ class Option extends Model implements HasMedia
             'order' => 0,
             'is_correct' => true,
             'metadata' => [
-                'tolerance' => $tolerance,
-                'unit' => $unit,
                 'correct_answer' => $correctAnswer,
             ],
         ]);
