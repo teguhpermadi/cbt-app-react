@@ -1,4 +1,1 @@
-Exam::find('01kdpgw4aa2zqt75vv4kxbj252');
-Exam::find('01kdpgw4aa2zqt75vv4kxbj252')->load('examSession');
-Exam::find('01kdpgw4aa2zqt75vv4kxbj252')->load('examSessions');
-Exam::find('01kdpgw4aa2zqt75vv4kxbj252')->load('examSessions.details');
+Question::find('01ke0bxnc8cy5r08sqp6rvwb0y')->load('options')

@@ -5,12 +5,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Image as ImageIcon, X } from 'lucide-react';
 import { Option, OptionEditorProps } from './types';
+import { MathField } from '@/components/ui/math-field';
 
 export default function OptionEditorNumerical({ options, onChange }: OptionEditorProps) {
 
     // Find existing or create one default option
     const numOption = options[0] || { option_key: 'NUM', content: '', is_correct: true, order: 0, metadata: {}, media_url: null, media_file: null };
-    const meta = numOption.metadata || {};
 
     const updateOptionFull = (newOpt: Option) => {
         const newOpts = [...options];
@@ -19,14 +19,10 @@ export default function OptionEditorNumerical({ options, onChange }: OptionEdito
         onChange(newOpts);
     };
 
-    const updateNum = (field: string, val: any, isMeta = false) => {
-        let newOpt = { ...numOption };
-        if (isMeta) {
-            newOpt.metadata = { ...meta, [field]: val };
-        } else {
-            // @ts-ignore
-            newOpt[field] = val;
-        }
+    const updateContent = (val: string) => {
+        let newOpt = { ...numOption, content: val };
+        // Sync metadata correct_answer as well if needed, or just rely on content
+        newOpt.metadata = { ...newOpt.metadata, correct_answer: val };
         updateOptionFull(newOpt);
     };
 
@@ -45,35 +41,21 @@ export default function OptionEditorNumerical({ options, onChange }: OptionEdito
 
     return (
         <Card>
-            <CardHeader><CardTitle className="text-base">Jawaban Angka</CardTitle></CardHeader>
+            <CardHeader><CardTitle className="text-base">Jawaban Angka (Rumus Matematika)</CardTitle></CardHeader>
             <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                        <Label>Jawaban Benar (Angka)</Label>
-                        <Input
-                            type="number"
-                            step="any"
-                            value={numOption.content}
-                            onChange={(e) => updateNum('content', e.target.value)}
-                        />
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Toleransi (+/-)</Label>
-                        <Input
-                            type="number"
-                            step="any"
-                            value={meta.tolerance || 0}
-                            onChange={(e) => updateNum('tolerance', parseFloat(e.target.value), true)}
-                        />
-                    </div>
-                </div>
                 <div className="space-y-2">
-                    <Label>Satuan (Opsional)</Label>
-                    <Input
-                        value={meta.unit || ''}
-                        onChange={(e) => updateNum('unit', e.target.value, true)}
-                        placeholder="Contoh: cm, kg, m²"
-                    />
+                    <Label>Jawaban Benar</Label>
+                    <div className="border rounded-md p-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
+                        <MathField
+                            value={numOption.content}
+                            onChange={updateContent}
+                            placeholder="Ketik jawaban atau rumus matematika..."
+                            className="w-full min-h-[3rem]"
+                        />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                        Gunakan keyboard matematika virtual yang muncul untuk memasukkan simbol khusus.
+                    </p>
                 </div>
 
                 {/* Media Upload */}
