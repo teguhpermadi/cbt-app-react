@@ -2,11 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, XCircle, HelpCircle, Clock, Calendar, AlertCircle } from 'lucide-react';
 import { format, differenceInMinutes, differenceInSeconds } from 'date-fns';
-import PreviewStudentAnswerMultipleChoice from "@/components/app/questions/results/PreviewStudentAnswerMultipleChoice";
-import PreviewStudentAnswerMultipleSelection from "@/components/app/questions/results/PreviewStudentAnswerMultipleSelection";
-import PreviewStudentAnswerMatching from "@/components/app/questions/results/PreviewStudentAnswerMatching";
-import PreviewStudentAnswerTrueFalse from "@/components/app/questions/results/PreviewStudentAnswerTrueFalse";
-import PreviewStudentAnswerOrdering from "@/components/app/questions/results/PreviewStudentAnswerOrdering";
+import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
 
 interface ExamSessionDetailProps {
     session: any;
@@ -116,117 +112,21 @@ export default function ExamSessionDetail({ session }: ExamSessionDetailProps) {
                             <CardDescription dangerouslySetInnerHTML={{ __html: detail.exam_question.content }} />
                         </CardHeader>
                         <CardContent>
-                            <div className="grid gap-4 md:grid-cols-2">
+                            <div className="grid gap-4">
                                 <div className="rounded-md border p-3 bg-muted/50">
                                     <div className="text-xs font-semibold uppercase text-muted-foreground mb-2">Student Answer</div>
                                     <div className="text-sm">
                                         {/* jawaban siswa */}
-                                        {detail.exam_question.question_type === 'multiple_choice' ? (
-                                            <PreviewStudentAnswerMultipleChoice
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={true}
-                                            />
-                                        ) : detail.exam_question.question_type === 'multiple_selection' ? (
-                                            <PreviewStudentAnswerMultipleSelection
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={true}
-                                            />
-                                        ) : detail.exam_question.question_type === 'true_false' ? (
-                                            <PreviewStudentAnswerTrueFalse
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={true}
-                                            />
-                                        ) : detail.exam_question.question_type === 'ordering' ? (
-                                            <PreviewStudentAnswerOrdering
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={true}
-                                            />
-                                        ) : detail.exam_question.question_type === 'matching' ? (
-                                            <PreviewStudentAnswerMatching
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={true}
-                                            />
-                                        ) : (
-                                            typeof detail.student_answer === 'object' ? JSON.stringify(detail.student_answer) : (detail.student_answer || '-')
-                                        )}
+                                        <PreviewStudentAnswer
+                                            type={detail.exam_question.question_type}
+                                            options={detail.exam_question.options}
+                                            studentAnswer={detail.student_answer}
+                                            keyAnswer={detail.exam_question.key_answer}
+                                            showMedia={false}
+                                            showKeyAnswer={true}
+                                            showStudentAnswer={true}
+                                        />
                                     </div>
-                                </div>
-                                <div className="rounded-md border p-3 bg-green-50 dark:bg-green-950/20">
-                                    <div className="text-xs font-semibold uppercase text-green-700 dark:text-green-400 mb-2">Key Answer</div>
-                                    <div className="text-sm">
-                                        {/* jawaban key */}
-                                        {detail.exam_question.question_type === 'multiple_choice' ? (
-                                            <PreviewStudentAnswerMultipleChoice
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={false}
-                                            />
-                                        ) : detail.exam_question.question_type === 'multiple_selection' ? (
-                                            <PreviewStudentAnswerMultipleSelection
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={false}
-                                            />
-                                        ) : detail.exam_question.question_type === 'true_false' ? (
-                                            <PreviewStudentAnswerTrueFalse
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={false}
-                                            />
-                                        ) : detail.exam_question.question_type === 'ordering' ? (
-                                            <PreviewStudentAnswerOrdering
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={false}
-                                            />
-                                        ) : detail.exam_question.question_type === 'matching' ? (
-                                            <PreviewStudentAnswerMatching
-                                                options={detail.exam_question.options}
-                                                studentAnswer={detail.student_answer}
-                                                keyAnswer={detail.exam_question.key_answer}
-                                                showMedia={false}
-                                                showKeyAnswer={true}
-                                                showStudentAnswer={false}
-                                            />
-                                        ) : (
-                                            typeof detail.student_answer === 'object' ? JSON.stringify(detail.student_answer) : (detail.student_answer || '-')
-                                        )}
-                                    </div>
-                                </div>
-                                <div>
-                                    {JSON.stringify(detail)}
                                 </div>
                             </div>
                         </CardContent>
