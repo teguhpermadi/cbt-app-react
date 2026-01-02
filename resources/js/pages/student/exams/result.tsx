@@ -105,17 +105,14 @@ export default function Result({ exam, session, questions, total_score }: Result
                                     <div className="space-y-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase">Jawaban Anda</span>
                                         <div className={`p-3 rounded-lg border text-sm ${q.is_correct ? 'bg-green-50 border-green-200 text-green-800' : (q.type === 'essay' ? 'bg-slate-50 border-slate-200' : 'bg-red-50 border-red-200 text-red-800')}`}>
-                                            {q.type === 'multiple_choice'
-                                                ? (typeof q.student_answer === 'object' ? JSON.stringify(q.student_answer) : q.student_answer)
-                                                : (q.student_answer || '-')
-                                            }
+                                            {formatAnswer(q.student_answer)}
                                         </div>
                                     </div>
 
                                     <div className="space-y-2">
                                         <span className="text-xs font-semibold text-slate-500 uppercase">Kunci Jawaban</span>
                                         <div className="p-3 rounded-lg border bg-blue-50 border-blue-200 text-blue-800 text-sm">
-                                            {typeof q.key_answer === 'object' ? JSON.stringify(q.key_answer) : q.key_answer}
+                                            {formatAnswer(q.key_answer)}
                                         </div>
                                     </div>
                                 </div>
@@ -123,9 +120,30 @@ export default function Result({ exam, session, questions, total_score }: Result
                         </Card>
                     ))}
                 </div>
-            </div>
-        </div>
+            </div >
+        </div >
     );
+}
+
+function formatAnswer(answer: any): React.ReactNode {
+    if (answer === null || answer === undefined) return '-';
+
+    if (typeof answer === 'object') {
+        // Handle matching pairs specific case if it looks like {L1: "...", ...}
+        // or just general object stringification
+        if (Array.isArray(answer)) {
+            return answer.join(', ');
+        }
+
+        // Pretty print object
+        return (
+            <pre className="whitespace-pre-wrap font-mono text-xs">
+                {JSON.stringify(answer, null, 2)}
+            </pre>
+        );
+    }
+
+    return String(answer);
 }
 
 function MathContent({ content, className }: { content: string, className?: string }) {
