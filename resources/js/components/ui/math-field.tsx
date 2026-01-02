@@ -20,11 +20,13 @@ declare global {
     }
 }
 
-export const MathField = ({ value, onChange, placeholder, readOnly, className, options }: MathFieldProps) => {
-    const mfRef = useRef<MathfieldElement>(null);
+export const MathField = React.forwardRef<MathfieldElement, MathFieldProps>(({ value, onChange, placeholder, readOnly, className, options }, ref) => {
+    const internalRef = useRef<MathfieldElement>(null);
+
+    React.useImperativeHandle(ref, () => internalRef.current as MathfieldElement);
 
     useEffect(() => {
-        const mf = mfRef.current;
+        const mf = internalRef.current;
         if (!mf) return;
 
         // Apply options
@@ -55,27 +57,31 @@ export const MathField = ({ value, onChange, placeholder, readOnly, className, o
 
     // Handle updates when value prop changes externally
     useEffect(() => {
-        const mf = mfRef.current;
+        const mf = internalRef.current;
         if (mf && value !== undefined && mf.value !== value) {
-            mf.setValue(value);
+            mf.setValue(value, { suppressChangeNotifications: true });
         }
     }, [value]);
 
     return (
         <math-field
-            ref={mfRef}
+            ref={internalRef}
             class={className}
             style={{
-                width: '100%',
-                padding: '0.5rem',
+                display: 'inline-block',
+                width: 'auto', // Allow it to grow
+                minWidth: '20px',
+                padding: '0.2rem 0.5rem',
                 borderRadius: 'calc(var(--radius) - 2px)',
-                border: '1px solid hsl(var(--input))',
-                backgroundColor: 'hsl(var(--background))',
+                border: className?.includes('border-0') ? 'none' : '1px solid hsl(var(--input))',
+                backgroundColor: className?.includes('bg-transparent') ? 'transparent' : 'hsl(var(--background))',
                 color: 'hsl(var(--foreground))',
-                fontSize: '1.2em'
+                fontSize: '1em',
+                ...((options as any)?.style || {})
             }}
         >
             {value}
         </math-field>
     );
-};
+});
+MathField.displayName = "MathField";

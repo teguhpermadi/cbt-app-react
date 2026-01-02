@@ -1,5 +1,6 @@
 import { AnswerOptionProps } from "../types";
 import { MathField } from "@/components/ui/math-field";
+import MathRichTextEditor from "@/components/ui/rich-text/MathRichTextEditor";
 
 export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = true }: AnswerOptionProps) {
     // Usually only one option record for numerical, storing answer in metadata
@@ -38,9 +39,9 @@ export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = t
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-muted-foreground">Rumus / Jawaban</span>
                             <div className="border rounded bg-white dark:bg-slate-950 p-2">
-                                <MathField
+                                <MathRichTextEditor
                                     value={correctAnswer}
-                                    readOnly
+                                    readOnly={true}
                                     className="border-none bg-transparent"
                                 />
                             </div>

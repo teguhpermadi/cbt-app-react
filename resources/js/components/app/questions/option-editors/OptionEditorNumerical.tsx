@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Image as ImageIcon, X } from 'lucide-react';
 import { Option, OptionEditorProps } from './types';
-import { MathField } from '@/components/ui/math-field';
+import MathRichTextEditor from '@/components/ui/rich-text/MathRichTextEditor';
 
 export default function OptionEditorNumerical({ options, onChange }: OptionEditorProps) {
 
@@ -46,16 +46,13 @@ export default function OptionEditorNumerical({ options, onChange }: OptionEdito
                 <div className="space-y-2">
                     <Label>Jawaban Benar</Label>
                     <div className="border rounded-md p-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                        <MathField
+                        <MathRichTextEditor
                             value={numOption.content}
                             onChange={updateContent}
                             placeholder="Ketik jawaban atau rumus matematika..."
                             className="w-full min-h-[3rem]"
                         />
                     </div>
-                    <p className="text-xs text-muted-foreground">
-                        Gunakan keyboard matematika virtual yang muncul untuk memasukkan simbol khusus.
-                    </p>
                 </div>
 
                 {/* Media Upload */}
