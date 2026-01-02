@@ -15,8 +15,8 @@ import { cn } from '@/lib/utils';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import ExamManualCorrectionController from '@/actions/App/Http/Controllers/Admin/ExamManualCorrectionController';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
-import OptionViewer from '@/components/app/questions/option-viewers/OptionViewer';
 import MathRenderer from '@/components/app/questions/MathRenderer';
+import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
 
 interface Question {
     id: string;
@@ -198,7 +198,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
 
                 <div className="flex-1 overflow-hidden flex">
                     {/* Left Column: Questions List */}
-                    <aside className="w-1/3 max-w-sm border-r bg-muted/10 flex flex-col">
+                    <aside className="w-1/4 max-w-sm border-r bg-muted/10 flex flex-col">
                         <div className="p-4 border-b font-medium bg-background/50 backdrop-blur">
                             Questions ({questions.length})
                         </div>
@@ -345,13 +345,14 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                                 }
 
                                                                 return (
-                                                                    <OptionViewer
-                                                                        type={selectedQuestion.question_type.toLowerCase()}
+                                                                    <PreviewStudentAnswer
+                                                                        type={selectedQuestion.question_type}
                                                                         options={selectedQuestion.options}
-                                                                        value={sanitizedValue}
-                                                                        onChange={() => { }}
-                                                                        disabled={true}
+                                                                        studentAnswer={sanitizedValue}
+                                                                        keyAnswer={selectedQuestion.key_answer}
                                                                         showMedia={false}
+                                                                        showKeyAnswer={true}
+                                                                        showStudentAnswer={true}
                                                                     />
                                                                 );
                                                             })()}
@@ -359,7 +360,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                     </div>
 
                                                     {/* Scoring Controls */}
-                                                    <div className="w-[300px] border-l pl-6 space-y-4 flex flex-col justify-center">
+                                                    <div className="w-[300px] border-l pl-6 space-y-4 flex flex-col">
                                                         <div className="space-y-2">
                                                             <Label>Score (Max: {selectedQuestion.score_value})</Label>
                                                             <div className="flex items-center gap-2">
