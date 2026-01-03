@@ -19,18 +19,18 @@ import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, Clipboard
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        href: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        href: 'https://laravel.com/docs/starter-kits#react',
-        icon: BookOpen,
-    },
-];
+// const footerNavItems: NavItem[] = [
+//     {
+//         title: 'Repository',
+//         href: 'https://github.com/laravel/react-starter-kit',
+//         icon: Folder,
+//     },
+//     {
+//         title: 'Documentation',
+//         href: 'https://laravel.com/docs/starter-kits#react',
+//         icon: BookOpen,
+//     },
+// ];
 
 export function AppSidebar() {
     const { auth } = usePage<SharedData>().props;
@@ -67,15 +67,16 @@ export function AppSidebar() {
             icon: GraduationCap,
         },
         {
-            title: 'Exam Management',
-            href: examsIndex(),
-            icon: ClipboardList,
-        },
-        {
             title: 'Bank Soal',
             href: '/admin/question-banks',
             icon: BookOpen,
         },
+        {
+            title: 'Exam Management',
+            href: examsIndex(),
+            icon: ClipboardList,
+        }
+
     ];
 
     const studentNavItems: NavItem[] = [
@@ -126,7 +127,7 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter className="p-4">
-                <NavFooter items={footerNavItems} className="mb-4" />
+                {/* <NavFooter items={footerNavItems} className="mb-4" /> */}
                 <div className="rounded-2xl bg-white/50 p-1 shadow-sm border border-slate-100 dark:bg-slate-950/50 dark:border-slate-800">
                     <NavUser />
                 </div>
