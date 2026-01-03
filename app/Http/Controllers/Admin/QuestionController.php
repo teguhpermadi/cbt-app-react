@@ -283,4 +283,23 @@ class QuestionController extends Controller
 
         return back()->with('success', 'Soal berhasil dihapus.');
     }
+
+    /**
+     * Search tags.
+     */
+    public function searchTags(Request $request)
+    {
+        $query = $request->query('query');
+        // Spatie tags store names as JSON if translatable, but if using simple tags...
+        // Assuming default config. If translatable, 'name->en' or similar.
+        // containing() scope usually handles it.
+        // We pluck 'name' which returns array/string.
+        // Frontend expects array of strings.
+
+        $tags = \Spatie\Tags\Tag::containing($query)->take(10)->get();
+
+        return $tags->map(function ($tag) {
+            return $tag->name;
+        });
+    }
 }

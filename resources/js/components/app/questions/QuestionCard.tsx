@@ -8,6 +8,7 @@ import renderMathInElement from "katex/dist/contrib/auto-render";
 import { DifficultySelector } from "./DifficultySelector";
 import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
+import { TagAutocomplete } from "./TagAutocomplete";
 
 import AnswerOptions from "./AnswerOptions";
 import { Question, QUESTION_TYPE_LABELS } from "./types";
@@ -173,21 +174,14 @@ export default function QuestionCard({
                     </div>
                     {!readOnly && (
                         <div className="flex w-full max-w-xs items-center space-x-2">
-                            <Input
-                                placeholder="Add tag..."
-                                className="h-8 text-sm"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        const val = e.currentTarget.value.trim();
-                                        if (val) {
-                                            const currentTags = question.tags?.map(t =>
-                                                typeof t.name === 'object' ? (t.name['en'] || t.name['id'] || Object.values(t.name)[0]) : t.name
-                                            ) || [];
-                                            if (!currentTags.includes(val)) {
-                                                handleValueChange('tags', [...currentTags, val]);
-                                            }
-                                            e.currentTarget.value = '';
+                            <TagAutocomplete
+                                onSelect={(val) => {
+                                    if (val) {
+                                        const currentTags = question.tags?.map(t =>
+                                            typeof t.name === 'object' ? (t.name['en'] || t.name['id'] || Object.values(t.name)[0]) : t.name
+                                        ) || [];
+                                        if (!currentTags.includes(val)) {
+                                            handleValueChange('tags', [...currentTags, val]);
                                         }
                                     }
                                 }}
