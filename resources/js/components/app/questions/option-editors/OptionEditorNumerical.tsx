@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Image as ImageIcon, X } from 'lucide-react';
 import { Option, OptionEditorProps } from './types';
-import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
+import { MathField } from '@/components/ui/math-field';
 
 export default function OptionEditorNumerical({ options, onChange }: OptionEditorProps) {
 
@@ -45,14 +45,16 @@ export default function OptionEditorNumerical({ options, onChange }: OptionEdito
             <CardContent className="space-y-4">
                 <div className="space-y-2">
                     <Label>Jawaban Benar</Label>
-                    <div className="border rounded-md p-1 focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2">
-                        <RichTextEditor
-                            value={numOption.content}
-                            onChange={updateContent}
-                            placeholder="Ketik jawaban atau rumus matematika..."
-                            className="w-full min-h-[3rem]"
-                        />
-                    </div>
+                    <MathField
+                        value={numOption.content}
+                        onChange={updateContent}
+                        placeholder="Ketik jawaban atau rumus matematika..."
+                        className="w-full p-4 text-lg border rounded-lg bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 outline-none"
+                        // options={{
+                        //     smartMode: true,
+                        //     mathModeSpace: '\\:',
+                        // }}
+                    />
                 </div>
 
                 {/* Media Upload */}

@@ -4,9 +4,10 @@ import PreviewStudentAnswerMultipleSelection from "./PreviewStudentAnswerMultipl
 import PreviewStudentAnswerMatching from "./PreviewStudentAnswerMatching";
 import PreviewStudentAnswerTrueFalse from "./PreviewStudentAnswerTrueFalse";
 import PreviewStudentAnswerOrdering from "./PreviewStudentAnswerOrdering";
+import PreviewStudentAnswerNumericalInput from "./PreviewStudentAnswerNumericalInput";
 
 interface PreviewStudentAnswerProps {
-    type: 'multiple_choice' | 'multiple_selection' | 'true_false' | 'matching' | 'ordering' | string;
+    type: 'multiple_choice' | 'multiple_selection' | 'true_false' | 'matching' | 'ordering' | 'numerical_input' | string;
     options: any;
     studentAnswer: any;
     keyAnswer: any;
@@ -76,6 +77,15 @@ export default function PreviewStudentAnswer({
                     studentAnswer={studentAnswer}
                     keyAnswer={keyAnswer}
                     showMedia={showMedia}
+                    showKeyAnswer={showKeyAnswer}
+                    showStudentAnswer={showStudentAnswer}
+                />
+            );
+        case 'numerical_input':
+            return (
+                <PreviewStudentAnswerNumericalInput
+                    studentAnswer={studentAnswer}
+                    keyAnswer={keyAnswer}
                     showKeyAnswer={showKeyAnswer}
                     showStudentAnswer={showStudentAnswer}
                 />

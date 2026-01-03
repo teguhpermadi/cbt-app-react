@@ -1,6 +1,6 @@
+import React from 'react';
+import { MathField } from '@/components/ui/math-field';
 import { AnswerOptionProps } from "../types";
-import { MathField } from "@/components/ui/math-field";
-import RichTextEditor from "@/components/ui/rich-text/RichTextEditor";
 
 export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = true }: AnswerOptionProps) {
     // Usually only one option record for numerical, storing answer in metadata
@@ -12,15 +12,6 @@ export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = t
 
     return (
         <div className="space-y-4">
-            {/* <div className="flex items-center gap-2">
-                <MathField
-                    value=""
-                    placeholder="Area jawaban siswa..."
-                    readOnly
-                    className="flex-1 min-h-[3rem]"
-                />
-            </div> */}
-
             {/* Context/Explanation Image */}
             {(option.media_url || option.media_path) && (
                 <div className="rounded-lg overflow-hidden border border-border max-w-xs">
@@ -38,13 +29,15 @@ export default function AnswerOptionsNumericalInput({ options, showKeyAnswer = t
                     <div className="space-y-2">
                         <div className="flex flex-col gap-1">
                             <span className="text-xs text-muted-foreground">Rumus / Jawaban</span>
-                            <div className="border rounded bg-white dark:bg-slate-950 p-2">
-                                <RichTextEditor
-                                    value={correctAnswer}
-                                    readOnly={true}
-                                    className="border-none bg-transparent"
-                                />
-                            </div>
+                            <MathField
+                                value={correctAnswer}
+                                readOnly={true}
+                                className="w-full p-3 text-base border rounded-lg bg-white dark:bg-slate-950"
+                                // options={{
+                                //     smartMode: true,
+                                //     mathModeSpace: '\\:',
+                                // }}
+                            />
                         </div>
                     </div>
                 </div>
