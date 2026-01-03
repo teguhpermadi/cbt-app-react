@@ -11,7 +11,11 @@ import { cn } from '@/lib/utils';
 
 export const ArabicNodeView = (props: NodeViewProps) => {
     const [open, setOpen] = useState(false);
-    const [input, setInput] = useState(props.node.attrs.text || '');
+    const [input, setInput] = useState(props.node.attrs.text || ''); // Final saved text
+    const [draftText, setDraftText] = useState(''); // Draft text while editing
+    const [cursorPosition, setCursorPosition] = useState(0); // Track cursor position
+    const [layoutName, setLayoutName] = useState('default'); // Track keyboard layout
+    const lastPressedButton = useRef<string>(''); // Track last pressed button
     const isEditable = props.editor.isEditable;
     const nodeRef = useRef(null); // Ref for Draggable to avoid strict mode warnings
     const keyboardRef = useRef<any>(null); // Ref for Keyboard
@@ -35,7 +39,8 @@ export const ArabicNodeView = (props: NodeViewProps) => {
     // Sync keyboard internal buffer when opening
     useEffect(() => {
         if (open && keyboardRef.current) {
-            keyboardRef.current.setInput(input);
+            // Load draft with current saved text
+            keyboardRef.current.setInput(draftText);
             // Autofocus input when opened
             setTimeout(() => {
                 inputRef.current?.focus();
@@ -43,84 +48,68 @@ export const ArabicNodeView = (props: NodeViewProps) => {
         }
     }, [open]);
 
-    // Helper to find what character was added/removed
-    const findCharacterDiff = (oldStr: string, newStr: string): { type: 'add' | 'remove' | 'none', char: string } => {
-        if (newStr.length > oldStr.length) {
-            // Character was added - find it
-            for (let i = 0; i < newStr.length; i++) {
-                if (i >= oldStr.length || newStr[i] !== oldStr[i]) {
-                    return { type: 'add', char: newStr.substring(i, i + (newStr.length - oldStr.length)) };
-                }
-            }
-        } else if (newStr.length < oldStr.length) {
-            return { type: 'remove', char: '' };
-        }
-        return { type: 'none', char: '' };
-    };
-
+    // Use button press to determine what to insert
     const onVirtualChange = (newValue: string) => {
-        // Get ACTUAL cursor position from Input element
-        const cursorPos = inputRef.current?.selectionStart ?? input.length;
+        // Only process if we have a valid button press
+        if (!lastPressedButton.current) {
+            return;
+        }
 
-        // Detect what changed
-        const diff = findCharacterDiff(input, newValue);
+        const button = lastPressedButton.current;
+        lastPressedButton.current = ''; // Reset
 
-        if (diff.type === 'add') {
-            // Manual insertion at cursor position
-            const before = input.substring(0, cursorPos);
-            const after = input.substring(cursorPos);
-            const result = before + diff.char + after;
+        // Check if it's a special key
+        if (button.startsWith('{')) {
+            return; // Special keys handled in handleKeyPress
+        }
 
-            setInput(result);
-            props.updateAttributes({ text: result });
+        // Harakat characters (Arabic diacritics)
+        const harakatChars = ['َ', 'ً', 'ُ', 'ٌ', 'ِ', 'ٍ', 'ْ', 'ّ'];
+        const isHarakat = harakatChars.includes(button);
 
-            // Update keyboard's internal state to match
-            keyboardRef.current?.setInput(result);
+        let before = draftText.substring(0, cursorPosition);
+        const after = draftText.substring(cursorPosition);
 
-            // Move cursor after inserted character
-            const newPos = cursorPos + diff.char.length;
-            setTimeout(() => {
-                inputRef.current?.setSelectionRange(newPos, newPos);
-                inputRef.current?.focus();
-                keyboardRef.current?.setCaretPosition(newPos);
-            }, 0);
-        } else if (diff.type === 'remove') {
-            // Backspace: remove character before cursor
-            if (cursorPos > 0) {
-                const before = input.substring(0, cursorPos - 1);
-                const after = input.substring(cursorPos);
-                const result = before + after;
-
-                setInput(result);
-                props.updateAttributes({ text: result });
-                keyboardRef.current?.setInput(result);
-
-                const newPos = cursorPos - 1;
-                setTimeout(() => {
-                    inputRef.current?.setSelectionRange(newPos, newPos);
-                    inputRef.current?.focus();
-                    keyboardRef.current?.setCaretPosition(newPos);
-                }, 0);
+        // If pressing harakat and previous character is also harakat, replace it
+        if (isHarakat && cursorPosition > 0) {
+            const prevChar = before[before.length - 1];
+            if (harakatChars.includes(prevChar)) {
+                // Replace previous harakat with new one
+                before = before.substring(0, before.length - 1);
             }
         }
+
+        // Insert character at cursor position
+        const result = before + button + after;
+
+        setDraftText(result);
+        keyboardRef.current?.setInput(result);
+
+        // Move cursor after inserted character
+        const newPos = before.length + button.length;
+        setCursorPosition(newPos);
+
+        setTimeout(() => {
+            inputRef.current?.setSelectionRange(newPos, newPos);
+            inputRef.current?.focus();
+            keyboardRef.current?.setCaretPosition(newPos);
+        }, 0);
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
-        setInput(val);
-        props.updateAttributes({ text: val });
+        setDraftText(val);
+        // Update cursor position
+        const pos = e.target.selectionStart || 0;
+        setCursorPosition(pos);
         // Sync keyboard state
         keyboardRef.current?.setInput(val);
-        // Sync caret position after state update
-        setTimeout(() => {
-            const pos = inputRef.current?.selectionStart || 0;
-            keyboardRef.current?.setCaretPosition(pos);
-        }, 0);
     };
 
     const syncCaretPosition = () => {
-        // Helper function to sync caret position from Input to Keyboard
+        // Helper function to sync caret position from Input to state
         const pos = inputRef.current?.selectionStart || 0;
+        setCursorPosition(pos);
         keyboardRef.current?.setCaretPosition(pos);
     };
 
@@ -130,11 +119,48 @@ export const ArabicNodeView = (props: NodeViewProps) => {
     };
 
     const handleKeyPress = (button: string) => {
-        // Sync caret position for arrow keys and special keys only
-        // For regular keys, let the keyboard handle insertion naturally
+        // Special keys that should be handled by keyboard library
+        if (button === "{shift}") {
+            // Toggle layout between default and shift
+            setLayoutName(current => current === 'default' ? 'shift' : 'default');
+            return;
+        }
 
-        if (button === "{enter}" || button === "{escape}") {
-            setOpen(false);
+        // Store the button that was pressed
+        lastPressedButton.current = button;
+
+        if (button === "{enter}") {
+            lastPressedButton.current = '';
+            handleSubmit();
+            return;
+        }
+
+        if (button === "{escape}") {
+            lastPressedButton.current = '';
+            handleCancel();
+            return;
+        }
+
+        if (button === "{bksp}") {
+            lastPressedButton.current = '';
+            // Handle backspace manually
+            if (cursorPosition > 0) {
+                const before = draftText.substring(0, cursorPosition - 1);
+                const after = draftText.substring(cursorPosition);
+                const result = before + after;
+
+                setDraftText(result);
+                keyboardRef.current?.setInput(result);
+
+                const newPos = cursorPosition - 1;
+                setCursorPosition(newPos);
+
+                setTimeout(() => {
+                    inputRef.current?.setSelectionRange(newPos, newPos);
+                    inputRef.current?.focus();
+                    keyboardRef.current?.setCaretPosition(newPos);
+                }, 0);
+            }
             return;
         }
 
@@ -165,7 +191,23 @@ export const ArabicNodeView = (props: NodeViewProps) => {
 
     const toggleOpen = () => {
         if (!isEditable) return;
+        if (!open) {
+            // Opening: initialize draft with current saved text
+            setDraftText(input);
+        }
         setOpen(!open);
+    };
+
+    const handleSubmit = () => {
+        // Apply draft to final state
+        setInput(draftText);
+        props.updateAttributes({ text: draftText });
+        setOpen(false);
+    };
+
+    const handleCancel = () => {
+        // Discard draft and close
+        setOpen(false);
     };
 
     return (
@@ -199,7 +241,7 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                       */}
 
                     <Draggable nodeRef={nodeRef} handle=".drag-handle">
-                        <div ref={nodeRef} className="absolute left-1/2 top-2/3 -translate-x-1/2 bg-background border shadow-2xl rounded-xl w-[650px] max-w-[95vw] p-4 pointer-events-auto cursor-auto">
+                        <div ref={nodeRef} className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-background border shadow-2xl rounded-xl w-[650px] max-w-[95vw] p-4 pointer-events-auto cursor-auto">
                             <div className="flex justify-between items-center mb-3 border-b pb-2 drag-handle cursor-move">
                                 <div className="flex items-center gap-2">
                                     <Move className="h-4 w-4 text-muted-foreground" />
@@ -214,7 +256,7 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                             <div className="mb-4">
                                 <Input
                                     ref={inputRef}
-                                    value={input}
+                                    value={draftText}
                                     onChange={handleInputChange}
                                     onSelect={handleInputSelect}
                                     onMouseUp={handleInputSelect} // Sync on click/drag
@@ -230,17 +272,36 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                                 />
                             </div>
 
+                            {/* Action Buttons */}
+                            <div className="flex gap-2 mb-4">
+                                <Button
+                                    onClick={handleSubmit}
+                                    className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                                    size="lg"
+                                >
+                                    Submit
+                                </Button>
+                                <Button
+                                    onClick={handleCancel}
+                                    variant="outline"
+                                    className="flex-1"
+                                    size="lg"
+                                >
+                                    Cancel
+                                </Button>
+                            </div>
+
                             {/* style font pada keyboard virtual */}
-                            <div className="arabic-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:h-14 [&_.hg-button]:text-2xl [&_.hg-button]:font-arabic [&_.hg-button]:font-semibold">
+                            <div className="arabic-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:h-14 [&_.hg-button]:text-2xl [&_.hg-button]:font-arabic [&_.hg-button]:font-medium">
                                 <Keyboard
                                     keyboardRef={r => (keyboardRef.current = r)}
                                     onChange={onVirtualChange}
                                     onKeyPress={handleKeyPress}
-                                    layoutName="default"
+                                    layoutName={layoutName}
                                     layout={{
                                         default: [
-                                            "1 2 3 4 5 6 7 8 9 0 - =",
-                                            "ض ص ث ق ف غ ع ه خ ح ج د \\",
+                                            "١ ٢ ٣ ٤ ٥ ٦ ٧ ٨ ٩ ٠ - =",
+                                            "ض ص ث ق ف غ ع ه خ ح ج د",
                                             "ش س ي ب ل ا ت ن م ك ط",
                                             "ئ ء ؤ ر لا ى ة و ز ظ",
                                             "َ ً ُ ٌ ِ ٍ ْ ّ",
@@ -249,7 +310,7 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                                         shift: [
                                             "! @ # $ % ^ & * ) ( _ +",
                                             "َ ً ُ ٌ ِ ٍ ْ ّ > < |",
-                                            "~ “ ” [ ] ، / : \" ‘ {enter}",
+                                            "~ “ ” [ ] ، / : \" {enter}",
                                             "{shift} {arrowright} {space} {arrowleft} {bksp}"
                                         ]
                                     }}
