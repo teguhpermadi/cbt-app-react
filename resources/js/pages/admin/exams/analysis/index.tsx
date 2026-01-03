@@ -40,6 +40,7 @@ interface ItemAnalysis {
     discrimination_index: number | null;
     discrimination_status: string | null;
     distractor_analysis: Record<string, DistractorData> | null;
+    analysis_recommendation: string | null;
 }
 
 interface ExamAnalysis {
@@ -277,88 +278,103 @@ export default function AnalysisIndex({ exam, analysis }: Props) {
                                     <CardDescription>Analisis detail per nomor soal.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead className="w-[50px]">No</TableHead>
-                                                <TableHead className="w-[30%]">Konten Soal</TableHead>
-                                                <TableHead>Tipe</TableHead>
-                                                <TableHead>Tingkat Kesulitan (P)</TableHead>
-                                                <TableHead>Daya Beda (D)</TableHead>
-                                                <TableHead>Distribusi Pengecoh</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {analysis.item_analyses && analysis.item_analyses.map((item) => (
-                                                <TableRow key={item.id}>
-                                                    <TableCell className="font-medium align-top pt-4">{item.exam_question?.question_number}</TableCell>
-                                                    <TableCell className="align-top">
-                                                        <div className="border rounded-md overflow-hidden bg-white max-h-[200px] overflow-y-auto">
-                                                            <RichTextEditor
-                                                                value={item.exam_question?.content || 'Konten tidak tersedia'}
-                                                                readOnly
-                                                                className="border-0 min-h-[60px]"
-                                                            />
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="align-top pt-4">
-                                                        <Badge variant="outline">
-                                                            {getQuestionTypeLabel(item.exam_question?.question_type)}
-                                                        </Badge>
-                                                    </TableCell>
-                                                    <TableCell className="align-top pt-4">
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <Badge variant="secondary" className={getDifficultyClass(item.difficulty_index)}>
-                                                                    {item.difficulty_index?.toFixed(2) ?? '-'}
-                                                                </Badge>
+                                    <div className="rounded-md border overflow-x-auto">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow>
+                                                    <TableHead className="w-[50px] min-w-[50px]">No</TableHead>
+                                                    <TableHead className="w-[30%] min-w-[400px]">Konten Soal</TableHead>
+                                                    <TableHead className="min-w-[150px]">Tipe</TableHead>
+                                                    <TableHead className="min-w-[150px]">Tingkat Kesulitan (P)</TableHead>
+                                                    <TableHead className="min-w-[150px]">Daya Beda (D)</TableHead>
+                                                    <TableHead className="min-w-[300px]">Distribusi Pengecoh</TableHead>
+                                                    <TableHead className="min-w-[250px]">Rekomendasi</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {analysis.item_analyses && analysis.item_analyses.map((item) => (
+                                                    <TableRow key={item.id}>
+                                                        <TableCell className="font-medium align-top pt-4">{item.exam_question?.question_number}</TableCell>
+                                                        <TableCell className="align-top">
+                                                            <div className="border rounded-md overflow-hidden bg-white max-h-[200px] overflow-y-auto">
+                                                                <RichTextEditor
+                                                                    value={item.exam_question?.content || 'Konten tidak tersedia'}
+                                                                    readOnly
+                                                                    className="border-0 min-h-[60px]"
+                                                                />
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="align-top pt-4">
+                                                            <Badge variant="outline">
+                                                                {getQuestionTypeLabel(item.exam_question?.question_type)}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="align-top pt-4">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Badge variant="secondary" className={getDifficultyClass(item.difficulty_index)}>
+                                                                        {item.difficulty_index?.toFixed(2) ?? '-'}
+                                                                    </Badge>
+                                                                </div>
                                                                 <span className="text-xs text-muted-foreground">
                                                                     ({getDifficultyLabel(item.difficulty_index)})
                                                                 </span>
                                                             </div>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="align-top pt-4">
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex items-center gap-2">
-                                                                <Badge variant="secondary" className={getDiscriminationClass(item.discrimination_index)}>
-                                                                    {item.discrimination_index?.toFixed(2) ?? '-'}
-                                                                </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="align-top pt-4">
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Badge variant="secondary" className={getDiscriminationClass(item.discrimination_index)}>
+                                                                        {item.discrimination_index?.toFixed(2) ?? '-'}
+                                                                    </Badge>
+                                                                </div>
                                                                 <span className="text-xs text-muted-foreground">
                                                                     ({getDiscriminationLabel(item.discrimination_index)})
                                                                 </span>
+                                                                {/* <span className="text-xs font-medium text-muted-foreground">Status: {item.discrimination_status || '-'}</span> */}
                                                             </div>
-                                                            <span className="text-xs font-medium text-muted-foreground">Status: {item.discrimination_status || '-'}</span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="align-top pt-4">
-                                                        {/* Distractor Mini Visualization */}
-                                                        <div className="flex gap-2 h-16 items-end pb-2">
-                                                            {Object.entries(item.distractor_analysis || {}).map(([key, data]) => (
-                                                                <Tooltip key={key}>
-                                                                    <TooltipTrigger asChild>
-                                                                        <div tabIndex={0} className="flex flex-col items-center group relative cursor-help outline-none">
-                                                                            <div
-                                                                                className={`w-6 rounded-t-lg transition-all hover:opacity-80 ${data.is_key ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`}
-                                                                                style={{ height: `${Math.max(15, data.percent * 0.8)}px` }}
-                                                                            ></div>
-                                                                            <span className={`text-[10px] font-bold mt-1 ${data.is_key ? 'text-green-600' : 'text-slate-500'}`}>{key}</span>
-                                                                        </div>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <div className="text-xs">
-                                                                            <p className="font-bold">Opsi {key} {data.is_key && '(Kunci)'}</p>
-                                                                            <p>Dipilih: <span className="font-semibold text-primary">{data.count} siswa</span> ({data.percent}%)</p>
-                                                                        </div>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            ))}
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
+                                                        </TableCell>
+                                                        <TableCell className="align-top pt-4">
+                                                            {item.exam_question?.question_type === 'essay' ? (
+                                                                <span className="text-muted-foreground italic text-sm">-</span>
+                                                            ) : (
+                                                                /* Distractor Mini Visualization - Vertical Layout */
+                                                                <div className="flex flex-col gap-2 w-full min-w-[180px]">
+                                                                    {Object.entries(item.distractor_analysis || {}).map(([key, data]) => (
+                                                                        <Tooltip key={key}>
+                                                                            <TooltipTrigger asChild>
+                                                                                <div className="flex items-center gap-2 w-full text-xs cursor-help">
+                                                                                    {/* <span className={`font-bold w-4 pr-2 ${data.is_key ? 'text-green-600' : 'text-slate-500'}`}>{key}</span> */}
+                                                                                    <div className="w-1/2 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                                                                        <div
+                                                                                            className={`h-full ${data.is_key ? 'bg-green-500' : 'bg-slate-400 dark:bg-slate-600'}`}
+                                                                                            style={{ width: `${data.percent}%` }}
+                                                                                        />
+                                                                                    </div>
+                                                                                    <span className="w-8 text-right text-muted-foreground">{data.percent}%</span>
+                                                                                </div>
+                                                                            </TooltipTrigger>
+                                                                            <TooltipContent>
+                                                                                <div className="text-xs">
+                                                                                    <p className="font-bold">Opsi {key} {data.is_key && '(Kunci)'}</p>
+                                                                                    <p>Dipilih: <span className="font-semibold text-primary">{data.count} siswa</span> ({data.percent}%)</p>
+                                                                                </div>
+                                                                            </TooltipContent>
+                                                                        </Tooltip>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell className="align-top pt-4">
+                                                            <p className="text-sm text-slate-700 dark:text-slate-300">
+                                                                {item.analysis_recommendation || '-'}
+                                                            </p>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
                                 </CardContent>
                             </Card>
                         </>

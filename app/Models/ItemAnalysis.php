@@ -19,6 +19,7 @@ class ItemAnalysis extends Model
         'discrimination_index',
         'discrimination_status',
         'distractor_analysis',
+        'analysis_recommendation',
     ];
 
     protected $casts = [

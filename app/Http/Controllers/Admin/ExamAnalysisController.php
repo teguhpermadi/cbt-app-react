@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\Analysis\CalculateDifficultyJob;
 use App\Jobs\Analysis\CalculateDiscriminationJob;
 use App\Jobs\Analysis\CalculateDistractorJob;
+use App\Jobs\Analysis\CalculateRecommendationJob;
 use App\Jobs\Analysis\CalculateReliabilityJob;
 use App\Jobs\Analysis\FinishAnalysisJob;
 use App\Jobs\Analysis\InitializeAnalysisJob;
@@ -28,15 +29,16 @@ class ExamAnalysisController extends Controller
             'status' => 'processing',
         ]);
 
-        $batch = Bus::batch([
-            new InitializeAnalysisJob($analysis->id),
+        Bus::batch([
             [
+                new InitializeAnalysisJob($analysis->id),
                 new CalculateReliabilityJob($analysis->id),
                 new CalculateDifficultyJob($analysis->id),
                 new CalculateDiscriminationJob($analysis->id),
                 new CalculateDistractorJob($analysis->id),
-            ],
-            new FinishAnalysisJob($analysis->id),
+                new CalculateRecommendationJob($analysis->id),
+                new FinishAnalysisJob($analysis->id),
+            ]
         ])->name("Exam Analysis: {$exam->title}")->dispatch();
 
         return redirect()->back()->with('success', 'Analisis butir soal sedang diproses. Silakan cek kembali beberapa saat lagi.');
