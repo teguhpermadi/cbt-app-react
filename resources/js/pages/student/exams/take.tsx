@@ -42,10 +42,11 @@ interface Props {
         id: string;
         title: string;
         duration: number;
+        timer_type: 'strict' | 'flexible';
     };
     session: {
         id: string;
-        end_time: string;
+        end_time: string | null;
     };
     questions: Question[];
 }
@@ -111,11 +112,14 @@ export default function ExamTake({ exam, session, questions }: Props) {
 
         activeQuestionStartTime.current = Date.now();
 
-        const end = new Date(session.end_time).getTime();
-        const now = new Date().getTime();
-        setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
+        // Only initialize timer for strict timer type
+        if (exam.timer_type === 'strict' && session.end_time) {
+            const end = new Date(session.end_time).getTime();
+            const now = new Date().getTime();
+            setTimeLeft(Math.max(0, Math.floor((end - now) / 1000)));
+        }
 
-    }, [questions, session.end_time]);
+    }, [questions, session.end_time, exam.timer_type]);
 
     // Render math formulas when question content changes
     useEffect(() => {
@@ -136,8 +140,10 @@ export default function ExamTake({ exam, session, questions }: Props) {
         }
     }, [currentIndex, questions[currentIndex]?.content]);
 
-    // Timer Interval
+    // Timer Interval - only for strict timer type
     useEffect(() => {
+        if (exam.timer_type !== 'strict') return;
+
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
                 if (prev <= 1) {
@@ -156,7 +162,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [exam.id, isSubmitting]);
+    }, [exam.id, isSubmitting, exam.timer_type]);
 
     // Format time
     const formatTime = (seconds: number) => {
@@ -270,13 +276,15 @@ export default function ExamTake({ exam, session, questions }: Props) {
                     </div>
 
                     <div className="flex items-center gap-4">
-                        <div className={cn(
-                            "flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-bold text-xl border shadow-sm",
-                            timeLeft < 300 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-slate-100 text-slate-700 border-slate-200"
-                        )}>
-                            <Clock className="w-5 h-5" />
-                            {formatTime(timeLeft)}
-                        </div>
+                        {exam.timer_type === 'strict' && (
+                            <div className={cn(
+                                "flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-bold text-xl border shadow-sm",
+                                timeLeft < 300 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-slate-100 text-slate-700 border-slate-200"
+                            )}>
+                                <Clock className="w-5 h-5" />
+                                {formatTime(timeLeft)}
+                            </div>
+                        )}
 
                         <Sheet open={isSidebarOpen} onOpenChange={setIsSidebarOpen}>
                             <SheetTrigger asChild>

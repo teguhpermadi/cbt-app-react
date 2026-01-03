@@ -27,6 +27,7 @@ interface Exam {
     subject: string;
     grade: string;
     duration: number;
+    timer_type: 'strict' | 'flexible';
     endTime: string;
     hasIncompleteSession: boolean;
 }
@@ -103,10 +104,12 @@ export default function ExamIndex({ exams, message }: Props) {
                                             </td>
                                             <td className="p-4">
                                                 <div className="flex flex-col gap-1 text-xs text-slate-500">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Clock className="h-3.5 w-3.5" />
-                                                        <span>{exam.duration} Menit</span>
-                                                    </div>
+                                                    {exam.timer_type === 'strict' && (
+                                                        <div className="flex items-center gap-1.5">
+                                                            <Clock className="h-3.5 w-3.5" />
+                                                            <span>{exam.duration} Menit</span>
+                                                        </div>
+                                                    )}
                                                     <div className="flex items-center gap-1.5 text-orange-600 dark:text-orange-400">
                                                         <Timer className="h-3.5 w-3.5" />
                                                         <span>Selesai: {formatDate(exam.endTime)}</span>

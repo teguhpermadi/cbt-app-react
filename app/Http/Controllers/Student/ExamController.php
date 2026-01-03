@@ -77,6 +77,7 @@ class ExamController extends Controller
                     'subject' => $exam->subject->name ?? '-',
                     'grade' => $studentGrades ?: '-',
                     'duration' => $exam->duration,
+                    'timer_type' => $exam->timer_type->value,
                     'endTime' => $exam->end_time->toISOString(), // Kirim format ISO untuk JS
                     'hasIncompleteSession' => $hasIncompleteSession,
                 ];
@@ -96,7 +97,21 @@ class ExamController extends Controller
         $exam->load(['subject', 'grades', 'teacher']);
 
         return Inertia::render('student/exams/show', [
-            'exam' => $exam,
+            'exam' => [
+                'id' => $exam->id,
+                'title' => $exam->title,
+                'description' => $exam->description ?? null,
+                'duration' => $exam->duration,
+                'timer_type' => $exam->timer_type->value,
+                'passing_score' => $exam->passing_score,
+                'is_token_visible' => $exam->is_token_visible,
+                'token' => $exam->token,
+                'subject' => [
+                    'name' => $exam->subject->name ?? '-',
+                ],
+                'start_time' => $exam->start_time->toISOString(),
+                'end_time' => $exam->end_time->toISOString(),
+            ],
             'student' => \Illuminate\Support\Facades\Auth::user(),
         ]);
     }
@@ -220,21 +235,24 @@ class ExamController extends Controller
             return redirect()->route('student.exams.finished', $exam->id);
         }
 
-        // Calculate remaining time
-        $now = now();
-        $startTime = $session->start_time;
-        $endTime = $startTime->copy()->addMinutes($exam->duration);
+        // Calculate remaining time only for strict timer type
+        $endTime = null;
+        if ($exam->timer_type === \App\Enums\TimerTypeEnum::Strict) {
+            $now = now();
+            $startTime = $session->start_time;
+            $endTime = $startTime->copy()->addMinutes($exam->duration);
 
-        // If hard end_time of exam is earlier than calculated end time, use that
-        if ($exam->end_time < $endTime) {
-            $endTime = $exam->end_time;
-        }
+            // If hard end_time of exam is earlier than calculated end time, use that
+            if ($exam->end_time < $endTime) {
+                $endTime = $exam->end_time;
+            }
 
-        $remainingSeconds = $now->diffInSeconds($endTime, false);
+            $remainingSeconds = $now->diffInSeconds($endTime, false);
 
-        if ($remainingSeconds <= 0) {
-            // Auto finish if time is up check is done in local, but good to have safety here
-            return $this->finish($exam);
+            if ($remainingSeconds <= 0) {
+                // Auto finish if time is up check is done in local, but good to have safety here
+                return $this->finish($exam);
+            }
         }
 
         // Fetch questions ordered by 'question_number' persisted in ExamResultDetail
@@ -269,10 +287,15 @@ class ExamController extends Controller
             });
 
         return Inertia::render('student/exams/take', [
-            'exam' => $exam,
+            'exam' => [
+                'id' => $exam->id,
+                'title' => $exam->title,
+                'duration' => $exam->duration,
+                'timer_type' => $exam->timer_type->value,
+            ],
             'session' => [
                 'id' => $session->id,
-                'end_time' => $endTime->toISOString(),
+                'end_time' => $endTime ? $endTime->toISOString() : null,
             ],
             'questions' => $questions,
         ]);

@@ -18,6 +18,7 @@ interface Props {
         title: string;
         description?: string;
         duration: number;
+        timer_type: 'strict' | 'flexible';
         passing_score: number;
         is_token_visible: boolean;
         token?: string;
@@ -93,14 +94,16 @@ export default function ExamShow({ exam, student }: Props) {
                                     <p className="font-medium text-slate-900 dark:text-slate-100">{exam.subject?.name}</p>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <Label className="text-muted-foreground text-xs uppercase tracking-wider">Durasi</Label>
-                                        <div className="flex items-center gap-1.5 mt-1">
-                                            <Clock className="h-4 w-4 text-slate-500" />
-                                            <span className="font-medium">{exam.duration} Menit</span>
+                                    {exam.timer_type === 'strict' && (
+                                        <div>
+                                            <Label className="text-muted-foreground text-xs uppercase tracking-wider">Durasi</Label>
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                                <Clock className="h-4 w-4 text-slate-500" />
+                                                <span className="font-medium">{exam.duration} Menit</span>
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div>
+                                    )}
+                                    <div className={exam.timer_type === 'flexible' ? 'col-span-2' : ''}>
                                         <Label className="text-muted-foreground text-xs uppercase tracking-wider">KKM</Label>
                                         <div className="flex items-center gap-1.5 mt-1">
                                             <ShieldCheck className="h-4 w-4 text-green-600" />
