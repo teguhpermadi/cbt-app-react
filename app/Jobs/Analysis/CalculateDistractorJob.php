@@ -94,7 +94,22 @@ class CalculateDistractorJob implements ShouldQueue
             // 2. Process Student Answers
             foreach ($details as $detail) {
                 $answerData = json_decode($detail->student_answer, true);
-                $rawAnswer = $answerData['answer'] ?? null;
+
+                $rawAnswer = null;
+
+                if (is_array($answerData)) {
+                    // Check for structured answer { answer: ... }
+                    if (array_key_exists('answer', $answerData)) {
+                        $rawAnswer = $answerData['answer'];
+                    } else {
+                        // Assume it might be an array of selections directly ["A", "B"] or complex
+                        // For MultipleChoice/TrueFalse, we expect single scalar, but keep safety
+                        $rawAnswer = $answerData;
+                    }
+                } else {
+                    // Scalar value (string/int) e.g. "A"
+                    $rawAnswer = $answerData;
+                }
 
                 if ($rawAnswer === null || $rawAnswer === '') continue;
 
