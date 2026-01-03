@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon, Sigma, List, ListOrdered, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface MathRichTextEditorProps {
+interface RichTextEditorProps {
     value: string;
     onChange?: (value: string) => void;
     placeholder?: string;
@@ -19,7 +19,7 @@ interface MathRichTextEditorProps {
     readOnly?: boolean;
 }
 
-export default function MathRichTextEditor({ value, onChange, placeholder, className, readOnly = false }: MathRichTextEditorProps) {
+export default function RichTextEditor({ value, onChange, placeholder, className, readOnly = false }: RichTextEditorProps) {
     const editor = useEditor({
         editable: !readOnly,
         extensions: [
