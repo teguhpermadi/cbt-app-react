@@ -153,6 +153,16 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                             Import Excel
                         </Button>
 
+                        <a href={StudentController.export().url}>
+                            <Button
+                                variant="outline"
+                                className="rounded-xl flex items-center gap-2 border-slate-200 shadow-sm transition-all hover:bg-slate-50 dark:border-slate-800 dark:hover:bg-slate-900"
+                            >
+                                <FileSpreadsheet className="size-4 text-blue-600" />
+                                Download Data
+                            </Button>
+                        </a>
+
                         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
                             <DialogTrigger asChild>
                                 <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">

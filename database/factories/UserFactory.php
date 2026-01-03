@@ -66,6 +66,7 @@ class UserFactory extends Factory
             if ($user->user_type === 'student') {
                 \App\Models\StudentData::factory()->create([
                     'user_id' => $user->id,
+                    'plain_password' => 'password',
                 ]);
             }
         });

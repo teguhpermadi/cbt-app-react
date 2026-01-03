@@ -15,6 +15,12 @@ class StudentTemplateExport implements WithHeadings, WithStyles
             'Username',
             'Email',
             'Password',
+            'NISN',
+            'NIS',
+            'Nomor Ujian',
+            'Jenis Kelamin (L/P)',
+            'Tempat Lahir',
+            'Tanggal Lahir (YYYY-MM-DD)',
         ];
     }
 

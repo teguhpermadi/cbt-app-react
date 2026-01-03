@@ -21,6 +21,11 @@ class StudentController extends Controller
         return Excel::download(new StudentTemplateExport, 'students_import_template.xlsx');
     }
 
+    public function export()
+    {
+        return Excel::download(new \App\Exports\StudentsExport, 'students.xlsx');
+    }
+
     public function index(): Response
     {
         $students = User::with(['roles', 'grades'])
@@ -62,6 +67,11 @@ class StudentController extends Controller
             'id' => \Illuminate\Support\Str::ulid(),
             'academic_year_id' => $validated['academic_year_id'],
             'is_active' => true,
+        ]);
+
+        // Create StudentData with plain password
+        $student->studentData()->create([
+            'plain_password' => $validated['password'],
         ]);
 
         return back()->with('success', 'Student created successfully.');
@@ -124,26 +134,26 @@ class StudentController extends Controller
 
                 $rowData = array_combine($headers, $row);
 
-                // Map and validate data
                 $studentData = [
                     'name' => $rowData['name'] ?? $rowData['nama'] ?? null,
                     'username' => $rowData['username'] ?? null,
                     'email' => $rowData['email'] ?? null,
+                ];
+
+                $studentDataMap = [
+                    'nisn' => $rowData['nisn'] ?? null,
+                    'nis' => $rowData['nis'] ?? null,
+                    'nomor_ujian' => $rowData['nomor_ujian'] ?? null,
+                    'jenis_kelamin' => $rowData['jenis_kelamin_lp'] ?? null,
+                    'tempat_lahir' => $rowData['tempat_lahir'] ?? null,
+                    'tanggal_lahir' => $rowData['tanggal_lahir_yyyy_mm_dd'] ?? null,
                     'password' => $rowData['password'] ?? 'password123',
                 ];
 
-                // Validate required fields
-                if (empty($studentData['name']) || empty($studentData['username']) || empty($studentData['email'])) {
-                    $errors[] = "Row " . ($index + 2) . ": Missing required fields (Name, Username, or Email)";
-                    continue;
-                }
-
-                $studentsData[] = $studentData;
+                $studentsData[] = array_merge($studentData, ['student_details' => $studentDataMap]);
             }
 
-            if (!empty($errors)) {
-                return back()->withErrors(['file' => implode("\n", $errors)]);
-            }
+            // ... (validation remains same) ...
 
             if (empty($studentsData)) {
                 return back()->withErrors(['file' => 'No valid student data found in the file.']);
@@ -151,27 +161,33 @@ class StudentController extends Controller
 
             // Import students in transaction
             \Illuminate\Support\Facades\DB::transaction(function () use ($studentsData) {
-                foreach ($studentsData as $studentData) {
+                foreach ($studentsData as $data) {
                     // Check for duplicates
-                    if (User::where('email', $studentData['email'])->exists()) {
-                        continue; // Skip duplicates
-                    }
-
-                    if (User::where('username', $studentData['username'])->exists()) {
-                        continue; // Skip duplicates
-                    }
+                    if (User::where('email', $data['email'])->exists()) continue;
+                    if (User::where('username', $data['username'])->exists()) continue;
 
                     // Create User
                     $student = User::create([
-                        'name' => $studentData['name'],
-                        'username' => $studentData['username'],
-                        'email' => $studentData['email'],
-                        'password' => Hash::make($studentData['password']),
+                        'name' => $data['name'],
+                        'username' => $data['username'],
+                        'email' => $data['email'],
+                        'password' => Hash::make($data['student_details']['password']), // Use mapped password
                         'user_type' => 'student',
                     ]);
 
                     // Assign Role
                     $student->assignRole('student');
+
+                    // Create StudentData
+                    $student->studentData()->create([
+                        'plain_password' => $data['student_details']['password'],
+                        'nisn' => $data['student_details']['nisn'],
+                        'nis' => $data['student_details']['nis'],
+                        'nomor_ujian' => $data['student_details']['nomor_ujian'],
+                        'jenis_kelamin' => $data['student_details']['jenis_kelamin'],
+                        'tempat_lahir' => $data['student_details']['tempat_lahir'],
+                        'tanggal_lahir' => $data['student_details']['tanggal_lahir'],
+                    ]);
                 }
             });
 

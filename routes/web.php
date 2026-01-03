@@ -42,6 +42,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin Routes
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
+        Route::get('students/export', [StudentController::class, 'export'])->name('students.export');
         Route::resource('users', UserController::class);
         Route::post('students/import', [StudentController::class, 'storeImport'])->name('students.import');
         Route::resource('students', StudentController::class);

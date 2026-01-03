@@ -11,6 +11,7 @@ class StudentData extends Model
 
     protected $fillable = [
         'user_id',
+        'plain_password',
         'avatar',
         'photo',
         'nisn',
