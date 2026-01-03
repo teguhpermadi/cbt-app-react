@@ -17,6 +17,7 @@ import ExamManualCorrectionController from '@/actions/App/Http/Controllers/Admin
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import MathRenderer from '@/components/app/questions/MathRenderer';
 import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
 
 interface Question {
     id: string;
@@ -245,13 +246,6 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                         <Badge variant="secondary">Max: {selectedQuestion.score_value}</Badge>
                                     </h2>
 
-                                    {/* <div className="mt-2 mb-4">
-                                        <MathRenderer
-                                            content={selectedQuestion.content}
-                                            className="prose prose-sm dark:prose-invert max-w-none text-sm text-foreground"
-                                        />
-                                    </div> */}
-
                                     {/* Bulk Actions */}
                                     <div className="flex items-center gap-4">
                                         <div className="flex items-center space-x-2">
@@ -282,6 +276,24 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                 </div>
 
                                 <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                    {/* Full Question Display */}
+                                    <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
+                                        <CardHeader>
+                                            <CardTitle className="text-base flex items-center gap-2">
+                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                                    {selectedQuestion.question_number}
+                                                </span>
+                                                Question Content
+                                            </CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            <RichTextEditor
+                                                value={selectedQuestion.content}
+                                                readOnly={true}
+                                                className="prose prose-sm dark:prose-invert max-w-none"
+                                            />
+                                        </CardContent>
+                                    </Card>
                                     {loadingAnswers ? (
                                         <div className="text-center py-10">Loading answers...</div>
                                     ) : answers.length === 0 ? (
