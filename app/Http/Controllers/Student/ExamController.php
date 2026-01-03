@@ -17,13 +17,13 @@ class ExamController extends Controller
     {
         $user = $request->user();
 
-        // Ambil kelas aktif siswa
+        // Ambil semua kelas aktif siswa
         // Asumsi relasi grades() di User model sudah ada dan pivot table grade_user memiliki kolom is_active
-        $activeGrade = $user->grades()
+        $activeGrades = $user->grades()
             ->wherePivot('is_active', true)
-            ->first();
+            ->get();
 
-        if (!$activeGrade) {
+        if ($activeGrades->isEmpty()) {
             return Inertia::render('Student/Exam/Index', [
                 'exams' => [],
                 'message' => 'Anda tidak terdaftar di kelas aktif manapun.',
@@ -31,11 +31,15 @@ class ExamController extends Controller
         }
 
         $now = now();
+        $activeGradeIds = $activeGrades->pluck('id')->toArray();
 
-        $exams = $activeGrade->exams()
-            ->where('is_published', true)
+        // Filter exams yang memiliki setidaknya satu grade yang sama dengan grade siswa
+        $exams = Exam::where('is_published', true)
             ->where('start_time', '<=', $now)
             ->where('end_time', '>=', $now)
+            ->whereHas('grades', function ($query) use ($activeGradeIds) {
+                $query->whereIn('grades.id', $activeGradeIds);
+            })
             // Filter ujian berdasarkan jumlah upaya (max_attempts)
             ->where(function ($query) use ($user) {
                 $query->whereDoesntHave('examSessions', function ($sub) use ($user) {
@@ -55,17 +59,23 @@ class ExamController extends Controller
             ->with(['examSessions' => function ($query) use ($user) {
                 $query->where('user_id', $user->id)
                     ->latest(); // Ambil sesi terakhir
-            }, 'subject', 'grade'])
+            }, 'subject', 'grades'])
             ->get()
-            ->map(function ($exam) {
+            ->map(function ($exam) use ($activeGradeIds) {
                 $latestSession = $exam->examSessions->first();
                 $hasIncompleteSession = $latestSession && !$latestSession->is_finished;
+
+                // Hanya tampilkan grade yang dimiliki oleh siswa
+                $studentGrades = $exam->grades
+                    ->whereIn('id', $activeGradeIds)
+                    ->pluck('name')
+                    ->join(', ');
 
                 return [
                     'id' => $exam->id,
                     'title' => $exam->title,
                     'subject' => $exam->subject->name ?? '-',
-                    'grade' => $exam->grade->name ?? '-',
+                    'grade' => $studentGrades ?: '-',
                     'duration' => $exam->duration,
                     'endTime' => $exam->end_time->toISOString(), // Kirim format ISO untuk JS
                     'hasIncompleteSession' => $hasIncompleteSession,
@@ -83,7 +93,7 @@ class ExamController extends Controller
      */
     public function show(Exam $exam)
     {
-        $exam->load(['subject', 'grade', 'teacher']);
+        $exam->load(['subject', 'grades', 'teacher']);
 
         return Inertia::render('student/exams/show', [
             'exam' => $exam,
