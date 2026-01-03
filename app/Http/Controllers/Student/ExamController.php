@@ -135,20 +135,26 @@ class ExamController extends Controller
         if ($exam->examQuestions()->doesntExist()) {
             $questions = $exam->questionBank->questions()->orderBy('order')->get();
 
+            $examQuestions = [];
             foreach ($questions as $index => $question) {
-                \App\Models\ExamQuestion::create([
+                $examQuestions[] = [
+                    'id' => (string) \Illuminate\Support\Str::ulid(),
                     'exam_id' => $exam->id,
                     'question_id' => $question->id,
                     'question_number' => $index + 1, // Urutan default dari bank soal
                     'content' => $question->content,
                     'options' => $question->getOptionsForExam(),
                     'key_answer' => $question->getKeyAnswerForExam(),
-                    'score_value' => $question->score_value, // Assuming enum value logic
+                    'score_value' => $question->score_value,
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
                     'media_path' => $question->getFirstMediaUrl('question_content') ?: $question->media_path,
-                ]);
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
             }
+
+            \App\Models\ExamQuestion::insert($examQuestions);
         }
 
         // 5. Create New Session
