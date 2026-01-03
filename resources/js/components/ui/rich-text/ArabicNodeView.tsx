@@ -19,10 +19,11 @@ export const ArabicNodeView = (props: NodeViewProps) => {
 
     useEffect(() => {
         // Sync local state if props change externally
-        if (props.node.attrs.text !== input) {
+        // ONLY if keyboard is NOT open. If it is open, user is typing, so ignore external updates to avoid overwriting.
+        if (!open && props.node.attrs.text !== input) {
             setInput(props.node.attrs.text || '');
         }
-    }, [props.node.attrs.text]);
+    }, [props.node.attrs.text, open]);
 
     useEffect(() => {
         // Auto open if empty and editable (newly inserted)
@@ -42,38 +43,110 @@ export const ArabicNodeView = (props: NodeViewProps) => {
         }
     }, [open]);
 
-    const onVirtualChange = (input: string) => {
-        setInput(input);
-        props.updateAttributes({ text: input });
+    // Helper to find what character was added/removed
+    const findCharacterDiff = (oldStr: string, newStr: string): { type: 'add' | 'remove' | 'none', char: string } => {
+        if (newStr.length > oldStr.length) {
+            // Character was added - find it
+            for (let i = 0; i < newStr.length; i++) {
+                if (i >= oldStr.length || newStr[i] !== oldStr[i]) {
+                    return { type: 'add', char: newStr.substring(i, i + (newStr.length - oldStr.length)) };
+                }
+            }
+        } else if (newStr.length < oldStr.length) {
+            return { type: 'remove', char: '' };
+        }
+        return { type: 'none', char: '' };
+    };
+
+    const onVirtualChange = (newValue: string) => {
+        // Get ACTUAL cursor position from Input element
+        const cursorPos = inputRef.current?.selectionStart ?? input.length;
+
+        // Detect what changed
+        const diff = findCharacterDiff(input, newValue);
+
+        if (diff.type === 'add') {
+            // Manual insertion at cursor position
+            const before = input.substring(0, cursorPos);
+            const after = input.substring(cursorPos);
+            const result = before + diff.char + after;
+
+            setInput(result);
+            props.updateAttributes({ text: result });
+
+            // Update keyboard's internal state to match
+            keyboardRef.current?.setInput(result);
+
+            // Move cursor after inserted character
+            const newPos = cursorPos + diff.char.length;
+            setTimeout(() => {
+                inputRef.current?.setSelectionRange(newPos, newPos);
+                inputRef.current?.focus();
+                keyboardRef.current?.setCaretPosition(newPos);
+            }, 0);
+        } else if (diff.type === 'remove') {
+            // Backspace: remove character before cursor
+            if (cursorPos > 0) {
+                const before = input.substring(0, cursorPos - 1);
+                const after = input.substring(cursorPos);
+                const result = before + after;
+
+                setInput(result);
+                props.updateAttributes({ text: result });
+                keyboardRef.current?.setInput(result);
+
+                const newPos = cursorPos - 1;
+                setTimeout(() => {
+                    inputRef.current?.setSelectionRange(newPos, newPos);
+                    inputRef.current?.focus();
+                    keyboardRef.current?.setCaretPosition(newPos);
+                }, 0);
+            }
+        }
     };
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const val = e.target.value;
         setInput(val);
         props.updateAttributes({ text: val });
+        // Sync keyboard state
         keyboardRef.current?.setInput(val);
+        // Sync caret position after state update
+        setTimeout(() => {
+            const pos = inputRef.current?.selectionStart || 0;
+            keyboardRef.current?.setCaretPosition(pos);
+        }, 0);
+    };
+
+    const syncCaretPosition = () => {
+        // Helper function to sync caret position from Input to Keyboard
+        const pos = inputRef.current?.selectionStart || 0;
+        keyboardRef.current?.setCaretPosition(pos);
     };
 
     const handleInputSelect = (e: React.SyntheticEvent<HTMLInputElement, Event>) => {
         // Sync virtual keyboard caret when user moves cursor in input
-        const target = e.target as HTMLInputElement;
-        keyboardRef.current?.setCaretPosition(target.selectionStart);
+        syncCaretPosition();
     };
 
     const handleKeyPress = (button: string) => {
+        // Sync caret position for arrow keys and special keys only
+        // For regular keys, let the keyboard handle insertion naturally
+
         if (button === "{enter}" || button === "{escape}") {
             setOpen(false);
             return;
         }
 
         if (button === "{arrowleft}" || button === "{arrowright}") {
+            // Sync current position first
+            syncCaretPosition();
+
             const currentPos = inputRef.current?.selectionStart || 0;
             let newPos = currentPos;
 
-            // In RTL context:
-            // Visual Left Arrow -> Logic: Move Forward (Increment) -> Visual Left
-            // Visual Right Arrow -> Logic: Move Backward (Decrement) -> Visual Right
-
+            // RTL: Left arrow moves right logically (forward in string)
+            // Right arrow moves left logically (backward in string)
             if (button === "{arrowleft}") {
                 newPos = Math.min(input.length, currentPos + 1);
             } else if (button === "{arrowright}") {
@@ -144,14 +217,21 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                                     value={input}
                                     onChange={handleInputChange}
                                     onSelect={handleInputSelect}
+                                    onMouseUp={handleInputSelect} // Sync on click/drag
+                                    onClick={handleInputSelect} // Sync on click
+                                    onKeyUp={handleInputSelect} // Sync after keyboard navigation
                                     dir="rtl"
                                     className="font-arabic text-2xl h-12 text-right bg-slate-50 focus-visible:ring-1 focus-visible:ring-primary"
                                     placeholder="Type Arabic here..."
                                     autoFocus
+                                    autoComplete="off"
+                                    autoCorrect="off"
+                                    autoCapitalize="off"
                                 />
                             </div>
 
-                            <div className="arabic-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:h-10 [&_.hg-button]:text-lg [&_.hg-button]:font-arabic">
+                            {/* style font pada keyboard virtual */}
+                            <div className="arabic-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:h-14 [&_.hg-button]:text-2xl [&_.hg-button]:font-arabic [&_.hg-button]:font-semibold">
                                 <Keyboard
                                     keyboardRef={r => (keyboardRef.current = r)}
                                     onChange={onVirtualChange}
@@ -184,7 +264,6 @@ export const ArabicNodeView = (props: NodeViewProps) => {
                                     }}
                                     theme="hg-theme-default hg-layout-default myTheme"
                                     inputName="arabic"
-                                    value={input}
                                     rtl={true}
                                 />
                             </div>
