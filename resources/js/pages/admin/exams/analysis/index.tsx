@@ -1,12 +1,25 @@
 import AppLayout from '@/layouts/app-layout';
-import { Head, router, useForm, usePage } from '@inertiajs/react'; // Corrected router import
+import { Head, router, usePage } from '@inertiajs/react'; // Corrected router import
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button'; // Ensure this path is correct based on your project structure
-import { ArrowLeft, Play, RefreshCw, AlertTriangle, CheckCircle, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Play, RefreshCw, Info, HelpCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
+import {
+    Accordion,
+    AccordionContent,
+    AccordionItem,
+    AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface DistractorData {
     count: number;
@@ -21,6 +34,7 @@ interface ItemAnalysis {
         id: string;
         question_number: number;
         content: string; // HTML content
+        question_type: string;
     };
     difficulty_index: number | null;
     discrimination_index: number | null;
@@ -69,185 +83,288 @@ export default function AnalysisIndex({ exam, analysis }: Props) {
 
     const getDifficultyClass = (p: number | null) => {
         if (p === null) return "bg-gray-100 text-gray-800";
-        if (p > 0.7) return "bg-green-100 text-green-800"; // Easy
-        if (p < 0.3) return "bg-red-100 text-red-800"; // Difficult
-        return "bg-yellow-100 text-yellow-800"; // Moderate
+        if (p > 0.7) return "bg-green-100 text-green-800"; // Mudah
+        if (p < 0.3) return "bg-red-100 text-red-800"; // Sukar
+        return "bg-yellow-100 text-yellow-800"; // Sedang
+    };
+
+    const getDifficultyLabel = (p: number | null) => {
+        if (p === null) return "-";
+        if (p > 0.7) return "Mudah";
+        if (p < 0.3) return "Sukar";
+        return "Sedang";
     };
 
     const getDiscriminationClass = (d: number | null) => {
         if (d === null) return "bg-gray-100 text-gray-800";
-        if (d >= 0.4) return "bg-green-100 text-green-800"; // Very Good
-        if (d >= 0.3) return "bg-blue-100 text-blue-800"; // Good
-        if (d >= 0.2) return "bg-yellow-100 text-yellow-800"; // Fair
-        return "bg-red-100 text-red-800"; // Poor
+        if (d >= 0.4) return "bg-green-100 text-green-800"; // Sangat Baik
+        if (d >= 0.3) return "bg-blue-100 text-blue-800"; // Baik
+        if (d >= 0.2) return "bg-yellow-100 text-yellow-800"; // Cukup
+        return "bg-red-100 text-red-800"; // Buruk
+    };
+
+    const getDiscriminationLabel = (d: number | null) => {
+        if (d === null) return "-";
+        if (d >= 0.4) return "Sangat Baik";
+        if (d >= 0.3) return "Baik";
+        if (d >= 0.2) return "Cukup";
+        return "Buruk";
+    };
+
+    const getQuestionTypeLabel = (type: string) => {
+        const types: Record<string, string> = {
+            'multiple_choice': 'Pilihan Ganda',
+            'true_false': 'Benar/Salah',
+            'essay': 'Esai',
+            'matching': 'Menjodohkan',
+            'ordering': 'Mengurutkan',
+            'multiple_selection': 'Pilihan Ganda Kompleks',
+            'numerical_input': 'Isian Angka',
+        };
+        return types[type] || type;
     };
 
     return (
-        <AppLayout breadcrumbs={[
-            { title: 'Exam Management', href: '/admin/exams' },
-            { title: 'Monitor', href: `/admin/exams/${exam.id}/monitor` },
-            { title: 'Item Analysis', href: '#' },
-        ]}>
-            <Head title={`Analysis - ${exam.title}`} />
+        <TooltipProvider>
+            <AppLayout breadcrumbs={[
+                { title: 'Manajemen Ujian', href: '/admin/exams' },
+                { title: 'Monitor', href: `/admin/exams/${exam.id}/monitor` },
+                { title: 'Analisis Butir Soal', href: '#' },
+            ]}>
+                <Head title={`Analisis - ${exam.title}`} />
 
-            <div className="flex flex-col gap-6 p-6">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Button variant="outline" size="icon" onClick={() => router.visit(`/admin/exams/${exam.id}/monitor`)}>
-                            <ArrowLeft className="h-4 w-4" />
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
-                                Item Analysis: {exam.title}
-                            </h1>
-                            <p className="text-muted-foreground font-medium">
-                                Evaluation of exam quality and item performance.
-                            </p>
-                        </div>
-                    </div>
-                    <div>
-                        <Button
-                            onClick={handleRunAnalysis}
-                            disabled={analysis?.status === 'processing' || isRefreshing}
-                        >
-                            {analysis?.status === 'processing' ? (
-                                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                                <Play className="mr-2 h-4 w-4" />
-                            )}
-                            {analysis ? 'Re-run Analysis' : 'Run Analysis'}
-                        </Button>
-                    </div>
-                </div>
-
-                {!analysis ? (
-                    <Card>
-                        <CardContent className="pt-6 text-center text-muted-foreground">
-                            No analysis has been performed yet. Click "Run Analysis" to start.
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <>
-                        {analysis.status === 'processing' && (
-                            <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded relative" role="alert">
-                                <strong className="font-bold">Processing!</strong>
-                                <span className="block sm:inline"> Analysis is currently running in the background. Result will appear here automatically.</span>
+                <div className="flex flex-col gap-6 p-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <Button variant="outline" size="icon" onClick={() => router.visit(`/admin/exams/${exam.id}/monitor`)}>
+                                <ArrowLeft className="h-4 w-4" />
+                            </Button>
+                            <div>
+                                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                                    Analisis Butir Soal: {exam.title}
+                                </h1>
+                                <p className="text-muted-foreground font-medium">
+                                    Evaluasi kualitas ujian dan performa setiap butir soal.
+                                </p>
                             </div>
-                        )}
-
-                        {/* Reliability Stats */}
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium">Reliability (Cronbach's Alpha)</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">
-                                        {analysis.reliability_coefficient?.toFixed(3) ?? '-'}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground">
-                                        {analysis.reliability_coefficient && analysis.reliability_coefficient > 0.7 ? 'High Reliability' : 'Needs Improvement'}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium">Participants</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">
-                                        {analysis.student_count}
-                                    </div>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium">Average Score</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">
-                                        {analysis.average_score?.toFixed(2) ?? '-'}
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mb-1">
-                                        SD: {analysis.standard_deviation?.toFixed(2) ?? '-'}
-                                    </p>
-                                </CardContent>
-                            </Card>
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-sm font-medium">Range</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">
-                                        {analysis.lowest_score} - {analysis.highest_score}
-                                    </div>
-                                </CardContent>
-                            </Card>
                         </div>
+                        <div>
+                            <Button
+                                onClick={handleRunAnalysis}
+                                disabled={analysis?.status === 'processing' || isRefreshing}
+                            >
+                                {analysis?.status === 'processing' ? (
+                                    <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Play className="mr-2 h-4 w-4" />
+                                )}
+                                {analysis ? 'Analisis Ulang' : 'Jalankan Analisis'}
+                            </Button>
+                        </div>
+                    </div>
 
-                        {/* Item Analysis Table */}
+                    {/* Explainer Accordion */}
+                    <Accordion type="single" collapsible className="w-full bg-slate-50 dark:bg-slate-900 rounded-lg border px-4">
+                        <AccordionItem value="item-1" className="border-b-0">
+                            <AccordionTrigger className="hover:no-underline py-2">
+                                <div className="flex items-center gap-2 text-sm font-medium text-slate-600 dark:text-slate-400">
+                                    <Info className="h-4 w-4" />
+                                    Panduan Membaca Analisis
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="text-sm text-slate-600 dark:text-slate-400 space-y-2 pb-4">
+                                <p><strong>Reliabilitas (Cronbach's Alpha):</strong> Mengukur konsistensi internal ujian. Nilai <strong>{`> 0.7`}</strong> dianggap reliabel.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
+                                    <div className="p-2 border rounded bg-white dark:bg-slate-950">
+                                        <div className="font-semibold mb-1">Tingkat Kesulitan (P)</div>
+                                        <p className="text-xs">Rasio siswa yang menjawab benar. Rentang 0-1.</p>
+                                        <ul className="text-xs list-disc ml-4 mt-1">
+                                            <li>0.0 - 0.3: <strong>Sukar</strong> (Terlalu sulit)</li>
+                                            <li>0.3 - 0.7: <strong>Sedang</strong> (Ideal)</li>
+                                            <li>0.7 - 1.0: <strong>Mudah</strong> (Terlalu gampang)</li>
+                                        </ul>
+                                    </div>
+                                    <div className="p-2 border rounded bg-white dark:bg-slate-950">
+                                        <div className="font-semibold mb-1">Daya Beda (D)</div>
+                                        <p className="text-xs">Kemampuan soal membedakan siswa pandai (kelompok atas) dan kurang (bawah).</p>
+                                        <ul className="text-xs list-disc ml-4 mt-1">
+                                            <li>{`>= 0.40`}: <strong>Sangat Baik</strong></li>
+                                            <li>0.30 - 0.39: <strong>Baik</strong></li>
+                                            <li>0.20 - 0.29: <strong>Cukup</strong> (Perlu revisi)</li>
+                                            <li>{`< 0.20`}: <strong>Buruk</strong> (Buang/Revisi total)</li>
+                                        </ul>
+                                    </div>
+                                    <div className="p-2 border rounded bg-white dark:bg-slate-950">
+                                        <div className="font-semibold mb-1">Efektivitas Pengecoh</div>
+                                        <p className="text-xs">Pengecoh (opsi salah) yang baik harus dipilih oleh minimal 5% peserta, terutama dari kelompok bawah.</p>
+                                    </div>
+                                </div>
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
+
+                    {!analysis ? (
                         <Card>
-                            <CardHeader>
-                                <CardTitle>Item Statistics</CardTitle>
-                                <CardDescription>Detailed analysis per question.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow>
-                                            <TableHead className="w-[50px]">No</TableHead>
-                                            <TableHead className="w-[400px]">Question Snippet</TableHead>
-                                            <TableHead>Difficulty (P)</TableHead>
-                                            <TableHead>Discrimination (D)</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead>Distractors</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {analysis.item_analyses && analysis.item_analyses.map((item) => (
-                                            <TableRow key={item.id}>
-                                                <TableCell className="font-medium">{item.exam_question?.question_number}</TableCell>
-                                                <TableCell>
-                                                    <div className="line-clamp-2 text-sm text-muted-foreground"
-                                                        dangerouslySetInnerHTML={{ __html: item.exam_question?.content || 'Content unavailable' }}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="secondary" className={getDifficultyClass(item.difficulty_index)}>
-                                                        {item.difficulty_index?.toFixed(2) ?? '-'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="secondary" className={getDiscriminationClass(item.discrimination_index)}>
-                                                        {item.discrimination_index?.toFixed(2) ?? '-'}
-                                                    </Badge>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <span className="text-xs font-medium">{item.discrimination_status ?? '-'}</span>
-                                                </TableCell>
-                                                <TableCell>
-                                                    {/* Distractor Mini Visualization */}
-                                                    <div className="flex gap-1 h-6 items-end">
-                                                        {Object.entries(item.distractor_analysis || {}).map(([key, data]) => (
-                                                            <div key={key} title={`${key}: ${data.count} (${data.percent}%)`} className="flex flex-col items-center group relative">
-                                                                <div
-                                                                    className={`w-4 ${data.is_key ? 'bg-green-500' : 'bg-slate-300'}`}
-                                                                    style={{ height: `${Math.max(10, data.percent)}%` }} // Minimum height for visibility
-                                                                ></div>
-                                                                <span className="text-[10px] text-muted-foreground">{key}</span>
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
+                            <CardContent className="pt-6 text-center text-muted-foreground">
+                                Belum ada data analisis. Klik tombol "Jalankan Analisis" untuk memulai.
                             </CardContent>
                         </Card>
-                    </>
-                )}
-            </div>
-        </AppLayout>
+                    ) : (
+                        <>
+                            {analysis.status === 'processing' && (
+                                <div className="bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded relative" role="alert">
+                                    <strong className="font-bold">Sedang memproses!</strong>
+                                    <span className="block sm:inline"> Analisis sedang berjalan di latar belakang. Hasil akan muncul otomatis.</span>
+                                </div>
+                            )}
+
+                            {/* Reliability Stats */}
+                            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium">Reliabilitas</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">
+                                            {analysis.reliability_coefficient?.toFixed(3) ?? '-'}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">
+                                            {analysis.reliability_coefficient && analysis.reliability_coefficient > 0.7 ? 'Reliabilitas Tinggi' : 'Perlu Perbaikan'}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium">Jumlah Peserta</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">
+                                            {analysis.student_count}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Siswa</p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium">Rata-rata Nilai</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">
+                                            {analysis.average_score?.toFixed(2) ?? '-'}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mb-1">
+                                            Standar Deviasi: {analysis.standard_deviation?.toFixed(2) ?? '-'}
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                                <Card>
+                                    <CardHeader className="pb-2">
+                                        <CardTitle className="text-sm font-medium">Rentang Nilai</CardTitle>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">
+                                            {analysis.lowest_score} - {analysis.highest_score}
+                                        </div>
+                                        <p className="text-xs text-muted-foreground">Min - Max</p>
+                                    </CardContent>
+                                </Card>
+                            </div>
+
+                            {/* Item Analysis Table */}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Statistik Butir Soal</CardTitle>
+                                    <CardDescription>Analisis detail per nomor soal.</CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead className="w-[50px]">No</TableHead>
+                                                <TableHead className="w-[30%]">Konten Soal</TableHead>
+                                                <TableHead>Tipe</TableHead>
+                                                <TableHead>Tingkat Kesulitan (P)</TableHead>
+                                                <TableHead>Daya Beda (D)</TableHead>
+                                                <TableHead>Distribusi Pengecoh</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {analysis.item_analyses && analysis.item_analyses.map((item) => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell className="font-medium align-top pt-4">{item.exam_question?.question_number}</TableCell>
+                                                    <TableCell className="align-top">
+                                                        <div className="border rounded-md overflow-hidden bg-white max-h-[200px] overflow-y-auto">
+                                                            <RichTextEditor
+                                                                value={item.exam_question?.content || 'Konten tidak tersedia'}
+                                                                readOnly
+                                                                className="border-0 min-h-[60px]"
+                                                            />
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="align-top pt-4">
+                                                        <Badge variant="outline">
+                                                            {getQuestionTypeLabel(item.exam_question?.question_type)}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="align-top pt-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <Badge variant="secondary" className={getDifficultyClass(item.difficulty_index)}>
+                                                                    {item.difficulty_index?.toFixed(2) ?? '-'}
+                                                                </Badge>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    ({getDifficultyLabel(item.difficulty_index)})
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="align-top pt-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <Badge variant="secondary" className={getDiscriminationClass(item.discrimination_index)}>
+                                                                    {item.discrimination_index?.toFixed(2) ?? '-'}
+                                                                </Badge>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    ({getDiscriminationLabel(item.discrimination_index)})
+                                                                </span>
+                                                            </div>
+                                                            <span className="text-xs font-medium text-muted-foreground">Status: {item.discrimination_status || '-'}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="align-top pt-4">
+                                                        {/* Distractor Mini Visualization */}
+                                                        <div className="flex gap-2 h-16 items-end pb-2">
+                                                            {Object.entries(item.distractor_analysis || {}).map(([key, data]) => (
+                                                                <Tooltip key={key}>
+                                                                    <TooltipTrigger asChild>
+                                                                        <div tabIndex={0} className="flex flex-col items-center group relative cursor-help outline-none">
+                                                                            <div
+                                                                                className={`w-6 rounded-t-lg transition-all hover:opacity-80 ${data.is_key ? 'bg-green-500' : 'bg-slate-300 dark:bg-slate-700'}`}
+                                                                                style={{ height: `${Math.max(15, data.percent * 0.8)}px` }}
+                                                                            ></div>
+                                                                            <span className={`text-[10px] font-bold mt-1 ${data.is_key ? 'text-green-600' : 'text-slate-500'}`}>{key}</span>
+                                                                        </div>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent>
+                                                                        <div className="text-xs">
+                                                                            <p className="font-bold">Opsi {key} {data.is_key && '(Kunci)'}</p>
+                                                                            <p>Dipilih: <span className="font-semibold text-primary">{data.count} siswa</span> ({data.percent}%)</p>
+                                                                        </div>
+                                                                    </TooltipContent>
+                                                                </Tooltip>
+                                                            ))}
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </CardContent>
+                            </Card>
+                        </>
+                    )}
+                </div>
+            </AppLayout>
+        </TooltipProvider>
     );
 }
