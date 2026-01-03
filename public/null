@@ -1,5 +1,6 @@
-Question::find('01ke0bxnc8cy5r08sqp6rvwb0y')->load('options')
-Question::find('01ke0bxnc8cy5r08sqp6rvwb0y')->load('options')
-Question::find('01ke0bxnc8cy5r08sqp6rvwb0y')->load('options')
 
 Option::find('01ke0bxnrp6zf16yz9np4s781t')
+
+Option::find('01ke0bxnc8cy5r08sqp6rvwb0y')
+Question::find('01ke0bxnc8cy5r08sqp6rvwb0y')->load('options')
+

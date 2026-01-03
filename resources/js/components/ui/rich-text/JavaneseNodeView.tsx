@@ -65,6 +65,50 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
         return text.split('').map(char => TRANSLITERATION_MAP[char] || char).join(' ');
     };
 
+    // Generate display mapping for keyboard buttons with optional transliteration
+    const getKeyboardDisplay = () => {
+        const baseDisplay = {
+            "{bksp}": "⌫",
+            "{enter}": "Done",
+            "{shift}": "⇧",
+            "{space}": " ",
+            "{escape}": "Esc",
+            "{arrowleft}": "←",
+            "{arrowright}": "→"
+        };
+
+        if (!showTransliteration) {
+            return baseDisplay;
+        }
+
+        // Add transliteration for each character
+        const displayWithTranslit: Record<string, string> = { ...baseDisplay };
+
+        // Get all unique characters from both layouts
+        const allChars = new Set<string>();
+        const layouts = [
+            ["꧐", "꧑", "꧒", "꧓", "꧔", "꧕", "꧖", "꧗", "꧘", "꧙"],
+            ["ꦲ", "ꦤ", "ꦕ", "ꦫ", "ꦏ", "ꦢ", "ꦠ", "ꦱ", "ꦮ", "ꦭ"],
+            ["ꦥ", "ꦝ", "ꦗ", "ꦪ", "ꦚ", "ꦩ", "ꦒ", "ꦧ", "ꦛ", "ꦔ"],
+            ["ꦴ", "ꦶ", "ꦸ", "ꦺ", "ꦼ", "ꦺꦴ", "ꦻ", "ꦄꦆ"],
+            ["ꦲ꧀", "ꦤ꧀", "ꦕ꧀", "ꦫ꧀", "ꦏ꧀", "ꦢ꧀", "ꦠ꧀", "ꦱ꧀", "ꦮ꧀", "ꦭ꧀"],
+            ["ꦥ꧀", "ꦝ꧀", "ꦗ꧀", "ꦪ꧀", "ꦚ꧀", "ꦩ꧀", "ꦒ꧀", "ꦧ꧀", "ꦛ꧀", "ꦔ꧀"],
+            ["꧁", "꧂", "꧃", "꧄", "꧅", "꧆", "꧇", "꧈", "꧉"]
+        ];
+
+        layouts.forEach(row => {
+            row.forEach(char => {
+                const translit = TRANSLITERATION_MAP[char] || TRANSLITERATION_MAP[char.charAt(0)];
+                if (translit) {
+                    // Use newline character for 2-line display
+                    displayWithTranslit[char] = `${char}\n${translit}`;
+                }
+            });
+        });
+
+        return displayWithTranslit;
+    };
+
     const onVirtualChange = (newValue: string) => {
         if (!lastPressedButton.current) {
             return;
@@ -73,13 +117,17 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
         const button = lastPressedButton.current;
         lastPressedButton.current = '';
 
-        if (button.startsWith('{')) {
+        // Clean button value - remove any newline or transliteration text
+        // The button value should only be the Javanese character, not the display text
+        const cleanButton = button.split('\n')[0]; // Take only first line if there's newline
+
+        if (cleanButton.startsWith('{')) {
             return;
         }
 
         // Sandhangan characters (vowel marks)
         const sandhanganChars = ['ꦴ', 'ꦶ', 'ꦸ', 'ꦺ', 'ꦼ', 'ꦺꦴ', 'ꦻ', 'ꦄꦆ'];
-        const isSandhangan = sandhanganChars.includes(button);
+        const isSandhangan = sandhanganChars.includes(cleanButton);
 
         let before = draftText.substring(0, cursorPosition);
         const after = draftText.substring(cursorPosition);
@@ -92,12 +140,12 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
             }
         }
 
-        const result = before + button + after;
+        const result = before + cleanButton + after;
 
         setDraftText(result);
         keyboardRef.current?.setInput(result);
 
-        const newPos = before.length + button.length;
+        const newPos = before.length + cleanButton.length;
         setCursorPosition(newPos);
 
         setTimeout(() => {
@@ -216,14 +264,7 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
                 )}
             >
                 {input ? (
-                    <>
-                        <span className="text-xl font-medium font-javanese">{input}</span>
-                        {showTransliteration && (
-                            <span className="text-xs text-muted-foreground mt-1 italic">
-                                {getTransliteration(input)}
-                            </span>
-                        )}
-                    </>
+                    <span className="text-xl font-medium font-javanese">{input}</span>
                 ) : (
                     <span className="text-sm italic opacity-50">Javanese...</span>
                 )}
@@ -264,11 +305,6 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
                                     autoCorrect="off"
                                     autoCapitalize="off"
                                 />
-                                {showTransliteration && draftText && (
-                                    <div className="mt-2 text-sm text-muted-foreground italic">
-                                        Transliterasi: {getTransliteration(draftText)}
-                                    </div>
-                                )}
                             </div>
 
                             {/* Transliteration Toggle */}
@@ -303,7 +339,12 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
                             </div>
 
                             {/* Virtual Keyboard */}
-                            <div className="javanese-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:h-16 [&_.hg-button]:min-w-[3rem] [&_.hg-button]:text-2xl [&_.hg-button]:font-javanese [&_.hg-button]:font-medium [&_.hg-button]:leading-tight">
+                            <div className={cn(
+                                "javanese-keyboard-wrapper [&_.hg-theme-default]:bg-transparent [&_.hg-button]:font-javanese [&_.hg-button]:font-medium",
+                                showTransliteration
+                                    ? "[&_.hg-button]:h-20 [&_.hg-button]:min-w-[3.5rem] [&_.hg-button]:text-base [&_.hg-button]:p-1"
+                                    : "[&_.hg-button]:h-16 [&_.hg-button]:min-w-[3rem] [&_.hg-button]:text-2xl [&_.hg-button]:leading-tight"
+                            )}>
                                 <Keyboard
                                     keyboardRef={r => (keyboardRef.current = r)}
                                     onChange={onVirtualChange}
@@ -324,15 +365,7 @@ export const JavaneseNodeView = (props: NodeViewProps) => {
                                             "{shift} {arrowleft} {arrowright} {space} {bksp}"
                                         ]
                                     }}
-                                    display={{
-                                        "{bksp}": "⌫",
-                                        "{enter}": "Done",
-                                        "{shift}": "⇧",
-                                        "{space}": " ",
-                                        "{escape}": "Esc",
-                                        "{arrowleft}": "←",
-                                        "{arrowright}": "→"
-                                    }}
+                                    display={getKeyboardDisplay()}
                                     theme="hg-theme-default hg-layout-default myTheme"
                                     inputName="javanese"
                                 />
