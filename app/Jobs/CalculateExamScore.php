@@ -103,7 +103,7 @@ class CalculateExamScore implements ShouldQueue
             ]);
 
             // Update or Create ExamResult
-            $scorePercent = $totalMaxScore > 0 ? ($totalEarnedScore / $totalMaxScore) * 100 : 0;
+            $scorePercent = $totalMaxScore > 0 ? round(($totalEarnedScore / $totalMaxScore) * 100, 1) : 0;
 
             $existingResult = ExamResult::where('exam_id', $session->exam_id)
                 ->where('user_id', $session->user_id)
@@ -235,7 +235,7 @@ class CalculateExamScore implements ShouldQueue
         if ($netCorrect < 0) $netCorrect = 0;
 
         $ratio = $totalCorrectOptions > 0 ? $netCorrect / $totalCorrectOptions : 0;
-        $scoreEarned = $ratio * $maxScore;
+        $scoreEarned = round($ratio * $maxScore, 1);
         $isCorrect = ($ratio == 1.0);
 
         Log::info("Scoring MultipleSelection. QID: {$question->id}", [
@@ -278,7 +278,7 @@ class CalculateExamScore implements ShouldQueue
         }
 
         $ratio = $totalPairs > 0 ? $correctMatchCount / $totalPairs : 0;
-        $scoreEarned = $ratio * $maxScore;
+        $scoreEarned = round($ratio * $maxScore, 1);
         $isCorrect = ($ratio == 1.0);
 
         Log::info("Scoring Matching. QID: {$question->id}", [
