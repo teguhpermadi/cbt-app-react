@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Javanese&display=swap');
 @import 'tailwindcss';
 
 @import "tw-animate-css";
@@ -143,5 +144,9 @@
 
     .font-arabic {
         font-family: 'Amiri Quran', serif;
+    }
+
+    .font-javanese {
+        font-family: 'Noto Sans Javanese', serif;
     }
 }

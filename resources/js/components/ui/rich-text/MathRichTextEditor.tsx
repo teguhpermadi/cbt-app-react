@@ -6,6 +6,7 @@ import { TextStyle } from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { MathExtension } from './MathExtension';
 import { ArabicExtension } from './ArabicExtension';
+import { JavaneseExtension } from './JavaneseExtension';
 import { Button } from '@/components/ui/button';
 import { Bold, Italic, Underline as UnderlineIcon, Sigma, List, ListOrdered, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,7 @@ export default function MathRichTextEditor({ value, onChange, placeholder, class
             Underline,
             MathExtension,
             ArabicExtension,
+            JavaneseExtension,
         ],
         content: value,
         onUpdate: ({ editor }) => {
@@ -116,6 +118,16 @@ export default function MathRichTextEditor({ value, onChange, placeholder, class
                     >
                         <Languages className="h-4 w-4" />
                         Arabic
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs font-medium gap-1 text-orange-600 dark:text-orange-400"
+                        onClick={() => editor.chain().focus().addJavaneseComponent().run()}
+                        title="Insert Javanese Text (Hanacaraka)"
+                    >
+                        <Languages className="h-4 w-4" />
+                        Jawa
                     </Button>
                 </div>
             )}
