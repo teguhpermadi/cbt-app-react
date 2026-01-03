@@ -274,6 +274,7 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
                                 </div>
 
                                 <div className="flex items-center space-x-2">
+                                    <Checkbox id="edit_is_answer_randomized" checked={form.data.is_answer_randomized} onCheckedChange={(c) => form.setData('is_answer_randomized', !!c)} />
                                     <label htmlFor="edit_is_answer_randomized" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Randomize Answer Options</label>
                                 </div>
 
