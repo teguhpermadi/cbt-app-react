@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { MultiSelect } from '@/components/ui/multi-select';
 import InputError from '@/components/input-error';
 import { useState, useEffect, useMemo } from 'react';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
@@ -46,7 +47,7 @@ interface ShowProps {
 
 interface CreateExamFormData {
     academic_year_id: string;
-    grade_id: string;
+    grade_ids: string[];
     subject_id: string;
     teacher_id: string;
     question_bank_id: string;
@@ -82,7 +83,7 @@ export default function Show({ questionBank, questions }: ShowProps) {
 
     const createForm = useForm<CreateExamFormData>({
         academic_year_id: '',
-        grade_id: questionBank.subject.grade?.id.toString() || '',
+        grade_ids: questionBank.subject.grade?.id ? [questionBank.subject.grade.id.toString()] : [],
         subject_id: questionBank.subject_id.toString(),
         teacher_id: questionBank.teacher.id.toString(),
         question_bank_id: questionBank.id.toString(),
@@ -309,6 +310,20 @@ export default function Show({ questionBank, questions }: ShowProps) {
                                     <InputError message={createForm.errors.title} />
                                 </div>
 
+                                <div className="space-y-2">
+                                    <Label>Kelas</Label>
+                                    <MultiSelect
+                                        options={formData.grades.map((grade: any) => ({
+                                            label: grade.name,
+                                            value: grade.id.toString()
+                                        }))}
+                                        value={createForm.data.grade_ids}
+                                        onChange={(v) => createForm.setData('grade_ids', v)}
+                                        placeholder="Pilih Kelas"
+                                    />
+                                    <InputError message={createForm.errors.grade_ids} />
+                                </div>
+
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label>Tahun Ajaran</Label>
@@ -485,9 +500,6 @@ export default function Show({ questionBank, questions }: ShowProps) {
 
                                 {/* Read-only fields */}
                                 <div className="border-t pt-4 space-y-2">
-                                    <div className="text-sm text-muted-foreground">
-                                        <strong>Kelas:</strong> {questionBank.subject.grade?.name || '-'}
-                                    </div>
                                     <div className="text-sm text-muted-foreground">
                                         <strong>Mata Pelajaran:</strong> {questionBank.subject.name}
                                     </div>
