@@ -29,9 +29,11 @@ export const MathField = React.forwardRef<MathfieldElement, MathFieldProps>(({ v
         const mf = internalRef.current;
         if (!mf) return;
 
-        // Apply options
+        // Apply options directly on the mathfield (MathLive 0.108.2+)
         if (options) {
-            mf.setOptions(options);
+            Object.entries(options).forEach(([key, value]) => {
+                (mf as any)[key] = value;
+            });
         }
 
         // Apply other props
