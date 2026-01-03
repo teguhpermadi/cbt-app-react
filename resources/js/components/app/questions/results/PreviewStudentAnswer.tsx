@@ -5,9 +5,10 @@ import PreviewStudentAnswerMatching from "./PreviewStudentAnswerMatching";
 import PreviewStudentAnswerTrueFalse from "./PreviewStudentAnswerTrueFalse";
 import PreviewStudentAnswerOrdering from "./PreviewStudentAnswerOrdering";
 import PreviewStudentAnswerNumericalInput from "./PreviewStudentAnswerNumericalInput";
+import PreviewStudentAnswerEssay from "./PreviewStudentAnswerEssay";
 
 interface PreviewStudentAnswerProps {
-    type: 'multiple_choice' | 'multiple_selection' | 'true_false' | 'matching' | 'ordering' | 'numerical_input' | string;
+    type: 'multiple_choice' | 'multiple_selection' | 'true_false' | 'matching' | 'ordering' | 'numerical_input' | 'essay' | string;
     options: any;
     studentAnswer: any;
     keyAnswer: any;
@@ -86,6 +87,15 @@ export default function PreviewStudentAnswer({
                 <PreviewStudentAnswerNumericalInput
                     studentAnswer={studentAnswer}
                     keyAnswer={keyAnswer}
+                    showKeyAnswer={showKeyAnswer}
+                    showStudentAnswer={showStudentAnswer}
+                />
+            );
+        case 'essay':
+            return (
+                <PreviewStudentAnswerEssay
+                    studentAnswer={studentAnswer}
+                    keyAnswer={keyAnswer?.answer || keyAnswer}
                     showKeyAnswer={showKeyAnswer}
                     showStudentAnswer={showStudentAnswer}
                 />
