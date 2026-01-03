@@ -20,17 +20,28 @@ interface RichTextEditorProps {
 }
 
 export default function RichTextEditor({ value, onChange, placeholder, className, readOnly = false }: RichTextEditorProps) {
+    // Sanitize the content to ensure it's a valid string
+    const sanitizedContent = React.useMemo(() => {
+        if (typeof value === 'string') return value;
+        if (value === null || value === undefined) return '';
+        // If it's an object or other type, convert to empty string to avoid tiptap errors
+        console.warn('[RichTextEditor] Invalid content type received:', typeof value, value);
+        return '';
+    }, [value]);
+
     const editor = useEditor({
         editable: !readOnly,
         extensions: [
-            StarterKit,
+            StarterKit.configure({
+                underline: false,
+            }),
             TextStyle,
             Underline,
             MathExtension,
             ArabicExtension,
             JavaneseExtension,
         ],
-        content: value,
+        content: sanitizedContent,
         onUpdate: ({ editor }) => {
             onChange?.(editor.getHTML());
         },
