@@ -5,8 +5,9 @@ import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style';
 import Underline from '@tiptap/extension-underline';
 import { MathExtension } from './MathExtension';
+import { ArabicExtension } from './ArabicExtension';
 import { Button } from '@/components/ui/button';
-import { Bold, Italic, Underline as UnderlineIcon, Sigma, List, ListOrdered } from 'lucide-react';
+import { Bold, Italic, Underline as UnderlineIcon, Sigma, List, ListOrdered, Languages } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MathRichTextEditorProps {
@@ -25,6 +26,7 @@ export default function MathRichTextEditor({ value, onChange, placeholder, class
             TextStyle,
             Underline,
             MathExtension,
+            ArabicExtension,
         ],
         content: value,
         onUpdate: ({ editor }) => {
@@ -104,6 +106,16 @@ export default function MathRichTextEditor({ value, onChange, placeholder, class
                     >
                         <Sigma className="h-4 w-4" />
                         Math
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs font-medium gap-1 text-green-600 dark:text-green-400"
+                        onClick={() => editor.chain().focus().addArabicComponent().run()}
+                        title="Insert Arabic Text"
+                    >
+                        <Languages className="h-4 w-4" />
+                        Arabic
                     </Button>
                 </div>
             )}
