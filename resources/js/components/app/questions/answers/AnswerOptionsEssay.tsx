@@ -1,5 +1,5 @@
 import { AnswerOptionProps } from "../types";
-import { Textarea } from "@/components/ui/textarea";
+import RichTextEditor from "@/components/ui/rich-text/RichTextEditor";
 
 export default function AnswerOptionsEssay({ options, showKeyAnswer = true }: AnswerOptionProps) {
     // Essay might not have explicit options in DB for the key answer text if it's manual grading,
@@ -12,10 +12,11 @@ export default function AnswerOptionsEssay({ options, showKeyAnswer = true }: An
 
     return (
         <div className="space-y-4">
-            <Textarea
+            <RichTextEditor
+                value=""
                 placeholder="Area jawaban peserta..."
-                disabled
-                className="min-h-[120px] resize-none bg-muted/20"
+                readOnly={true}
+                className="bg-muted/20"
             />
 
             {showKeyAnswer && (option || rubric) && (
@@ -25,7 +26,11 @@ export default function AnswerOptionsEssay({ options, showKeyAnswer = true }: An
                     {modelAnswer && (
                         <div className="space-y-1">
                             <div className="text-xs font-medium text-emerald-600 dark:text-emerald-500">Contoh Jawaban / Poin Utama:</div>
-                            <div className="prose prose-sm max-w-none text-slate-700 dark:text-slate-300" dangerouslySetInnerHTML={{ __html: modelAnswer }} />
+                            <RichTextEditor
+                                value={modelAnswer}
+                                readOnly={true}
+                                className="prose prose-sm max-w-none"
+                            />
                         </div>
                     )}
 
