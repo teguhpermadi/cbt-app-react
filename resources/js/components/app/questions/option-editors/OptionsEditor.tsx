@@ -6,6 +6,7 @@ import OptionEditorTrueFalse from './OptionEditorTrueFalse';
 import OptionEditorMatching from './OptionEditorMatching';
 import OptionEditorOrdering from './OptionEditorOrdering';
 import OptionEditorNumerical from './OptionEditorNumerical';
+import OptionEditorEssay from './OptionEditorEssay';
 
 interface Props {
     type: string;
@@ -47,6 +48,10 @@ export default function OptionsEditor({ type, options, onChange, errors }: Props
 
     if (type === 'numerical_input') {
         return <OptionEditorNumerical options={options} onChange={onChange} errors={errors} />;
+    }
+
+    if (type === 'essay') {
+        return <OptionEditorEssay options={options} onChange={onChange} errors={errors} />;
     }
 
     return <div className="text-muted-foreground italic">Editor untuk tipe soal ini belum tersedia.</div>;
