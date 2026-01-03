@@ -70,6 +70,7 @@ class ExamManualCorrectionController extends Controller
                     'student_name' => $session->user->name,
                     'student_email' => $session->user->email,
                     'exam_session_id' => $session->id,
+                    'attempt_number' => $session->attempt_number,
                     'student_answer' => $detail->student_answer,
                     'score_earned' => $detail->score_earned,
                     'correction_notes' => $detail->correction_notes,

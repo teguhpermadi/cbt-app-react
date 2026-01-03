@@ -33,6 +33,7 @@ interface AnswerDetail {
     student_name: string;
     student_email: string;
     exam_session_id: string;
+    attempt_number: number;
     student_answer: any;
     score_earned: number;
     correction_notes: string | null;
@@ -305,6 +306,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                         <div className="flex items-center gap-2">
                                                             <div className="font-medium">{answer.student_name}</div>
                                                             <div className="text-xs text-muted-foreground">({answer.student_email})</div>
+                                                            <Badge variant="outline" className="text-xs">Upaya ke-{answer.attempt_number}</Badge>
                                                         </div>
 
                                                         {/* Answer Content */}
