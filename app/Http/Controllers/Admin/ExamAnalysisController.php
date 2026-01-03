@@ -19,6 +19,9 @@ class ExamAnalysisController extends Controller
 {
     public function store(Request $request, Exam $exam)
     {
+        // Delete existing analysis to avoid duplicates
+        ExamAnalysis::where('exam_id', $exam->id)->delete();
+
         // Create a new analysis record
         $analysis = ExamAnalysis::create([
             'exam_id' => $exam->id,
