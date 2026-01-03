@@ -70,6 +70,14 @@ class User extends Authenticatable implements HasMedia
     }
 
     /**
+     * Get the student data associated with the user.
+     */
+    public function studentData()
+    {
+        return $this->hasOne(StudentData::class);
+    }
+
+    /**
      * Get the grades associated with the user.
      */
     public function grades()

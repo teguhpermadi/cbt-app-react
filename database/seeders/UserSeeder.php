@@ -38,5 +38,15 @@ class UserSeeder extends Seeder
             'user_type' => 'admin',
         ]);
         $admin->assignRole('admin');
+
+        // student
+        $student = User::factory()->create([
+            'name' => 'Student',
+            'email' => 'student@example.com',
+            'username' => 'student',
+            'password' => Hash::make('password'),
+            'user_type' => 'student',
+        ]);
+        $student->assignRole('student');
     }
 }
