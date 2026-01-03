@@ -90,6 +90,9 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button variant="outline" onClick={() => router.visit(`/admin/exams/${exam.id}/analysis`)}>
+                            Item Analysis
+                        </Button>
                         <RecalculateScoreDialog
                             actionUrl={`/admin/exams/${exam.id}/recalculate-all`}
                             triggerText="Recalculate All Scores"
