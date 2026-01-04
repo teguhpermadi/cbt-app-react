@@ -1,24 +1,33 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router } from '@inertiajs/react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Head, router } from '@inertiajs/react'; // Added router
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, CheckCircle, XCircle, HelpCircle } from 'lucide-react';
+import { ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import ExamSessionDetail from './components/exam-session-detail';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import { RecalculateScoreDialog } from './components/recalculate-score-dialog';
+import ExamResultView from '@/components/app/exams/exam-result-view'; // Imported reusable view
 
 interface CorrectionProps {
     session: any;
     all_sessions?: any[];
+    analysis: any[];
+    norm_reference: any;
+    leaderboard: any[];
+    questions: any[];
+    total_score: number;
 }
 
-
-
-export default function CorrectionPage({ session, all_sessions }: CorrectionProps) {
+export default function CorrectionPage({
+    session,
+    all_sessions,
+    analysis,
+    norm_reference,
+    leaderboard,
+    questions,
+    total_score
+}: CorrectionProps) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Exam Management', href: examsIndexRoute.url() },
         { title: 'Monitor', href: `/admin/exams/${session.exam_id}/monitor` },
@@ -45,7 +54,12 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                     <RecalculateScoreDialog actionUrl={ExamController.calculateScores(session.id)} />
                 </div>
 
-                <Tabs defaultValue={session.id.toString()} className="w-full">
+                <Tabs
+                    value={session.id.toString()}
+                    // @ts-ignore
+                    onValueChange={(val) => router.visit(route('admin.exams.sessions.correction', val))}
+                    className="w-full"
+                >
                     <div className="w-full overflow-x-auto pb-2">
                         <TabsList className="w-full flex h-auto p-1 bg-muted/40 rounded-lg justify-start gap-2">
                             {(all_sessions || [session]).map((s: any) => (
@@ -82,11 +96,17 @@ export default function CorrectionPage({ session, all_sessions }: CorrectionProp
                         </TabsList>
                     </div>
 
-                    {(all_sessions || [session]).map((s: any) => (
-                        <TabsContent key={s.id} value={s.id.toString()} className="mt-6">
-                            <ExamSessionDetail session={s} />
-                        </TabsContent>
-                    ))}
+                    <TabsContent value={session.id.toString()} className="mt-6">
+                        <ExamResultView
+                            exam={session.exam}
+                            session={session}
+                            questions={questions}
+                            total_score={total_score}
+                            analysis={analysis}
+                            norm_reference={norm_reference}
+                            leaderboard={leaderboard}
+                        />
+                    </TabsContent>
                 </Tabs>
             </div>
         </AppLayout>

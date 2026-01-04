@@ -17,6 +17,13 @@ use Inertia\Inertia;
 
 class ExamController extends Controller
 {
+    private $analysisService;
+
+    public function __construct(\App\Services\ExamAnalysisService $analysisService)
+    {
+        $this->analysisService = $analysisService;
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -198,7 +205,7 @@ class ExamController extends Controller
 
     public function correction(\App\Models\ExamSession $session)
     {
-        $session->load(['user', 'exam.subject', 'examResultDetails.examQuestion', 'examResult']);
+        $session->load(['user', 'exam.subject', 'examResultDetails.examQuestion.originalQuestion.tags', 'examResult']);
 
         // Fetch all attempts for this user and exam
         $allSessions = \App\Models\ExamSession::with(['examResultDetails.examQuestion', 'examResult'])
@@ -207,9 +214,22 @@ class ExamController extends Controller
             ->orderBy('attempt_number', 'asc')
             ->get();
 
+        // Prepare Analysis Data
+        $analysisResult = $this->analysisService->calculateMasteryAnalysis($session);
+        $normReference = $this->analysisService->calculateNormReference($session->exam, $session);
+        $leaderboard = $this->analysisService->getLeaderboard($session->exam, $session->user_id); // Highlight this user
+        $questions = $this->analysisService->getFormattedQuestions($session);
+
+        $totalScore = $session->final_score;
+
         return Inertia::render('admin/exams/correction', [
             'session' => $session,
             'all_sessions' => $allSessions,
+            'analysis' => $analysisResult,
+            'norm_reference' => $normReference,
+            'leaderboard' => $leaderboard,
+            'questions' => $questions,
+            'total_score' => $totalScore,
         ]);
     }
 
