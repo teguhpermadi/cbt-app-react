@@ -15,15 +15,14 @@ import {
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
 import { AnswerOptionProps } from "../types";
-
-import MathRenderer from '../MathRenderer';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
 
 // --- Custom Nodes ---
 
 function LeftOptionNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex items-center min-h-[50px] bg-card w-[250px] shadow-sm",
+            "relative p-3 rounded-lg border-2 text-sm flex items-center min-h-[100px] bg-card w-[400px] shadow-sm",
             data.colorClass as string
         )}>
             {/* Pair ID Indicator (if showing key) */}
@@ -33,11 +32,15 @@ function LeftOptionNode({ data }: NodeProps) {
                 </span>
             )}
 
-            <div className="flex-1">
-                <MathRenderer content={data.content as string} />
+            <div className="flex-1 min-w-0">
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm"
+                />
                 {/* Media Preview */}
                 {(data.mediaUrl) && (
-                    <div className="mt-2 rounded overflow-hidden border border-border h-12 w-auto bg-white/50 inline-block">
+                    <div className="mt-2 rounded overflow-hidden border border-border h-24 w-auto bg-white/50 inline-block">
                         <img
                             src={data.mediaUrl as string}
                             alt="Visual"
@@ -59,7 +62,7 @@ function LeftOptionNode({ data }: NodeProps) {
 function RightOptionNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex items-center min-h-[50px] bg-card w-[250px] shadow-sm",
+            "relative p-3 rounded-lg border-2 text-sm flex items-center min-h-[100px] bg-card w-[400px] shadow-sm",
             data.colorClass as string
         )}>
             <Handle
@@ -68,11 +71,15 @@ function RightOptionNode({ data }: NodeProps) {
                 className="w-3 h-3 bg-muted-foreground border-2 border-background"
             />
 
-            <div className="flex-1 text-right">
-                <MathRenderer content={data.content as string} />
+            <div className="flex-1 text-right min-w-0">
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm [&_.ProseMirror]:text-right"
+                />
                 {/* Media Preview */}
                 {(data.mediaUrl) && (
-                    <div className="mt-2 rounded overflow-hidden border border-border h-12 w-auto bg-white/50 inline-block">
+                    <div className="mt-2 rounded overflow-hidden border border-border h-24 w-auto bg-white/50 inline-block">
                         <img
                             src={data.mediaUrl as string}
                             alt="Visual"
@@ -128,9 +135,9 @@ export default function AnswerOptionsMatching({ options, showKeyAnswer = true }:
 
         // Determine layout
         const startX = 50;
-        const rightX = 500;
+        const rightX = 700; // Increased
         const startY = 50;
-        const gapY = 120; // Enough space for nodes
+        const gapY = 180; // Increased
 
         // Create Left Nodes
         leftOptions.forEach((opt, index) => {
@@ -197,7 +204,7 @@ export default function AnswerOptionsMatching({ options, showKeyAnswer = true }:
         options.filter(o => o.option_key.startsWith('L') || o.metadata?.side === 'left').length,
         options.filter(o => o.option_key.startsWith('R') || o.metadata?.side === 'right').length
     );
-    const canvasHeight = Math.max(400, (maxItems * 120) + 100);
+    const canvasHeight = Math.max(400, (maxItems * 180) + 100);
 
     return (
         <div
@@ -213,13 +220,9 @@ export default function AnswerOptionsMatching({ options, showKeyAnswer = true }:
                 fitView
                 fitViewOptions={{ padding: 0.2 }}
                 proOptions={{ hideAttribution: true }}
-                panOnDrag={false}
-                zoomOnScroll={false}
-                zoomOnPinch={false}
-                zoomOnDoubleClick={false}
             >
                 <Background color="#94a3b8" gap={20} size={1} />
-                <Controls showInteractive={false} />
+                <Controls />
             </ReactFlow>
         </div>
     );

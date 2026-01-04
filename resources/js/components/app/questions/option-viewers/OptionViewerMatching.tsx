@@ -22,25 +22,29 @@ import {
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
 import { OptionViewerProps } from './OptionViewerSingleChoice';
-import MathRenderer from '../MathRenderer';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
 
 // Custom Node Components for read-only matching display
 function LeftNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-card w-[280px] shadow-sm",
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[100px] bg-card w-[400px] shadow-sm",
             data.colorClass as string
         )}>
             <div className="text-xs font-bold text-muted-foreground mb-2">Premis</div>
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
                 {data.mediaUrl && (
                     <img
                         src={data.mediaUrl as string}
                         alt="Premise"
-                        className="h-16 w-auto rounded-md border object-contain"
+                        className="h-24 w-auto rounded-md border object-contain"
                     />
                 )}
-                <MathRenderer content={data.content as string} className="text-sm" />
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm"
+                />
             </div>
             <Handle
                 type="source"
@@ -49,7 +53,7 @@ function LeftNode({ data }: NodeProps) {
                     width: '1.5em',
                     height: '1.5em',
                 }}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background"
+                className="w-3 h-3 bg-muted-foreground border-2 border-background transform translate-x-1/2"
             />
         </div>
     );
@@ -58,7 +62,7 @@ function LeftNode({ data }: NodeProps) {
 function RightNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-white dark:bg-slate-950 w-[280px] shadow-sm",
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[100px] bg-white dark:bg-slate-950 w-[400px] shadow-sm",
             // data.colorClass as string // Disabled color for answers
         )}>
             <Handle
@@ -68,18 +72,22 @@ function RightNode({ data }: NodeProps) {
                     width: '1.5em',
                     height: '1.5em',
                 }}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background"
+                className="w-3 h-3 bg-muted-foreground border-2 border-background transform -translate-x-1/2"
             />
             <div className="text-xs font-bold text-muted-foreground mb-2">Respon</div>
-            <div className="space-y-2">
+            <div className="space-y-2 flex-1">
                 {data.mediaUrl && (
                     <img
                         src={data.mediaUrl as string}
                         alt="Response"
-                        className="h-16 w-auto rounded-md border object-contain"
+                        className="h-24 w-auto rounded-md border object-contain"
                     />
                 )}
-                <MathRenderer content={data.content as string} className="text-sm" />
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm"
+                />
             </div>
         </div>
     );
@@ -198,9 +206,9 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: 
 
         const newNodes: Node[] = [];
         const startX = 50;
-        const rightX = 600;
+        const rightX = 700; // Increased
         const startY = 50;
-        const gapY = 150;
+        const gapY = 180; // Increased
 
         leftOptions.forEach(([key, opt]: [string, any], index) => {
             newNodes.push({
@@ -283,8 +291,15 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: 
         onChange(newPairs);
     }, [disabled, value, onChange]);
 
+    // Calculate canvas height based on items
+    const maxItems = Math.max(
+        Object.entries(options || {}).filter(([key, opt]: [string, any]) => opt.metadata?.side === 'left' || key.startsWith('L')).length,
+        Object.entries(options || {}).filter(([key, opt]: [string, any]) => opt.metadata?.side === 'right' || key.startsWith('R')).length
+    );
+    const canvasHeight = Math.max(600, (maxItems * 180) + 100);
+
     return (
-        <div className="w-full h-[600px] border rounded-xl bg-muted/10 relative">
+        <div className="w-full border rounded-xl bg-muted/10 relative" style={{ height: `${canvasHeight}px` }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -294,15 +309,15 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: 
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 nodesDraggable={false}
-                panOnDrag={false}
-                zoomOnScroll={false}
-                zoomOnPinch={false}
-                zoomOnDoubleClick={false}
+                panOnDrag={true}
+                zoomOnScroll={true}
+                zoomOnPinch={true}
+                zoomOnDoubleClick={true}
                 proOptions={{ hideAttribution: true }}
                 fitView
             >
                 <Background color="#94a3b8" gap={20} size={1} />
-                <Controls showInteractive={false} />
+                <Controls />
             </ReactFlow>
         </div>
     );

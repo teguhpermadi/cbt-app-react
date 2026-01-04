@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
     ReactFlow,
     Background,
@@ -14,16 +14,36 @@ import {
     Edge,
     Node,
     Panel,
-    useReactFlow,
     ReactFlowProvider,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, X, Plus, Trash2 } from 'lucide-react';
+import { Image as ImageIcon, X, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Option, OptionEditorProps } from './types';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
+
+// --- Type Definitions ---
+interface EditableNodeData extends Record<string, unknown> {
+    content: string;
+    mediaUrl?: string | null;
+    mediaFile?: File | null;
+    media_url?: string | null;
+    media_path?: string;
+    delete_media?: boolean;
+    pairId?: any;
+    colorClass?: string;
+    onChange: (id: string, content: string) => void;
+    onFileChange: (id: string, e: React.ChangeEvent<HTMLInputElement>) => void;
+    onRemoveMedia: (id: string) => void;
+    onDelete: (id: string) => void;
+    metadata?: {
+        side?: 'left' | 'right';
+        pair_id?: any;
+    };
+    question_id?: any;
+}
 
 // --- Helper for Colors ---
 const getPairColor = (pairId: any) => {
@@ -40,11 +60,9 @@ const getPairColor = (pairId: any) => {
     return colors[(id - 1) % colors.length];
 };
 
-import MathRenderer from '../MathRenderer';
-
 // --- Custom Node Components ---
 
-const RenderImageUploader = ({ data, id }: { data: any, id: string }) => {
+const RenderImageUploader = ({ data, id }: { data: EditableNodeData, id: string }) => {
     const { mediaUrl, mediaFile, onFileChange, onRemoveMedia } = data;
 
     // Local handler to wrap the event
@@ -58,9 +76,9 @@ const RenderImageUploader = ({ data, id }: { data: any, id: string }) => {
                 {(mediaUrl || mediaFile) ? (
                     <div className="relative group">
                         <img
-                            src={mediaFile ? URL.createObjectURL(mediaFile) : mediaUrl}
+                            src={mediaFile ? URL.createObjectURL(mediaFile) : (mediaUrl || "")}
                             alt="Preview"
-                            className="h-16 w-auto min-w-[50px] object-contain rounded-md border bg-muted"
+                            className="h-20 w-auto min-w-[50px] object-contain rounded-md border bg-muted"
                         />
                         <Button
                             type="button"
@@ -73,12 +91,13 @@ const RenderImageUploader = ({ data, id }: { data: any, id: string }) => {
                         </Button>
                     </div>
                 ) : (
-                    <Label htmlFor={`file-${id}`} className="h-10 w-10 flex flex-col items-center justify-center rounded-md border border-dashed bg-muted/30 text-muted-foreground cursor-pointer hover:bg-muted/50">
-                        <ImageIcon className="h-4 w-4 opacity-50" />
+                    <Label htmlFor={`file-${id}`} className="h-9 w-24 flex items-center justify-center rounded-md border bg-muted/30 text-xs font-medium text-muted-foreground cursor-pointer hover:bg-muted/50 gap-1">
+                        <ImageIcon className="h-3 w-3" />
+                        Image
                     </Label>
                 )}
 
-                <Input
+                <input
                     id={`file-${id}`}
                     type="file"
                     accept="image/*"
@@ -91,10 +110,11 @@ const RenderImageUploader = ({ data, id }: { data: any, id: string }) => {
 };
 
 function LeftEditableNode({ id, data }: NodeProps) {
+    const nodeData = data as EditableNodeData;
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-card w-[280px] shadow-sm transition-colors",
-            data.colorClass as string
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors",
+            nodeData.colorClass
         )}>
             <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs font-bold text-muted-foreground">Premis</span>
@@ -102,49 +122,43 @@ function LeftEditableNode({ id, data }: NodeProps) {
                     variant="ghost"
                     size="icon"
                     className="h-5 w-5 ml-auto text-muted-foreground hover:text-destructive"
-                    onClick={() => data.onDelete(id)}
+                    onClick={() => nodeData.onDelete(id)}
                 >
                     <X className="h-3 w-3" />
                 </Button>
             </div>
 
-            <div className="space-y-2">
-                <Input
-                    value={data.content as string}
-                    onChange={(e) => data.onChange(id, e.target.value)}
+            <div className="space-y-2 flex-1">
+                <RichTextEditor
+                    value={nodeData.content || ''}
+                    onChange={(val) => nodeData.onChange(id, val)}
                     placeholder="Teks premis..."
-                    className="h-8 text-xs"
+                    className="min-h-[100px]"
                 />
 
-                {(data.content as string) && (
-                    <div className="p-2 border rounded bg-slate-50/50 dark:bg-slate-900/50">
-                        <div className="text-[10px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">Preview:</div>
-                        <MathRenderer content={data.content as string} className="text-xs" />
-                    </div>
-                )}
-
-                <RenderImageUploader data={data} id={id} />
+                <RenderImageUploader data={nodeData} id={id} />
             </div>
 
             <Handle
                 type="source"
                 position={Position.Right}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background"
+                className="w-3 h-3 bg-muted-foreground border-2 border-background transform translate-x-1/2"
             />
         </div>
     );
 }
 
 function RightEditableNode({ id, data }: NodeProps) {
+    const nodeData = data as EditableNodeData;
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[80px] bg-card w-[280px] shadow-sm transition-colors",
-            data.colorClass as string
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors",
+            nodeData.colorClass
         )}>
             <Handle
                 type="target"
                 position={Position.Left}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background"
+                className="w-3 h-3 bg-muted-foreground border-2 border-background transform -translate-x-1/2"
             />
 
             <div className="flex items-center gap-2 mb-2 pl-2">
@@ -153,36 +167,29 @@ function RightEditableNode({ id, data }: NodeProps) {
                     variant="ghost"
                     size="icon"
                     className="h-5 w-5 ml-auto text-muted-foreground hover:text-destructive"
-                    onClick={() => data.onDelete(id)}
+                    onClick={() => nodeData.onDelete(id)}
                 >
                     <X className="h-3 w-3" />
                 </Button>
             </div>
 
-            <div className="space-y-2 text-right">
-                <Input
-                    value={data.content as string}
-                    onChange={(e) => data.onChange(id, e.target.value)}
+            <div className="space-y-2 flex-1 relative">
+                <RichTextEditor
+                    value={nodeData.content || ''}
+                    onChange={(val) => nodeData.onChange(id, val)}
                     placeholder="Teks respon..."
-                    className="h-8 text-xs"
+                    className="min-h-[100px]"
                 />
 
-                {(data.content as string) && (
-                    <div className="p-2 border rounded bg-slate-50/50 dark:bg-slate-900/50 text-left">
-                        <div className="text-[10px] text-muted-foreground mb-1 font-bold uppercase tracking-wider">Preview:</div>
-                        <MathRenderer content={data.content as string} className="text-xs" />
-                    </div>
-                )}
-
-                <div className="flex justify-end">
-                    <RenderImageUploader data={data} id={id} />
+                <div className="flex justify-end mt-2">
+                    <RenderImageUploader data={nodeData} id={id} />
                 </div>
             </div>
 
             {/* Pair Indicator */}
-            {data.pairId && (
-                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm">
-                    {data.pairId as string}
+            {nodeData.pairId && (
+                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm z-10">
+                    {nodeData.pairId as string}
                 </div>
             )}
         </div>
@@ -197,39 +204,41 @@ const nodeTypes = {
 // --- Main Editor Component ---
 
 function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
-    const [nodes, setNodes, onNodesChange] = useNodesState([]);
-    const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+    const [nodes, setNodes, onNodesChange] = useNodesState<Node<EditableNodeData>>([]);
+    const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
     // --- Sync Options to Nodes/Edges (Initial Load) ---
     useEffect(() => {
-        if (nodes.length > 0 || edges.length > 0) return; // Only load once or if strict sync needed. 
-        // Better: Only load if node count doesn't match option count or explicit reset. 
-        // For editing, we might need a more robust sync. For now, let's load initially.
-        // Actually, if we want to support external updates, we should sync carefully. 
-        // But assuming this component owns the state while active.
+        if (nodes.length > 0 || edges.length > 0) return;
 
         const leftOptions = options.filter(o => o.metadata?.side === 'left');
         const rightOptions = options.filter(o => o.metadata?.side === 'right');
 
-        const newNodes: Node[] = [];
+        const newNodes: Node<EditableNodeData>[] = [];
         const newEdges: Edge[] = [];
 
         // Layout
         const startX = 50;
-        const rightX = 600;
+        const rightX = 700; // Increased
         const startY = 50;
-        const gapY = 150;
+        const gapY = 300; // Increased significantly for RichTextEditor
 
         leftOptions.forEach((opt, index) => {
             newNodes.push({
-                id: opt.id || `temp-L-${index}`, // Use ID if available, else temp
+                id: opt.id || `temp-L-${index}`,
                 type: 'leftNode',
                 position: { x: startX, y: startY + (index * gapY) },
                 data: {
-                    // We need to pass opt data
                     ...opt,
-                    // And handlers
-                }
+                    // Ensure all required fields of EditableNodeData are present or placeholder
+                    // Handlers are attached later, but for type safety here:
+                    content: opt.content || '',
+                    onChange: () => { },
+                    onFileChange: () => { },
+                    onRemoveMedia: () => { },
+                    onDelete: () => { },
+                    colorClass: getPairColor(opt.metadata?.pair_id)
+                } as EditableNodeData
             });
         });
 
@@ -238,13 +247,20 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 id: opt.id || `temp-R-${index}`,
                 type: 'rightNode',
                 position: { x: rightX, y: startY + (index * gapY) },
-                data: { ...opt }
+                data: {
+                    ...opt,
+                    content: opt.content || '',
+                    onChange: () => { },
+                    onFileChange: () => { },
+                    onRemoveMedia: () => { },
+                    onDelete: () => { },
+                    colorClass: getPairColor(opt.metadata?.pair_id)
+                } as EditableNodeData
             });
         });
 
         // Edges
         // We find pairs based on metadata.pair_id
-        // We need to ensure pair_id matches
         leftOptions.forEach(lOpt => {
             if (lOpt.metadata?.pair_id) {
                 const partner = rightOptions.find(r => r.metadata?.pair_id == lOpt.metadata?.pair_id);
@@ -265,6 +281,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             }
         });
 
+        // Attach actual handlers
         setNodes(newNodes.map(n => ({
             ...n,
             data: {
@@ -273,11 +290,11 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 onFileChange: handleNodeFileChange,
                 onRemoveMedia: handleNodeRemoveMedia,
                 onDelete: handleNodeDelete,
-                colorClass: getPairColor((n.data.metadata as any)?.pair_id)
+                colorClass: getPairColor((n.data as EditableNodeData).metadata?.pair_id)
             }
         })));
         setEdges(newEdges);
-    }, []); // Run once on mount. Dependency handling is tricky for 2-way sync without loops.
+    }, []); // Run once on mount
 
     // --- Handlers ---
 
@@ -285,12 +302,10 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
     const handleNodeContentChange = useCallback((id: string, content: string) => {
         setNodes(nds => nds.map(node => {
             if (node.id === id) {
-                return { ...node, data: { ...node.data, content } };
+                return { ...node, data: { ...(node.data as EditableNodeData), content } };
             }
             return node;
         }));
-        // Update Options Prop
-        updateOptionsFromState();
     }, [setNodes]);
 
     // 2. Node File Change
@@ -303,7 +318,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 return {
                     ...node,
                     data: {
-                        ...node.data,
+                        ...(node.data as EditableNodeData),
                         mediaFile: file,
                         delete_media: false
                     }
@@ -311,7 +326,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             }
             return node;
         }));
-        updateOptionsFromState();
     }, [setNodes]);
 
     // 3. Remove Media
@@ -321,7 +335,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 return {
                     ...node,
                     data: {
-                        ...node.data,
+                        ...(node.data as EditableNodeData),
                         mediaFile: null,
                         mediaUrl: null,
                         media_url: null, // clear both
@@ -331,27 +345,15 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             }
             return node;
         }));
-        updateOptionsFromState();
     }, [setNodes]);
 
     // 4. Delete Node
     const handleNodeDelete = useCallback((id: string) => {
         setNodes(nds => nds.filter(n => n.id !== id));
         setEdges(eds => eds.filter(e => e.source !== id && e.target !== id));
-        // Need to wait for state update to propagate before invoking onChange? 
-        // Actually, we should call updateOptionsFromState using the filtered lists.
-        // But doing it inside setState callback is hard. 
-        // Let's use useEffect to sync state -> options? 
-        // No, that might cause loops with props -> state logic.
-        // Best approach: Calculate new state, set it, AND call parent.
-
-        // We'll trust the event loop or use a ref, or just re-calculate from current nodes (minus deleted).
-        // For simplicity, let's trigger an effect or manually construct.
     }, [setNodes, setEdges]);
 
-    // We need a robust way to push changes up.
-    // Let's use a `useEffect` that listens to nodes/edges changes? 
-    // IF dependencies are handled well.
+    // Effect to sync options up
     useEffect(() => {
         if (nodes.length === 0 && options.length === 0) return; // Init
 
@@ -362,19 +364,13 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 else return e.target === node.id;
             });
 
-            // Determine Pair ID
-            // If connected, edge might have data or just use existing logic.
-            // Ideally, we assign pair IDs based on connection order or just sequential?
-            // Let's say: each Edge represents a pair. We can assign a unique ID to that edge.
-
-            let pairId = (node.data.metadata as any)?.pair_id;
+            const nodeData = node.data as EditableNodeData;
+            let pairId = nodeData.metadata?.pair_id;
 
             // If not connected, clear pairId
             if (!connectedEdge) {
                 pairId = undefined;
             } else {
-                // If connected, we need a common pairId. 
-                // We can use the Edge ID or generate one.
                 // Let's use the index of the edge + 1 for simple 1, 2, 3.. visual
                 const edgeIndex = edges.indexOf(connectedEdge);
                 pairId = edgeIndex + 1;
@@ -382,16 +378,14 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
 
             return {
                 id: node.id.startsWith('temp-') ? undefined : node.id, // Keep ID if real
-                question_id: (node.data.question_id as any),
-                option_key: (node.type === 'leftNode' ? `L` : `R`) + (index + 1), // Re-assign keys? Or keep?
-                // Re-assigning keys L1, L2... R1, R2... based on list order is safer for 'matching' type usually.
-                content: (node.data.content as string) || '',
-                media_path: (node.data.media_path as string),
-                media_url: (node.data.media_url as string), // For preview
-                media_file: (node.data.mediaFile as File), // For upload
-                delete_media: (node.data.delete_media as boolean),
-                is_correct: true, // Matching options usually considered 'parts' of correct answer? Or is_correct logic handles it?
-                // In generic Option model, we store parts.
+                question_id: nodeData.question_id,
+                option_key: (node.type === 'leftNode' ? `L` : `R`) + (index + 1),
+                content: (nodeData.content as string) || '',
+                media_path: (nodeData.media_path as string),
+                media_url: (nodeData.media_url as string), // For preview
+                media_file: (nodeData.mediaFile as File), // For upload
+                delete_media: (nodeData.delete_media as boolean),
+                is_correct: true,
                 order: index,
                 metadata: {
                     side: node.type === 'leftNode' ? 'left' : 'right',
@@ -400,23 +394,9 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             };
         });
 
-        // Update nodes color based on NEW pairId
-        // This is a side-effect on the nodes state itself (visual update)
-        // We shouldn't call setNodes inside this effect if it triggers this effect.
-        // But we need the visual update. 
-        // We can do it in render/node component. Node receives data. 
-        // We passed `colorClass` in data. We need to update that.
-
-        // Let's ONLY call onChange here.
-        // For visual updates in ReactFlow, we need to update nodes data.
-        // Preventing loop: Only update options if deep different? 
-
-        // Actually, let's rely on the user interactions to trigger specific updates?
-        // Drag/Connect -> triggers handleConnect -> updates Edges -> triggers this Effect.
-
         onChange(newOptions);
 
-    }, [nodes, edges]); // Be careful!
+    }, [nodes, edges]);
 
     // Color Update Effect
     useEffect(() => {
@@ -431,13 +411,15 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 pairId = edges.indexOf(connectedEdge) + 1;
             }
 
+            const data = n.data as EditableNodeData;
+
             // Only update if changed
-            if ((n.data.metadata as any)?.pair_id !== pairId || n.data.pairId !== pairId) {
+            if (data.metadata?.pair_id !== pairId || data.pairId !== pairId) {
                 return {
                     ...n,
                     data: {
                         ...n.data,
-                        metadata: { ...(n.data.metadata as any), pair_id: pairId },
+                        metadata: { ...data.metadata, pair_id: pairId },
                         pairId: pairId,
                         colorClass: getPairColor(pairId)
                     }
@@ -449,28 +431,20 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
 
 
     const onConnect = useCallback((params: Connection) => {
-        // Only allow Left -> Right
-        // ReactFlow handles target/source types if handles are typed? 
-        // We can just addEdge.
-        // Enforce 1-to-1? If we want strict pairs, yes.
-        // If we connect, we should remove existing connections from source or target if 1-to-1.
-
         setEdges((eds) => {
-            // Disable multiple connections for same node?
-            // Remove any edge where source is params.source OR target is params.target
             const filtered = eds.filter(e => e.source !== params.source && e.target !== params.target);
             return addEdge({ ...params, animated: true, style: { strokeWidth: 2 } }, filtered)
         });
     }, [setEdges]);
 
     const addLeftNode = () => {
-        const id = `temp-L-${Date.now()}`; // Unique Temp ID
+        const id = `temp-L-${Date.now()}`;
         const maxY = nodes.filter(n => n.type === 'leftNode').reduce((max, n) => Math.max(max, n.position.y), 0) || 0;
 
-        const newNode: Node = {
+        const newNode: Node<EditableNodeData> = {
             id,
             type: 'leftNode',
-            position: { x: 50, y: maxY + 150 },
+            position: { x: 50, y: maxY + 300 },
             data: {
                 content: '',
                 metadata: { side: 'left' },
@@ -479,7 +453,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 onRemoveMedia: handleNodeRemoveMedia,
                 onDelete: handleNodeDelete,
                 colorClass: getPairColor(null)
-            }
+            } as EditableNodeData
         };
         setNodes(nds => [...nds, newNode]);
     };
@@ -488,10 +462,10 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
         const id = `temp-R-${Date.now()}`;
         const maxY = nodes.filter(n => n.type === 'rightNode').reduce((max, n) => Math.max(max, n.position.y), 0) || 0;
 
-        const newNode: Node = {
+        const newNode: Node<EditableNodeData> = {
             id,
             type: 'rightNode',
-            position: { x: 600, y: maxY + 150 },
+            position: { x: 700, y: maxY + 300 },
             data: {
                 content: '',
                 metadata: { side: 'right' },
@@ -500,18 +474,19 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 onRemoveMedia: handleNodeRemoveMedia,
                 onDelete: handleNodeDelete,
                 colorClass: getPairColor(null)
-            }
+            } as EditableNodeData
         };
         setNodes(nds => [...nds, newNode]);
     };
 
-    // Update handlers in nodes when they are recreated?
-    // We already wrapped them in useEffect [nodes, edges].
-    // Wait, the initial useEffect sets the handlers. 
-    // New nodes added via addLeftNode need handlers too.
+    const maxItems = Math.max(
+        nodes.filter(n => n.type === 'leftNode').length,
+        nodes.filter(n => n.type === 'rightNode').length
+    );
+    const canvasHeight = Math.max(600, (maxItems * 300) + 100);
 
     return (
-        <div className="w-full h-[600px] border rounded-xl bg-muted/10 relative group">
+        <div className="w-full border rounded-xl bg-muted/10 relative group" style={{ height: `${canvasHeight}px` }}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -537,8 +512,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
     );
 }
 
-// Wrapper to provide Context if needed (ReactFlowProvider)
-// Useful if we use useReactFlow hooks inside. 
 export default function OptionEditorMatching(props: OptionEditorProps) {
     return (
         <ReactFlowProvider>

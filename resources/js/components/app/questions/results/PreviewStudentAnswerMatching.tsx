@@ -14,7 +14,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
-import MathRenderer from '../MathRenderer';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
 
 interface Option {
     id: string;
@@ -42,7 +42,7 @@ interface MatchingResultProps {
 function LeftOptionNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-xl border text-sm flex items-center min-h-[60px] bg-card w-[350px] shadow-sm transition-all hover:shadow-md",
+            "relative p-3 rounded-xl border text-sm flex items-center min-h-[100px] bg-card w-[400px] shadow-sm transition-all hover:shadow-md",
             data.colorClass as string
         )}>
             <div className="flex-1 min-w-0 pr-4">
@@ -52,10 +52,14 @@ function LeftOptionNode({ data }: NodeProps) {
                     </span>
                 </div>
 
-                <MathRenderer content={data.content as string} className="text-sm" />
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm"
+                />
 
                 {data.mediaUrl && (
-                    <div className="mt-2 rounded-lg overflow-hidden border border-border h-16 w-auto bg-muted/20 inline-block">
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border h-24 w-auto bg-muted/20 inline-block">
                         <img
                             src={data.mediaUrl as string}
                             alt="Visual"
@@ -77,7 +81,7 @@ function LeftOptionNode({ data }: NodeProps) {
 function RightOptionNode({ data }: NodeProps) {
     return (
         <div className={cn(
-            "relative p-3 rounded-xl border text-sm flex items-center min-h-[60px] bg-card w-[350px] shadow-sm transition-all hover:shadow-md",
+            "relative p-3 rounded-xl border text-sm flex items-center min-h-[100px] bg-card w-[400px] shadow-sm transition-all hover:shadow-md",
             data.colorClass as string
         )}>
             <Handle
@@ -93,10 +97,14 @@ function RightOptionNode({ data }: NodeProps) {
                     </span>
                 </div>
 
-                <MathRenderer content={data.content as string} className="text-sm" />
+                <RichTextEditor
+                    value={data.content as string}
+                    readOnly
+                    className="border-0 bg-transparent p-0 min-h-0 text-sm [&_.ProseMirror]:text-right"
+                />
 
                 {data.mediaUrl && (
-                    <div className="mt-2 rounded-lg overflow-hidden border border-border h-16 w-auto bg-muted/20 inline-block">
+                    <div className="mt-2 rounded-lg overflow-hidden border border-border h-24 w-auto bg-muted/20 inline-block">
                         <img
                             src={data.mediaUrl as string}
                             alt="Visual"
@@ -141,9 +149,9 @@ export default function PreviewStudentAnswerMatching({
 
         // Layout Config
         const startX = 20;
-        const rightX = 600; // Increased distance for better visibility
+        const rightX = 700; // Increased distance for better visibility with larger nodes
         const startY = 20;
-        const gapY = 150; // More vertical space
+        const gapY = 180; // Increased vertical space
 
         // Create Left Nodes
         leftOptionsList.forEach((opt, index) => {
@@ -242,7 +250,7 @@ export default function PreviewStudentAnswerMatching({
         Object.values(options).filter(o => o.key.startsWith('L') || o.side === 'left').length,
         Object.values(options).filter(o => o.key.startsWith('R') || o.side === 'right').length
     );
-    const canvasHeight = Math.max(400, (maxItems * 150) + 100);
+    const canvasHeight = Math.max(400, (maxItems * 180) + 100);
 
     return (
         <div
@@ -258,10 +266,10 @@ export default function PreviewStudentAnswerMatching({
                 fitView
                 fitViewOptions={{ padding: 0.2 }}
                 proOptions={{ hideAttribution: true }}
-                panOnDrag={true} // Allow panning for better view
-                zoomOnScroll={false}
-                zoomOnPinch={false}
-                zoomOnDoubleClick={false}
+                panOnDrag={true}
+                zoomOnScroll={true}
+                zoomOnPinch={true}
+                zoomOnDoubleClick={true}
                 // Prevent user interaction modifying structure
                 nodesDraggable={false}
                 nodesConnectable={false}
