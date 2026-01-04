@@ -23,7 +23,9 @@ class QuestionTemplateService
         $properties->setTitle('Template Upload Soal');
         $properties->setDescription('Template untuk upload soal ke bank soal');
 
-        $section = $phpWord->addSection();
+        $section = $phpWord->addSection([
+            'orientation' => 'landscape',
+        ]);
 
         // Add title
         $section->addText(
@@ -37,10 +39,11 @@ class QuestionTemplateService
         // Add instructions
         $section->addText('Petunjuk Penggunaan:', ['size' => 12, 'bold' => true]);
         $section->addText('1. Isi tabel di bawah dengan soal-soal Anda', ['size' => 10]);
-        $section->addText('2. Kolom yang diperlukan: Tipe Soal, Pertanyaan, Opsi, Kunci, Poin', ['size' => 10]);
+        $section->addText('2. Kolom yang diperlukan: Tipe Soal, Pertanyaan, Opsi, Kunci, Poin, Tags', ['size' => 10]);
         $section->addText('3. Untuk opsi, pisahkan dengan ENTER (line break)', ['size' => 10]);
         $section->addText('4. Tipe soal yang didukung: MULTIPLE_CHOICE, MULTIPLE_SELECTION, TRUE_FALSE, MATCHING, ORDERING, ESSAY, NUMERICAL_INPUT', ['size' => 10]);
-        $section->addText('5. Simpan file dan upload melalui menu Bank Soal', ['size' => 10]);
+        $section->addText('5. Kolom Tags: Pisahkan tag dengan koma (contoh: Matematika, Trigonometri, Mudah)', ['size' => 10]);
+        $section->addText('6. Simpan file dan upload melalui menu Bank Soal', ['size' => 10]);
 
         $section->addTextBreak(1);
 
@@ -65,6 +68,7 @@ class QuestionTemplateService
         $table->addCell(2500, ['bgColor' => 'CCCCCC'])->addText('Opsi', ['bold' => true], ['alignment' => 'center']);
         $table->addCell(1500, ['bgColor' => 'CCCCCC'])->addText('Kunci', ['bold' => true], ['alignment' => 'center']);
         $table->addCell(800, ['bgColor' => 'CCCCCC'])->addText('Poin', ['bold' => true], ['alignment' => 'center']);
+        $table->addCell(2000, ['bgColor' => 'CCCCCC'])->addText('Tags', ['bold' => true], ['alignment' => 'center']);
 
         // Example 1: Multiple Choice
         $table->addRow();
@@ -81,6 +85,7 @@ class QuestionTemplateService
 
         $table->addCell(1500)->addText('A');
         $table->addCell(800)->addText('10');
+        $table->addCell(2000)->addText('Matematika, Geometri, Mudah');
 
         // Example 2: Multiple Selection
         $table->addRow();
@@ -96,6 +101,7 @@ class QuestionTemplateService
 
         $table->addCell(1500)->addText('A, D');
         $table->addCell(800)->addText('10');
+        $table->addCell(2000)->addText('Matematika, Bilangan');
 
         // Example 3: True/False
         $table->addRow();
@@ -106,6 +112,7 @@ class QuestionTemplateService
         $table->addCell(2500)->addText('-');
         $table->addCell(1500)->addText('TRUE');
         $table->addCell(800)->addText('5');
+        $table->addCell(2000)->addText('Fisika, Besaran, Satuan');
 
         // Example 4: Matching
         $table->addRow();
@@ -119,6 +126,7 @@ class QuestionTemplateService
 
         $table->addCell(1500)->addText('-');
         $table->addCell(800)->addText('15');
+        $table->addCell(2000)->addText('Matematika, Rumus');
 
         // Example 5: Ordering
         $table->addRow();
@@ -133,6 +141,7 @@ class QuestionTemplateService
 
         $table->addCell(1500)->addText('-');
         $table->addCell(800)->addText('10');
+        $table->addCell(2000)->addText('Sains, Metode Ilmiah');
 
         // Example 6: Essay
         $table->addRow();
@@ -143,6 +152,7 @@ class QuestionTemplateService
         $table->addCell(2500)->addText('-');
         $table->addCell(1500)->addText('Gunakan aturan L\'Hopital atau ekspansi deret Taylor.');
         $table->addCell(800)->addText('20');
+        $table->addCell(2000)->addText('Matematika, Kalkulus, Pembuktian');
 
         // Example 7: Numerical Input
         $table->addRow();
@@ -153,6 +163,7 @@ class QuestionTemplateService
         $table->addCell(2500)->addText('-');
         $table->addCell(1500)->addText('1.15');
         $table->addCell(800)->addText('15');
+        $table->addCell(2000)->addText('Matematika, Pecahan, Aritmatika');
 
         // Add empty rows for user to fill
         for ($i = 0; $i < 5; $i++) {
@@ -162,6 +173,7 @@ class QuestionTemplateService
             $table->addCell(2500);
             $table->addCell(1500);
             $table->addCell(800);
+            $table->addCell(2000);
         }
 
         // Save file

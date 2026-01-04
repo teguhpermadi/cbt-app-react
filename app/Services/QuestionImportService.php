@@ -291,11 +291,11 @@ class QuestionImportService
         }
 
         // Fill missing columns with empty string/images structure
-        while (count($cells) < 5) {
+        while (count($cells) < 6) {
             $cells[] = ['text' => '', 'images' => []];
         }
 
-        [$typeCell, $questionCell, $optionsCell, $keyCell, $pointsCell] = $cells;
+        [$typeCell, $questionCell, $optionsCell, $keyCell, $pointsCell, $tagsCell] = $cells;
 
         $typeStr = is_array($typeCell) ? $typeCell['text'] : $typeCell;
         $typeNormalized = strtoupper(trim($typeStr));
@@ -326,6 +326,15 @@ class QuestionImportService
 
             // Create options based on type
             $this->createOptions($question, $questionType, $optionsCell, $keyCell['text']);
+
+            // Attach Tags
+            if (!empty(trim($tagsCell['text']))) {
+                // Split by comma, trim, and filter empty
+                $tags = array_values(array_filter(array_map('trim', explode(',', $tagsCell['text']))));
+                if (!empty($tags)) {
+                    $question->attachTags($tags);
+                }
+            }
 
             DB::commit();
             return $question;
