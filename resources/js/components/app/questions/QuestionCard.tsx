@@ -3,12 +3,11 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Edit, Trash2, Tag, X } from "lucide-react";
-import { useEffect, useRef } from "react";
-import renderMathInElement from "katex/dist/contrib/auto-render";
 import { DifficultySelector } from "./DifficultySelector";
 import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
 import { TagAutocomplete } from "./TagAutocomplete";
+import RichTextEditor from "@/components/ui/rich-text/RichTextEditor";
 
 import AnswerOptions from "./AnswerOptions";
 import { Question, QUESTION_TYPE_LABELS } from "./types";
@@ -40,22 +39,6 @@ export default function QuestionCard({
             onUpdate(question.id, field, value);
         }
     };
-
-    const contentRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        if (contentRef.current && typeof question.content === 'string') {
-            renderMathInElement(contentRef.current, {
-                delimiters: [
-                    { left: '$$', right: '$$', display: true },
-                    { left: '$', right: '$', display: false },
-                    { left: '\\(', right: '\\)', display: false },
-                    { left: '\\[', right: '\\]', display: true }
-                ],
-                throwOnError: false
-            });
-        }
-    }, [question.content]);
 
     return (
         <Card className="overflow-hidden border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl transition-all hover:shadow-md">
@@ -127,11 +110,12 @@ export default function QuestionCard({
                     )}
 
                     {/* Render content based on type later, for now just dump or show text */}
-                    {typeof question.content === 'string' ? (
-                        <div ref={contentRef} dangerouslySetInnerHTML={{ __html: question.content }} />
-                    ) : (
-                        <p className="text-muted-foreground italic">Content format required rendering implementation</p>
-                    )}
+                    {/* Render content using RichTextEditor in readOnly mode */}
+                    <RichTextEditor
+                        value={typeof question.content === 'string' ? question.content : ''}
+                        readOnly={true}
+                        className="bg-transparent border-none p-0"
+                    />
                 </div>
             </CardContent>
             <CardFooter className="p-3 bg-slate-50/20 dark:bg-slate-900/20 border-t border-slate-100 dark:border-slate-800 flex-col items-start gap-4">
