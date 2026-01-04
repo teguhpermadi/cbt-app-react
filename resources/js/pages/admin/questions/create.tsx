@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
 import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { DifficultySelector } from '@/components/app/questions/DifficultySelector';
@@ -203,11 +204,11 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
                         <CardTitle className="text-lg">Konten Soal</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <Textarea
+                        <RichTextEditor
                             value={data.content}
-                            onChange={(e) => setData('content', e.target.value)}
+                            onChange={(value) => setData('content', value)}
                             placeholder="Tuliskan pertanyaan di sini..."
-                            className="min-h-[120px] text-lg p-4 resize-y"
+                            className="min-h-[120px]"
                         />
                         {errors.content && <p className="text-red-500 text-sm">{errors.content}</p>}
 
