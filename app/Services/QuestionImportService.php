@@ -373,6 +373,63 @@ class QuestionImportService
      * @param array $data
      * @return Question
      */
+    /**
+     * Process text to convert specific patterns to Rich Text HTML components
+     * 1. $...$ -> MathComponent
+     * 2. Javanese chars -> JavaneseComponent
+     * 3. Arabic chars -> ArabicComponent
+     */
+    protected function processRichText(?string $text): string
+    {
+        if (empty($text)) {
+            return '';
+        }
+
+        // 1. Convert Latex: $equation$ -> math-component
+        $text = preg_replace_callback(
+            '/\$([^$]+)\$/',
+            function ($matches) {
+                $latex = htmlspecialchars($matches[1], ENT_QUOTES);
+                return '<span data-type="math-component" latex="' . $latex . '"></span>';
+            },
+            $text
+        );
+
+        // 2. Convert Javanese (Hanacaraka) - Unicode Block A980–A9DF
+        $text = preg_replace_callback(
+            '/[\x{A980}-\x{A9DF}]+/u',
+            function ($matches) {
+                $content = htmlspecialchars($matches[0], ENT_QUOTES);
+                return '<span data-type="javanese-component" text="' . $content . '"></span>';
+            },
+            $text
+        );
+
+        // 3. Convert Arabic - Unicode Block 0600–06FF and supplements
+        $text = preg_replace_callback(
+            '/\p{Arabic}+/u',
+            function ($matches) {
+                $content = htmlspecialchars($matches[0], ENT_QUOTES);
+                return '<span data-type="arabic-component" text="' . $content . '"></span>';
+            },
+            $text
+        );
+
+        // Enhance layout: Wrap in paragraph if it looks like a block
+        $lines = explode("\n", $text);
+        if (count($lines) > 1) {
+            $html = '';
+            foreach ($lines as $line) {
+                if (trim($line) !== '') {
+                    $html .= '<p>' . $line . '</p>';
+                }
+            }
+            return $html;
+        }
+
+        return $text;
+    }
+
     protected function createQuestion(array $data): Question
     {
         return Question::create([
@@ -380,7 +437,7 @@ class QuestionImportService
             'question_type' => $data['type'],
             'difficulty_level' => DifficultyLevelEnum::Medium, // Default: sedang
             'timer' => TimerEnum::ThirtySeconds, // Default: 30 detik (karena DB Constraint NOT NULL)
-            'content' => $data['content'],
+            'content' => $this->processRichText($data['content']),
             'score_value' => (int) $data['points'],
             'is_active' => true,
             'is_approved' => true, // Auto info approved for uploaded questions
@@ -441,7 +498,7 @@ class QuestionImportService
             $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $key,
-                'content' => $content,
+                'content' => $this->processRichText($content),
                 'order' => $index,
                 'is_correct' => ($key === $correctKey),
             ]);
@@ -473,7 +530,7 @@ class QuestionImportService
             $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $key,
-                'content' => $content,
+                'content' => $this->processRichText($content),
                 'order' => $index,
                 'is_correct' => in_array($key, $correctKeys),
             ]);
@@ -529,7 +586,7 @@ class QuestionImportService
             $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $mappedKey,
-                'content' => $content,
+                'content' => $this->processRichText($content),
                 'order' => $index,
                 'is_correct' => ($mappedKey === $standardizedCorrectKey),
             ]);
@@ -565,7 +622,7 @@ class QuestionImportService
             $leftOption = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $leftKey,
-                'content' => $leftContent,
+                'content' => $this->processRichText($leftContent),
                 'order' => $index * 2,
                 'is_correct' => false,
                 'metadata' => [
@@ -578,7 +635,7 @@ class QuestionImportService
             $rightOption = Option::create([
                 'question_id' => $question->id,
                 'option_key' => $rightKey,
-                'content' => $rightContent,
+                'content' => $this->processRichText($rightContent),
                 'order' => $index * 2 + 1,
                 'is_correct' => false,
                 'metadata' => [
@@ -618,7 +675,7 @@ class QuestionImportService
             $option = Option::create([
                 'question_id' => $question->id,
                 'option_key' => (string)($index + 1),
-                'content' => $content,
+                'content' => $this->processRichText($content),
                 'order' => $index,
                 'is_correct' => false,
                 'metadata' => [
@@ -678,8 +735,8 @@ class QuestionImportService
             'order' => 0,
             'is_correct' => false,
             'metadata' => [
-                'rubric' => $rubric,
-                'expected_answer' => $rubric,
+                'rubric' => $this->processRichText($rubric),
+                'expected_answer' => $this->processRichText($rubric),
             ],
         ]);
     }
