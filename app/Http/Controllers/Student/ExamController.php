@@ -158,12 +158,11 @@ class ExamController extends Controller
                     'question_id' => $question->id,
                     'question_number' => $index + 1, // Urutan default dari bank soal
                     'content' => $question->content,
-                    'options' => $question->getOptionsForExam(),
-                    'key_answer' => $question->getKeyAnswerForExam(),
+                    'options' => json_encode($question->getOptionsForExam()),
+                    'key_answer' => json_encode($question->getKeyAnswerForExam()),
                     'score_value' => $question->score_value,
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
-                    'media_path' => $question->getFirstMediaUrl('question_content') ?: $question->media_path,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
