@@ -12,9 +12,10 @@ interface SortableItemProps {
     content: string;
     mediaUrl?: string;
     showMedia?: boolean;
+    onImageClick?: (src: string) => void;
 }
 
-function SortableItem({ id, content, mediaUrl, showMedia = true }: SortableItemProps) {
+function SortableItem({ id, content, mediaUrl, showMedia = true, onImageClick }: SortableItemProps) {
     const {
         attributes,
         listeners,
@@ -51,7 +52,11 @@ function SortableItem({ id, content, mediaUrl, showMedia = true }: SortableItemP
                         <img
                             src={mediaUrl}
                             alt="Option Media"
-                            className="max-h-[100px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900"
+                            className="max-h-[100px] w-auto rounded-md object-contain border bg-white dark:bg-slate-900 cursor-pointer hover:shadow-lg transition-shadow"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onImageClick?.(mediaUrl);
+                            }}
                         />
                     </div>
                 )}
@@ -61,7 +66,7 @@ function SortableItem({ id, content, mediaUrl, showMedia = true }: SortableItemP
     );
 }
 
-export default function OptionViewerOrdering({ options, value, onChange, disabled, showMedia = true }: OptionViewerProps) {
+export default function OptionViewerOrdering({ options, value, onChange, disabled, showMedia = true, onImageClick }: OptionViewerProps) {
     const sensors = useSensors(
         useSensor(PointerSensor),
         useSensor(KeyboardSensor, {
@@ -112,6 +117,7 @@ export default function OptionViewerOrdering({ options, value, onChange, disable
                                 content={option.content}
                                 mediaUrl={option.media_url}
                                 showMedia={showMedia}
+                                onImageClick={onImageClick}
                             />
                         );
                     })}

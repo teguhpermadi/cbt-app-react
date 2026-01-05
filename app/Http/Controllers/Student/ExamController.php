@@ -152,6 +152,10 @@ class ExamController extends Controller
 
             $examQuestions = [];
             foreach ($questions as $index => $question) {
+                // Get Media Path (Spatie Media Library)
+                $media = $question->getFirstMedia('question_content');
+                $mediaPath = $media ? $media->id . '/' . $media->file_name : null;
+
                 $examQuestions[] = [
                     'id' => (string) \Illuminate\Support\Str::ulid(),
                     'exam_id' => $exam->id,
@@ -163,6 +167,7 @@ class ExamController extends Controller
                     'score_value' => $question->score_value,
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
+                    'media_path' => $mediaPath,
                     'hint' => $question->hint,
                     'created_at' => now(),
                     'updated_at' => now(),

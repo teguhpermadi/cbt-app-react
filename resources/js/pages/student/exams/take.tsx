@@ -141,6 +141,13 @@ export default function ExamTake({ exam, session, questions }: Props) {
                 ],
                 throwOnError: false
             });
+
+            // Make images clickable
+            const images = contentRef.current.getElementsByTagName('img');
+            Array.from(images).forEach((img) => {
+                img.style.cursor = 'pointer';
+                img.onclick = () => handleImageClick(img.src);
+            });
         }
     }, [currentIndex, questions[currentIndex]?.content]);
 

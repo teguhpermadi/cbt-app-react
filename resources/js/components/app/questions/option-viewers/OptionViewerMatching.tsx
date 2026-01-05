@@ -37,7 +37,13 @@ function LeftNode({ data }: NodeProps) {
                     <img
                         src={data.mediaUrl as string}
                         alt="Premise"
-                        className="h-24 w-auto rounded-md border object-contain"
+                        className="h-24 w-auto rounded-md border object-contain cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-900"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (typeof data.onImageClick === 'function') {
+                                (data.onImageClick as (src: string) => void)(data.mediaUrl as string);
+                            }
+                        }}
                     />
                 )}
                 <RichTextEditor
@@ -80,7 +86,13 @@ function RightNode({ data }: NodeProps) {
                     <img
                         src={data.mediaUrl as string}
                         alt="Response"
-                        className="h-24 w-auto rounded-md border object-contain"
+                        className="h-24 w-auto rounded-md border object-contain cursor-pointer hover:shadow-lg transition-shadow bg-white dark:bg-slate-900"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (typeof data.onImageClick === 'function') {
+                                (data.onImageClick as (src: string) => void)(data.mediaUrl as string);
+                            }
+                        }}
                     />
                 )}
                 <RichTextEditor
@@ -181,7 +193,7 @@ const getPairColor = (pairId: any) => {
     return colors[(id - 1) % colors.length];
 };
 
-function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: OptionViewerProps) {
+function MatchingFlow({ options, value, onChange, disabled, showMedia = true, onImageClick }: OptionViewerProps) {
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
@@ -218,7 +230,8 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: 
                 data: {
                     content: opt.content || '',
                     mediaUrl: (showMedia !== false) ? (opt.media_url || opt.media) : null,
-                    colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id)
+                    colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id),
+                    onImageClick: onImageClick
                 }
             });
         });
@@ -232,7 +245,8 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true }: 
                     content: opt.content || '',
                     mediaUrl: (showMedia !== false) ? (opt.media_url || opt.media) : null,
                     pairId: opt.metadata?.pair_id || opt.pair_id,
-                    colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id)
+                    colorClass: getPairColor(opt.metadata?.pair_id || opt.pair_id),
+                    onImageClick: onImageClick
                 }
             });
         });

@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ExamQuestion extends Model
 {
     use HasFactory, HasUlids;
-    
+
     protected $keyType = 'string';
     public $incrementing = false;
 
@@ -26,6 +26,8 @@ class ExamQuestion extends Model
         'score_value',          // Nilai soal dalam ujian ini (bisa berbeda dari soal asli)
         'question_type',        // Tipe soal
         'difficulty_level',     // Level kesulitan soal
+        'media_path',           // Added media_path
+        'hint',
     ];
 
     protected $casts = [
