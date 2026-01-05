@@ -185,6 +185,7 @@ class ExamAnalysisService
                 'media_url' => $question->media_path ? asset('storage/' . $question->media_path) : null,
                 'explanation' => $question->explanation ?? null,
                 'options' => $question->options,
+                'correction_notes' => $detail->correction_notes,
             ];
         })->toArray();
     }

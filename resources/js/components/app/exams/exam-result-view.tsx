@@ -5,7 +5,7 @@ import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import {
     Trophy, Target, CheckCircle, XCircle, HelpCircle,
-    Users, Medal, BarChart3
+    Users, Medal, BarChart3, MessageSquare
 } from 'lucide-react';
 import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
 import MathRenderer from "@/components/app/questions/MathRenderer";
@@ -271,6 +271,18 @@ export default function ExamResultView({
                                                     <span className="text-xs font-bold text-blue-600 uppercase mb-1 block">Penjelasan</span>
                                                     <div className="prose prose-sm text-slate-600">
                                                         <MathRenderer content={q.explanation} />
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {q.correction_notes && (
+                                                <div className="mt-4 pt-4 border-t border-slate-200">
+                                                    <span className="text-xs font-bold text-orange-600 uppercase mb-1 flex items-center gap-1">
+                                                        <MessageSquare className="w-3 h-3" />
+                                                        Catatan Guru
+                                                    </span>
+                                                    <div className="prose prose-sm text-slate-700 bg-orange-50 p-3 rounded border border-orange-100 italic">
+                                                        {q.correction_notes}
                                                     </div>
                                                 </div>
                                             )}
