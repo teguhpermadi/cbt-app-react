@@ -14,22 +14,52 @@ class DashboardController extends Controller
         /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // Ambil ujian aktif yang sesuai dengan grade siswa
-        // Relasi Exam -> Grade adalah Many-to-Many
-        // Siswa -> Grade juga Many-to-Many (asumsi siswa bisa punya >1 grade, misal akselerasi atau pindah)
-        // Kita cari Exam yang punya setidaknya satu grade yang sama dengan grade siswa.
+        // 1. Data existing dashboard (stats personal)
+        // Ambil ID Kelas siswa dari relasi grades
+        $gradeIds = $user->grades->pluck('id');
 
-        $studentGradeIds = $user->grades->pluck('id');
+        // Stats Personal
+        $completedExamsCount = \App\Models\ExamSession::where('user_id', $user->id)->where('is_finished', true)->count();
+        // Uses ExamResult score_percent for accuracy
+        $averageScore = round(\App\Models\ExamResult::where('user_id', $user->id)->avg('score_percent') ?? 0, 1);
 
-        $activeExams = \App\Models\Exam::query()
+        $upcomingExamsCount = \App\Models\Exam::whereHas('grades', function ($query) use ($gradeIds) {
+            $query->whereIn('grades.id', $gradeIds);
+        })
             ->where('is_published', true)
-            // ->where('start_time', '<=', now()) // Optional: jika ingin menyembunyikan yg belum mulai
-            ->where('end_time', '>', now())
-            ->whereHas('grades', function ($query) use ($studentGradeIds) {
-                $query->whereIn('grades.id', $studentGradeIds);
-            })
-            ->with(['subject', 'grades'])
-            ->latest('start_time')
+            ->where('start_time', '>', now())
+            ->count();
+
+        // NEW: Total Final Score (Sum of score_percent from ExamResult)
+        $totalFinalScore = round(\App\Models\ExamResult::where('user_id', $user->id)->sum('score_percent'));
+
+        $stats = [
+            'completed_exams' => $completedExamsCount,
+            'average_score' => $averageScore,
+            'upcoming_exams' => $upcomingExamsCount,
+            'total_score' => $totalFinalScore,
+        ];
+
+        // Riwayat Hasil Terakhir
+        $recentResults = \App\Models\ExamSession::with(['exam.subject'])
+            ->where('user_id', $user->id)
+            ->where('is_finished', true)
+            ->orderBy('finish_time', 'desc')
+            ->limit(5)
+            ->get();
+
+        // 2. Data Baru untuk Card Informatif & Leaderboard
+        $activeAcademicYear = \App\Models\AcademicYear::active()->first();
+
+        // Exams Today (Exam yang berjalan hari ini / saat ini)
+        $examsToday = \App\Models\Exam::with(['subject', 'grades'])
+            ->where('is_published', true)
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>=', now())
+            ->whereHas('grades', function ($query) use ($gradeIds) {
+                $query->whereIn('grades.id', $gradeIds);
+            }) // Filter only exams for student's grade
+            ->orderBy('end_time', 'asc')
             ->get()
             ->map(function ($exam) use ($user) {
                 // Check if user has started
@@ -37,49 +67,85 @@ class DashboardController extends Controller
                     ->where('user_id', $user->id)
                     ->first();
 
-                // Jika sudah selesai, mungkin tidak perlu muncul di "Active Exams"? 
-                // Atau tetap muncul tapi statusnya selesai?
-                // Mockup sebelumnya: 'has_started' => boolean.
-
                 // Logic tambahan: Kalau sudah finished, jangan tampilkan di active exams?
                 if ($session && $session->is_finished) {
                     return null;
                 }
 
-                return [
-                    'id' => $exam->id,
-                    'title' => $exam->title,
-                    'subject' => $exam->subject->name,
-                    'grade' => $exam->grades->pluck('name')->join(', '),
-                    'duration' => $exam->duration,
-                    'end_time' => $exam->end_time,
-                    'has_started' => $session ? true : false,
-                ];
+                $exam->has_started = $session ? true : false;
+                return $exam;
             })
-            ->filter() // Hapus yang null (finished exams)
+            ->filter()
             ->values();
 
-        $recentResults = \App\Models\ExamSession::query()
-            ->with(['exam.subject'])
-            ->where('user_id', $user->id)
-            ->where('is_finished', true)
-            ->latest('finish_time')
-            ->take(5)
-            ->get()
-            ->map(function ($session) {
-                return [
-                    'id' => $session->id, // Session ID for detail view
-                    'title' => $session->exam->title,
-                    'subject' => $session->exam->subject->name,
-                    // Pastikan model ExamSession memiliki accessor final_score atau hitung manual
-                    'score' => $session->final_score ?? 0,
-                    'date' => $session->finish_time,
-                ];
-            });
+        // LEADERBOARD LOGIC
+        // 1. Get all students in the same grades as the current user
+        $classmateIds = \App\Models\User::role('student')
+            ->whereHas('grades', function ($query) use ($gradeIds) {
+                $query->whereIn('grades.id', $gradeIds);
+            })
+            ->pluck('id');
+
+        // 2. Calculate total points for each classmate
+        $allLeaderboardData = \App\Models\ExamResult::with('user')
+            ->whereIn('user_id', $classmateIds)
+            ->select('user_id', \Illuminate\Support\Facades\DB::raw('SUM(score_percent) as total_points'))
+            ->groupBy('user_id')
+            ->orderByDesc('total_points')
+            ->get();
+
+        // 3. Map to array with rank
+        $rankedData = $allLeaderboardData->map(function ($result, $index) use ($user) {
+            return [
+                'rank' => $index + 1,
+                'user_id' => $result->user_id,
+                'name' => $result->user ? $result->user->name : 'Unknown',
+                'username' => $result->user ? $result->user->username : 'Unknown',
+                'points' => round($result->total_points),
+                'avatar_url' => $result->user->profile_photo_url ?? null,
+                'is_me' => $result->user_id === $user->id,
+            ];
+        });
+
+        // 4. Find current user's index
+        $userIndex = $rankedData->search(function ($item) use ($user) {
+            return $item['user_id'] === $user->id;
+        });
+
+        // 5. Select indices to display
+        $indicesToShow = collect([]);
+        $totalCount = $rankedData->count();
+
+        // Top 3
+        for ($i = 0; $i < min(3, $totalCount); $i++) {
+            $indicesToShow->push($i);
+        }
+
+        // Neighbors (UserIndex - 2 to UserIndex + 2)
+        if ($userIndex !== false) {
+            for ($i = max(0, $userIndex - 2); $i <= min($totalCount - 1, $userIndex + 2); $i++) {
+                $indicesToShow->push($i);
+            }
+        }
+
+        // Bottom 2
+        for ($i = max(0, $totalCount - 2); $i < $totalCount; $i++) {
+            $indicesToShow->push($i);
+        }
+
+        // 6. Filter, Unique, Sort, and Re-values
+        $leaderboard = $rankedData->filter(function ($item, $key) use ($indicesToShow) {
+            return $indicesToShow->contains($key);
+        })->unique('rank')->sortBy('rank')->values();
 
         return Inertia::render('student/dashboard', [
-            'activeExams' => $activeExams,
+            'stats' => $stats,
             'recentResults' => $recentResults,
+
+            // Data Baru
+            'activeAcademicYear' => $activeAcademicYear,
+            'examsToday' => $examsToday,
+            'leaderboard' => $leaderboard,
         ]);
     }
 }

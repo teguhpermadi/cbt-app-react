@@ -14,31 +14,14 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // 1. Data existing dashboard (stats personal)
         // Ambil ID Kelas siswa dari relasi grades
         $gradeIds = $user->grades->pluck('id');
 
-        // 1. Ujian Aktif: Ujian untuk kelas siswa yang sudah dipublikasikan dan masih dalam rentang waktu
-        $activeExams = Exam::with(['subject', 'grades'])
-            ->whereHas('grades', function ($query) use ($gradeIds) {
-                $query->whereIn('grades.id', $gradeIds);
-            })
-            ->where('is_published', true)
-            ->where('end_time', '>=', now())
-            ->orderBy('start_time', 'asc')
-            ->get()
-            ->map(function ($exam) use ($user) {
-                // Cek apakah siswa sudah punya sesi pengerjaan untuk ujian ini
-                $exam->has_started = ExamSession::where('exam_id', $exam->id)
-                    ->where('user_id', $user->id)
-                    ->exists();
-
-                return $exam;
-            });
-
-        // 2. Statistik Singkat
+        // Stats Personal
         $stats = [
-            'completed_exams' => ExamSession::where('user_id', $user->id)->where('is_finished', true)->count(),
-            'average_score' => round(ExamSession::where('user_id', $user->id)->where('is_finished', true)->avg('total_score') ?? 0, 1),
+            'completed_exams' => \App\Models\ExamSession::where('user_id', $user->id)->where('is_finished', true)->count(),
+            'average_score' => round(\App\Models\ExamSession::where('user_id', $user->id)->where('is_finished', true)->avg('total_score') ?? 0, 1),
             'upcoming_exams' => Exam::whereHas('grades', function ($query) use ($gradeIds) {
                 $query->whereIn('grades.id', $gradeIds);
             })
@@ -47,18 +30,60 @@ class DashboardController extends Controller
                 ->count(),
         ];
 
-        // 3. Riwayat Hasil Terakhir
-        $recentResults = ExamSession::with(['exam.subject'])
+        // Riwayat Hasil Terakhir
+        $recentResults = \App\Models\ExamSession::with(['exam.subject'])
             ->where('user_id', $user->id)
             ->where('is_finished', true)
             ->orderBy('finish_time', 'desc')
             ->limit(5)
             ->get();
 
+        // 2. Data Baru untuk Card Informatif & Leaderboard
+        $activeAcademicYear = \App\Models\AcademicYear::active()->first();
+
+        $teacherCount = \App\Models\User::role('teacher')->count();
+        $studentCount = \App\Models\User::role('student')->count();
+
+        $examsToday = Exam::with(['subject', 'grades'])
+            ->where('is_published', true)
+            // Exam yang berjalan hari ini:
+            // start_time <= now AND end_time >= now
+            // ATAU
+            // start_time hari ini
+            // Asumsi "Berjalan hari ini" bisa berarti sedang aktif atau dijadwalkan hari ini.
+            // Kita ambil yang sedang aktif saat ini saja agar lebih relevan.
+            ->where('start_time', '<=', now())
+            ->where('end_time', '>=', now())
+            ->orderBy('end_time', 'asc')
+            ->get();
+
+        $leaderboard = \App\Models\ExamResult::with('user')
+            ->select('user_id', \Illuminate\Support\Facades\DB::raw('SUM(score_percent) as total_points'))
+            ->groupBy('user_id')
+            ->orderByDesc('total_points')
+            ->limit(10)
+            ->get()
+            ->map(function ($result) {
+                return [
+                    'name' => $result->user->name,
+                    'username' => $result->user->username,
+                    'points' => round($result->total_points),
+                    'avatar_url' => $result->user->profile_photo_url ?? null, // Fallback if handled elsewhere
+                ];
+            });
+
+
         return Inertia::render('dashboard', [
-            'activeExams' => $activeExams,
+            // Data Existing
             'stats' => $stats,
             'recentResults' => $recentResults,
+
+            // Data Baru
+            'activeAcademicYear' => $activeAcademicYear,
+            'teacherCount' => $teacherCount,
+            'studentCount' => $studentCount,
+            'examsToday' => $examsToday,
+            'leaderboard' => $leaderboard,
         ]);
     }
 }
