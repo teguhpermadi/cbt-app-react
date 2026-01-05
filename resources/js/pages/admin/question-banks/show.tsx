@@ -93,6 +93,8 @@ export default function Show({ questionBank, questions }: ShowProps) {
         is_published: true, // Default true
         is_randomized: true,
         is_answer_randomized: false,
+        is_hint_visible: false, // Added
+        show_result_on_finish: true, // Added
         max_attempts: null,
         timer_type: 'flexible',
         passing_score: 70, // Default 70
@@ -475,6 +477,48 @@ export default function Show({ questionBank, questions }: ShowProps) {
                                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                                         >
                                             Acak Urutan Jawaban
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="show_result_on_finish"
+                                            checked={createForm.data.show_result_on_finish}
+                                            onCheckedChange={(c) => createForm.setData('show_result_on_finish', !!c)}
+                                        />
+                                        <label
+                                            htmlFor="show_result_on_finish"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Tampilkan Nilai Diahir
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="is_hint_visible"
+                                            checked={createForm.data.is_hint_visible}
+                                            onCheckedChange={(c) => createForm.setData('is_hint_visible', !!c)}
+                                        />
+                                        <label
+                                            htmlFor="is_hint_visible"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Tampilkan Hint/Bantuan
+                                        </label>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox
+                                            id="is_published"
+                                            checked={createForm.data.is_published}
+                                            onCheckedChange={(c) => createForm.setData('is_published', !!c)}
+                                        />
+                                        <label
+                                            htmlFor="is_published"
+                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                        >
+                                            Publish Exam
                                         </label>
                                     </div>
                                 </div>

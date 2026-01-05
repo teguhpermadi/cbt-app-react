@@ -34,6 +34,7 @@ interface QuestionFormData {
     score_value: number;
     options: Option[];
     question_media?: File | null;
+    hint?: string;
     order?: number;
 }
 
@@ -59,6 +60,7 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
         score_value: 1, // Default to 1 point
         options: generateDefaultOptions(defaultType),
         question_media: null,
+        hint: '', // Added
         order: order,
     };
 
@@ -247,6 +249,21 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
                             </div>
                         </div>
 
+                    </CardContent>
+                </Card>
+
+                {/* HINT CARD */}
+                <Card className="border-primary/10 shadow-md">
+                    <CardHeader>
+                        <CardTitle className="text-lg">Hint (Bantuan)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <RichTextEditor
+                            value={data.hint || ''}
+                            onChange={(value) => setData('hint', value)}
+                            placeholder="Tuliskan hint atau bantuan untuk siswa di sini (opsional)..."
+                            className="min-h-[80px]"
+                        />
                     </CardContent>
                 </Card>
 

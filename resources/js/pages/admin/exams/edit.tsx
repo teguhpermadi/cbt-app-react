@@ -37,6 +37,7 @@ interface CreateExamForm {
     is_published: boolean;
     is_randomized: boolean;
     is_answer_randomized: boolean; // Add this
+    is_hint_visible: boolean;
     show_result_on_finish: boolean; // Add this
     max_attempts: number | null;   // Add this
     timer_type: string;           // Add this
@@ -75,6 +76,7 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
         is_published: !!exam.is_published,
         is_randomized: !!exam.is_randomized,
         is_answer_randomized: !!exam.is_answer_randomized,
+        is_hint_visible: !!exam.is_hint_visible,
         show_result_on_finish: !!exam.show_result_on_finish,
         max_attempts: exam.max_attempts,
         timer_type: exam.timer_type?.value || exam.timer_type || 'flexible',
@@ -284,8 +286,12 @@ export default function Edit({ exam, academicYears, grades, subjects, teachers, 
                                 </div>
 
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox id="edit_is_published" checked={form.data.is_published} onCheckedChange={(c) => form.setData('is_published', !!c)} />
                                     <label htmlFor="edit_is_published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Publish Exam</label>
+                                </div>
+
+                                <div className="flex items-center space-x-2">
+                                    <Checkbox id="edit_is_hint_visible" checked={form.data.is_hint_visible} onCheckedChange={(c) => form.setData('is_hint_visible', !!c)} />
+                                    <label htmlFor="edit_is_hint_visible" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Show Hints to Students</label>
                                 </div>
                             </div>
 

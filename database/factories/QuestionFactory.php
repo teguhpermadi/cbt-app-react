@@ -26,6 +26,7 @@ class QuestionFactory extends Factory
             'difficulty_level' => $this->faker->randomElement(DifficultyLevelEnum::cases()),
             'timer' => $this->faker->randomElement(TimerEnum::cases()),
             'content' => $this->generateQuestionContent($type),
+            'hint' => $this->faker->optional()->sentence(),
             'score_value' => $this->faker->numberBetween(1, 5),
             'order' => $this->faker->numberBetween(1, 100),
             'is_active' => true,

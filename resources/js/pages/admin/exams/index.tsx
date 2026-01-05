@@ -52,14 +52,14 @@ interface Exam {
     end_time: string;
     status: string;
     academic_year: { id: string; year: string; };
-    status: string;
-    academic_year: { id: string; year: string; };
     grades: { id: string; name: string; }[];
     subject: { id: string; name: string; };
     teacher: { id: string; name: string; };
     question_bank: { id: string; name: string; };
     token: string;
     is_token_visible: boolean;
+    is_hint_visible: boolean;
+    show_result_on_finish: boolean;
 }
 
 interface CreateExamForm {
@@ -74,6 +74,8 @@ interface CreateExamForm {
     is_published: boolean;
     is_randomized: boolean;
     is_answer_randomized: boolean;
+    is_hint_visible: boolean; // Added
+    show_result_on_finish: boolean; // Added
     max_attempts: number | null;
     timer_type: string;
     passing_score: number;
@@ -117,6 +119,8 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
         is_published: false,
         is_randomized: true,
         is_answer_randomized: false,
+        is_hint_visible: false,
+        show_result_on_finish: true,
         max_attempts: null,
         timer_type: 'flexible',
         passing_score: 75,
@@ -520,7 +524,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                             </div>
                         </div>
 
-                         <div className="grid gap-4 md:grid-cols-2">
+                        <div className="grid gap-4 md:grid-cols-2">
                             <div className="space-y-2">
                                 <Label>Max Attempts (Empty for unlimited)</Label>
                                 <Input type="number" min="1" value={createForm.data.max_attempts || ''} onChange={(e) => createForm.setData('max_attempts', e.target.value ? parseInt(e.target.value) : null)} />
@@ -554,6 +558,11 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
                             <div className="flex items-center space-x-2">
                                 <Checkbox id="create_is_published" checked={createForm.data.is_published} onCheckedChange={(c) => createForm.setData('is_published', !!c)} />
                                 <label htmlFor="create_is_published" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Publish Exam</label>
+                            </div>
+
+                            <div className="flex items-center space-x-2">
+                                <Checkbox id="create_is_hint_visible" checked={createForm.data.is_hint_visible} onCheckedChange={(c) => createForm.setData('is_hint_visible', !!c)} />
+                                <label htmlFor="create_is_hint_visible" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Show Hints to Students</label>
                             </div>
                         </div>
 

@@ -43,6 +43,7 @@ class QuestionController extends Controller
         $validated = $request->validate([
             'question_bank_id' => 'required|exists:question_banks,id',
             'content' => 'required|string',
+            'hint' => 'nullable|string',
             'question_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(QuestionTypeEnum::cases(), 'value'))],
             'difficulty_level' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(DifficultyLevelEnum::cases(), 'value'))],
             'timer' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(TimerEnum::cases(), 'value'))],
@@ -74,6 +75,7 @@ class QuestionController extends Controller
             $question = Question::create([
                 'question_bank_id' => $validated['question_bank_id'],
                 'content' => $validated['content'],
+                'hint' => $validated['hint'] ?? null,
                 'question_type' => $validated['question_type'],
                 'difficulty_level' => $validated['difficulty_level'],
                 'timer' => $validated['timer'],
@@ -161,6 +163,7 @@ class QuestionController extends Controller
         // 1. Validate Basic Question Data
         $validated = $request->validate([
             'content' => 'required|string',
+            'hint' => 'nullable|string',
             'question_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(QuestionTypeEnum::cases(), 'value'))],
             'difficulty_level' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(DifficultyLevelEnum::cases(), 'value'))],
             'timer' => ['required', 'integer', \Illuminate\Validation\Rule::in(array_column(TimerEnum::cases(), 'value'))],
@@ -178,6 +181,7 @@ class QuestionController extends Controller
             // 2. Update Question
             $question->update([
                 'content' => $validated['content'],
+                'hint' => $validated['hint'] ?? null,
                 'question_type' => $validated['question_type'],
                 'difficulty_level' => $validated['difficulty_level'],
                 'timer' => $validated['timer'],

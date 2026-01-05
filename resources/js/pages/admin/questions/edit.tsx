@@ -44,6 +44,7 @@ interface Question {
     score_value: number;
     options: Option[];
     media_url?: string | null;
+    hint?: string | null; // Added
 }
 
 interface EnumOption {
@@ -61,6 +62,7 @@ interface QuestionFormData {
     options: Option[];
     question_media?: File | null;
     delete_question_media?: boolean;
+    hint?: string;
 }
 
 interface Props {
@@ -81,6 +83,7 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
         options: question.options.map(opt => ({ ...opt, media_file: null, delete_media: false })),
         question_media: null,
         delete_question_media: false,
+        hint: question.hint || '', // Added
     };
 
     const { data, setData, post, processing, errors } = useForm(initialData);
@@ -280,6 +283,21 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                             </div>
                         </div>
 
+                    </CardContent>
+                </Card>
+
+                {/* HINT CARD */}
+                <Card className="border-primary/10 shadow-md">
+                    <CardHeader>
+                        <CardTitle className="text-lg">Hint (Bantuan)</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <RichTextEditor
+                            value={data.hint || ''}
+                            onChange={(value) => setData('hint', value)}
+                            placeholder="Tuliskan hint atau bantuan untuk siswa di sini (opsional)..."
+                            className="min-h-[80px]"
+                        />
                     </CardContent>
                 </Card>
 

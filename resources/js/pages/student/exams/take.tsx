@@ -14,7 +14,8 @@ import {
     CheckCircle2,
     AlertCircle,
     Menu,
-    Save
+    Save,
+    Lightbulb // Added
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -35,6 +36,7 @@ interface Question {
     student_answer: any;
     is_flagged: boolean;
     media_url?: string;
+    hint?: string; // Added
 }
 
 interface Props {
@@ -43,6 +45,7 @@ interface Props {
         title: string;
         duration: number;
         timer_type: 'strict' | 'flexible';
+        is_hint_visible: boolean; // Added
     };
     session: {
         id: string;
@@ -61,6 +64,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
     const [imageViewerOpen, setImageViewerOpen] = useState(false);
     const [viewingImage, setViewingImage] = useState<string>('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [hintVisible, setHintVisible] = useState(false); // Added state for hint visibility
 
     const handleImageClick = (src: string) => {
         setViewingImage(src);
@@ -247,7 +251,9 @@ export default function ExamTake({ exam, session, questions }: Props) {
         });
 
         // Switch to new question
+        // Switch to new question
         setCurrentIndex(index);
+        setHintVisible(false); // Reset hint visibility
     };
 
     // Render Question Options - Delegates to OptionViewer
@@ -345,6 +351,35 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     <p className="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Pilih Jawaban:</p>
                                     {renderOptions(questions[currentIndex])}
                                 </div>
+
+                                {/* HINT SECTION */}
+                                {exam.is_hint_visible && questions[currentIndex].hint && (
+                                    <div className="mt-8 pt-4 border-t border-dashed border-slate-200 dark:border-slate-800">
+                                        <div className="flex flex-col gap-4">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() => setHintVisible(!hintVisible)}
+                                                className="self-start gap-2 text-yellow-600 hover:text-yellow-700 hover:bg-yellow-50 dark:text-yellow-500 dark:hover:text-yellow-400 dark:hover:bg-yellow-950/20"
+                                            >
+                                                <Lightbulb className={cn("w-4 h-4", hintVisible ? "fill-current" : "")} />
+                                                {hintVisible ? "Sembunyikan Bantuan" : "Lihat Bantuan (Hint)"}
+                                            </Button>
+
+                                            {hintVisible && (
+                                                <div className="bg-yellow-50 dark:bg-yellow-950/10 border border-yellow-200 dark:border-yellow-900/50 rounded-lg p-4 text-sm text-slate-700 dark:text-slate-300 animate-in fade-in slide-in-from-top-2 duration-300">
+                                                    <div className="flex gap-2">
+                                                        <Lightbulb className="w-5 h-5 text-yellow-500 shrink-0 mt-0.5" />
+                                                        <div
+                                                            className="prose prose-sm dark:prose-invert max-w-none"
+                                                            dangerouslySetInnerHTML={{ __html: questions[currentIndex].hint }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
                             </CardContent>
                         </ScrollArea>
 

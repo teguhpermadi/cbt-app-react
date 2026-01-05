@@ -252,6 +252,7 @@ class ExamController extends Controller
             'is_randomized' => 'required|boolean',
             'is_answer_randomized' => 'nullable|boolean',
             'show_result_on_finish' => 'nullable|boolean',
+            'is_hint_visible' => 'nullable|boolean',
             'max_attempts' => 'nullable|integer|min:1',
             'timer_type' => ['nullable', Rule::in(array_map(fn($case) => $case->value, TimerTypeEnum::cases()))],
         ]);

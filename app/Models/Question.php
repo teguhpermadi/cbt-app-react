@@ -30,6 +30,7 @@ class Question extends Model implements HasMedia
         'timer',
         'content',
         'score_value',
+        'hint',
         'order',        // Nomor urut
         'is_active',
         'is_approved',
