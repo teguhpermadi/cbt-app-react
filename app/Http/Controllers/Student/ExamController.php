@@ -163,6 +163,7 @@ class ExamController extends Controller
                     'score_value' => $question->score_value,
                     'question_type' => $question->question_type,
                     'difficulty_level' => $question->difficulty_level,
+                    'hint' => $question->hint,
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -276,10 +277,11 @@ class ExamController extends Controller
                     'number' => $detail->question_number,
                     'content' => $examQuestion->content,
                     'type' => $examQuestion->question_type,
+                    'hint' => $examQuestion->hint,
                     'options' => $this->prepareOptions($exam, $session, $examQuestion),
                     'student_answer' => (is_string($detail->student_answer) && in_array(substr($detail->student_answer, 0, 1), ['{', '[', '"']))
                         ? json_decode($detail->student_answer)
-                        : $detail->student_answer,
+                        : (($detail->student_answer === 'null') ? null : $detail->student_answer),
                     'is_flagged' => (bool) $detail->is_flagged,
                     'media_url' => $examQuestion->media_path ? asset('storage/' . $examQuestion->media_path) : null,
                 ];
@@ -291,6 +293,7 @@ class ExamController extends Controller
                 'title' => $exam->title,
                 'duration' => $exam->duration,
                 'timer_type' => $exam->timer_type->value,
+                'is_hint_visible' => (bool) $exam->is_hint_visible,
             ],
             'session' => [
                 'id' => $session->id,
@@ -327,7 +330,8 @@ class ExamController extends Controller
 
         if ($request->has('answer')) {
             // Always json_encode since student_answer is a JSON column in PostgreSQL
-            $updateData['student_answer'] = json_encode($request->answer);
+            // Fix: Store null if answer is null to avoid "null" string
+            $updateData['student_answer'] = $request->answer === null ? null : json_encode($request->answer);
             $updateData['answered_at'] = now();
         }
 

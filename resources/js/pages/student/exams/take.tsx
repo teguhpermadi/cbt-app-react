@@ -105,7 +105,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
         const initialFlags: Record<string, boolean> = {};
 
         questions.forEach(q => {
-            if (q.student_answer !== null && q.student_answer !== undefined) {
+            if (q.student_answer !== null && q.student_answer !== undefined && q.student_answer !== 'null') {
                 initialAnswers[q.detail_id] = q.student_answer;
             }
             initialFlags[q.detail_id] = q.is_flagged;
@@ -179,7 +179,11 @@ export default function ExamTake({ exam, session, questions }: Props) {
     // Check if all questions are answered
     const isAllAnswered = questions.every(q => {
         const ans = answers[q.detail_id];
-        return ans !== null && ans !== undefined && (typeof ans !== 'string' || ans.trim() !== '');
+        if (ans === null || ans === undefined || ans === 'null') return false;
+        if (typeof ans === 'string') return ans.trim() !== '';
+        if (Array.isArray(ans)) return ans.length > 0;
+        if (typeof ans === 'object') return Object.keys(ans).length > 0;
+        return true;
     });
 
     // -- Actions --
@@ -543,7 +547,14 @@ function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect
         <ScrollArea className="h-[400px] pr-2">
             <div className="grid grid-cols-5 gap-2.5">
                 {questions.map((q, idx) => {
-                    const isAnswered = answers[q.detail_id] !== null && answers[q.detail_id] !== undefined && (typeof answers[q.detail_id] !== 'string' || answers[q.detail_id].trim() !== '');
+                    const ans = answers[q.detail_id];
+                    let isAnswered = false;
+                    if (ans !== null && ans !== undefined && ans !== 'null') {
+                        if (typeof ans === 'string') isAnswered = ans.trim() !== '';
+                        else if (Array.isArray(ans)) isAnswered = ans.length > 0;
+                        else if (typeof ans === 'object') isAnswered = Object.keys(ans).length > 0;
+                        else isAnswered = true; // numbers, booleans
+                    }
                     const isFlagged = flagged[q.detail_id];
                     const isActive = idx === currentIndex;
 
