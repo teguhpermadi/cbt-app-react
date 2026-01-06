@@ -22,56 +22,78 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Student Routes
-    Route::prefix('student')->name('student.')->group(function () {
-        Route::get('dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
-        Route::get('exams', [\App\Http\Controllers\Student\ExamController::class, 'index'])->name('exams.index');
-        Route::get('exams/{exam}', [\App\Http\Controllers\Student\ExamController::class, 'show'])->name('exams.show');
-        Route::get('exams/{exam}/take', [\App\Http\Controllers\Student\ExamController::class, 'take'])->name('exams.take');
-        Route::post('exams/{exam}/save-answer', [\App\Http\Controllers\Student\ExamController::class, 'saveAnswer'])->name('exams.save-answer');
-        Route::post('exams/{exam}/start', [\App\Http\Controllers\Student\ExamController::class, 'start'])->name('exams.start');
-        Route::post('exams/{exam}/finish', [\App\Http\Controllers\Student\ExamController::class, 'finish'])->name('exams.finish');
+    Route::group(['middleware' => ['role:student']], function () {
+        Route::prefix('student')->name('student.')->group(function () {
+            Route::get('dashboard', [\App\Http\Controllers\Student\DashboardController::class, 'index'])->name('dashboard');
+            Route::get('exams', [\App\Http\Controllers\Student\ExamController::class, 'index'])->name('exams.index');
+            Route::get('exams/{exam}', [\App\Http\Controllers\Student\ExamController::class, 'show'])->name('exams.show');
+            Route::get('exams/{exam}/take', [\App\Http\Controllers\Student\ExamController::class, 'take'])->name('exams.take');
+            Route::post('exams/{exam}/save-answer', [\App\Http\Controllers\Student\ExamController::class, 'saveAnswer'])->name('exams.save-answer');
+            Route::post('exams/{exam}/start', [\App\Http\Controllers\Student\ExamController::class, 'start'])->name('exams.start');
+            Route::post('exams/{exam}/finish', [\App\Http\Controllers\Student\ExamController::class, 'finish'])->name('exams.finish');
 
-        // Results Routes
-        Route::get('results', [\App\Http\Controllers\Student\ExamResultController::class, 'index'])->name('results.index');
-        Route::get('exams/{exam}/result', [\App\Http\Controllers\Student\ExamResultController::class, 'show'])->name('exams.result'); // Keeps backward compatibility
-        Route::get('results/session/{session}', [\App\Http\Controllers\Student\ExamResultController::class, 'showSession'])->name('results.show');
+            // Results Routes
+            Route::get('results', [\App\Http\Controllers\Student\ExamResultController::class, 'index'])->name('results.index');
+            Route::get('exams/{exam}/result', [\App\Http\Controllers\Student\ExamResultController::class, 'show'])->name('exams.result'); // Keeps backward compatibility
+            Route::get('results/session/{session}', [\App\Http\Controllers\Student\ExamResultController::class, 'showSession'])->name('results.show');
 
-        Route::get('exams/{exam}/finished', [\App\Http\Controllers\Student\ExamController::class, 'finished'])->name('exams.finished');
+            Route::get('exams/{exam}/finished', [\App\Http\Controllers\Student\ExamController::class, 'finished'])->name('exams.finished');
+        });
     });
 
     // Admin Routes
-    Route::prefix('admin')->name('admin.')->group(function () {
-        Route::get('students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
-        Route::get('students/export', [StudentController::class, 'export'])->name('students.export');
-        Route::resource('users', UserController::class);
-        Route::post('students/import', [StudentController::class, 'storeImport'])->name('students.import');
-        Route::resource('students', StudentController::class);
-        Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
-        Route::resource('academic-years', AcademicYearController::class);
-        Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
-        Route::prefix('grades/{grade}')->name('grades.')->group(function () {
-            Route::get('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'index'])->name('students.index');
-            Route::post('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'store'])->name('students.store');
-            Route::delete('students/{student}', [\App\Http\Controllers\Admin\GradeStudentController::class, 'destroy'])->name('students.destroy');
+    Route::group(['middleware' => ['role:admin|teacher']], function () {
+        Route::prefix('admin')->name('admin.')->group(function () {
+
+            // Admin Only Access
+            Route::group(['middleware' => ['role:admin']], function () {
+                Route::resource('users', UserController::class);
+                Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
+                Route::resource('academic-years', AcademicYearController::class);
+                Route::get('students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
+                Route::get('students/export', [StudentController::class, 'export'])->name('students.export');
+                Route::post('students/import', [StudentController::class, 'storeImport'])->name('students.import');
+
+                // Admin has full control over students (create, edit, delete)
+                // Index and Show are shared below.
+                Route::resource('students', StudentController::class)->except(['index', 'show']);
+            });
+
+            // Shared Access (Admin & Teacher)
+            Route::resource('students', StudentController::class)->only(['index', 'show']);
+
+            // ... Resuming shared routes
+
+            // Grades
+            Route::resource('grades', \App\Http\Controllers\Admin\GradeController::class);
+            Route::prefix('grades/{grade}')->name('grades.')->group(function () {
+                Route::get('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'index'])->name('students.index');
+                Route::post('students', [\App\Http\Controllers\Admin\GradeStudentController::class, 'store'])->name('students.store');
+                Route::delete('students/{student}', [\App\Http\Controllers\Admin\GradeStudentController::class, 'destroy'])->name('students.destroy');
+            });
+
+            // Exams
+            Route::put('exams/{exam}/regenerate-token', [\App\Http\Controllers\Admin\ExamController::class, 'regenerateToken'])->name('exams.regenerate-token');
+            Route::put('exams/{exam}/toggle-token-visibility', [\App\Http\Controllers\Admin\ExamController::class, 'toggleTokenVisibility'])->name('exams.toggle-token-visibility');
+            Route::get('exams/{exam}/monitor', [\App\Http\Controllers\Admin\ExamController::class, 'monitor'])->name('exams.monitor');
+            Route::get('exams/sessions/{session}/correction', [\App\Http\Controllers\Admin\ExamController::class, 'correction'])->name('exams.sessions.correction');
+            Route::post('exams/sessions/{session}/recalculate', [\App\Http\Controllers\Admin\ExamController::class, 'calculateScores'])->name('exams.sessions.recalculate');
+            Route::post('/exams/{exam}/recalculate-all', [\App\Http\Controllers\Admin\ExamController::class, 'calculateAllScores'])->name('exams.recalculate-all');
+            Route::get('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'show'])->name('exams.analysis.index');
+            Route::post('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'store'])->name('exams.analysis.store');
+            Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
+            Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
+            Route::post('/exams/manual-correction/bulk-score', [ExamManualCorrectionController::class, 'bulkStoreScore'])->name('exams.manual-correction.bulk-score');
+            Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
+
+            // Question Banks
+            Route::get('question-banks/template/download', [\App\Http\Controllers\Admin\QuestionBankController::class, 'downloadTemplate'])->name('question-banks.template.download');
+            Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
+            Route::post('question-banks/{questionBank}/upload-questions', [\App\Http\Controllers\Admin\QuestionBankController::class, 'uploadQuestions'])->name('question-banks.upload-questions');
+            Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
+            Route::get('tags/search', [\App\Http\Controllers\Admin\QuestionController::class, 'searchTags'])->name('tags.search');
+            Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
         });
-        Route::put('exams/{exam}/regenerate-token', [\App\Http\Controllers\Admin\ExamController::class, 'regenerateToken'])->name('exams.regenerate-token');
-        Route::put('exams/{exam}/toggle-token-visibility', [\App\Http\Controllers\Admin\ExamController::class, 'toggleTokenVisibility'])->name('exams.toggle-token-visibility');
-        Route::get('exams/{exam}/monitor', [\App\Http\Controllers\Admin\ExamController::class, 'monitor'])->name('exams.monitor');
-        Route::get('exams/sessions/{session}/correction', [\App\Http\Controllers\Admin\ExamController::class, 'correction'])->name('exams.sessions.correction');
-        Route::post('exams/sessions/{session}/recalculate', [\App\Http\Controllers\Admin\ExamController::class, 'calculateScores'])->name('exams.sessions.recalculate');
-        Route::post('/exams/{exam}/recalculate-all', [\App\Http\Controllers\Admin\ExamController::class, 'calculateAllScores'])->name('exams.recalculate-all');
-        Route::get('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'show'])->name('exams.analysis.index');
-        Route::post('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'store'])->name('exams.analysis.store');
-        Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
-        Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
-        Route::post('/exams/manual-correction/bulk-score', [ExamManualCorrectionController::class, 'bulkStoreScore'])->name('exams.manual-correction.bulk-score');
-        Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
-        Route::get('question-banks/template/download', [\App\Http\Controllers\Admin\QuestionBankController::class, 'downloadTemplate'])->name('question-banks.template.download');
-        Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
-        Route::post('question-banks/{questionBank}/upload-questions', [\App\Http\Controllers\Admin\QuestionBankController::class, 'uploadQuestions'])->name('question-banks.upload-questions');
-        Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
-        Route::get('tags/search', [\App\Http\Controllers\Admin\QuestionController::class, 'searchTags'])->name('tags.search');
-        Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
     });
 });
 

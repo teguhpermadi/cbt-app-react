@@ -18,22 +18,10 @@ import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
-
-// const footerNavItems: NavItem[] = [
-//     {
-//         title: 'Repository',
-//         href: 'https://github.com/laravel/react-starter-kit',
-//         icon: Folder,
-//     },
-//     {
-//         title: 'Documentation',
-//         href: 'https://laravel.com/docs/starter-kits#react',
-//         icon: BookOpen,
-//     },
-// ];
+import { usePermission } from '@/hooks/usePermission';
 
 export function AppSidebar() {
-    const { auth } = usePage<SharedData>().props;
+    const { hasRole } = usePermission();
 
     const adminNavItems: NavItem[] = [
         {
@@ -75,8 +63,8 @@ export function AppSidebar() {
             title: 'Exam Management',
             href: examsIndex(),
             icon: ClipboardList,
+            // active: true, // Example of marking active
         }
-
     ];
 
     const studentNavItems: NavItem[] = [
@@ -97,8 +85,30 @@ export function AppSidebar() {
         },
     ];
 
-    const mainNavItems = auth.user.user_type === 'student' ? studentNavItems : adminNavItems;
-    const dashboardLink = auth.user.user_type === 'student' ? '/student/dashboard' : dashboard();
+    // Determine nav items based on roles
+    let mainNavItems: NavItem[] = [];
+    let dashboardLink = '#';
+
+    // Prioritize Roles
+    if (hasRole('student')) {
+        mainNavItems = studentNavItems;
+        dashboardLink = '/student/dashboard';
+    } else if (hasRole('admin') || hasRole('teacher')) {
+        mainNavItems = adminNavItems;
+        dashboardLink = dashboard();
+    }
+
+    // Fallback for user_type if roles are not yet synced or legacy user
+    const { auth } = usePage<SharedData>().props;
+    if (mainNavItems.length === 0) {
+        if (auth.user.user_type === 'student') {
+            mainNavItems = studentNavItems;
+            dashboardLink = '/student/dashboard';
+        } else {
+            mainNavItems = adminNavItems;
+            dashboardLink = dashboard();
+        }
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset" className="border-r-0 bg-slate-50/50 dark:bg-slate-900/50">
@@ -127,7 +137,6 @@ export function AppSidebar() {
             </SidebarContent>
 
             <SidebarFooter className="p-4">
-                {/* <NavFooter items={footerNavItems} className="mb-4" /> */}
                 <div className="rounded-2xl bg-white/50 p-1 shadow-sm border border-slate-100 dark:bg-slate-950/50 dark:border-slate-800">
                     <NavUser />
                 </div>
