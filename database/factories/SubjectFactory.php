@@ -19,9 +19,9 @@ class SubjectFactory extends Factory
             'name' => $this->faker->word(),
             'code' => $this->faker->word(),
             'description' => $this->faker->paragraph(),
-            'academic_year_id' => AcademicYear::inRandomOrder()->first()?->id ?? AcademicYear::factory(),
-            'grade_id' => Grade::inRandomOrder()->first()?->id ?? Grade::factory(),
-            'user_id' => User::where('user_type', 'teacher')->inRandomOrder()->first()?->id ?? User::factory()->state(['user_type' => 'teacher']),
+            'academic_year_id' => AcademicYear::get()->random()->id,
+            'grade_id' => Grade::get()->random()->id,
+            'user_id' => User::where('user_type', 'teacher')->inRandomOrder()->first()->id,
         ];
     }
 }

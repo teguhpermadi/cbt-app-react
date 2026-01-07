@@ -73,7 +73,6 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::Matching => 'Jodohkan item di Kolom Kiri dengan item yang tepat di Kolom Kanan.',
             QuestionTypeEnum::Ordering => 'Urutkan langkah-langkah berikut secara kronologis.',
             QuestionTypeEnum::NumericalInput => $this->generateNumericalQuestion(),
-            QuestionTypeEnum::WordCloud => 'Susun kata-kata berikut menjadi kalimat yang benar.',
         };
     }
 
@@ -106,7 +105,6 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::Matching => $this->createMatchingOptions($question),
             QuestionTypeEnum::Ordering => $this->createOrderingOptions($question),
             QuestionTypeEnum::NumericalInput => $this->createNumericalInputOption($question),
-            QuestionTypeEnum::WordCloud => $this->createWordCloudOptions($question),
             QuestionTypeEnum::Essay => null, // Essay tidak memerlukan options
         };
     }
@@ -251,20 +249,6 @@ class QuestionFactory extends Factory
         if (extension_loaded('gd')) {
             $this->attachDummyMedia($option, 'option_media', "Num {$option->option_key}");
         }
-    }
-
-    /**
-     * Create word cloud options (sentence ordering)
-     */
-    private function createWordCloudOptions(Question $question): void
-    {
-        // Generate a random sentence
-        $sentence = $this->faker->sentence(6); // 6 words
-
-        // Remove trailing dot for cleaner split
-        $sentence = rtrim($sentence, '.');
-
-        Option::createWordCloudOptions($question->id, $sentence);
     }
 
     /**
