@@ -6,6 +6,7 @@ import OptionViewerEssay from './OptionViewerEssay';
 import OptionViewerNumericalInput from './OptionViewerNumericalInput';
 import OptionViewerOrdering from './OptionViewerOrdering';
 import OptionViewerMatching from './OptionViewerMatching';
+import OptionViewerWordCloud from './OptionViewerWordCloud';
 import ImageViewerModal from '@/components/ui/image-viewer-modal';
 import { AlertCircle } from 'lucide-react';
 
@@ -62,6 +63,9 @@ export default function OptionViewer({ type, options, value, onChange, disabled,
 
             case 'matching':
                 return <OptionViewerMatching {...commonProps} />;
+
+            case 'word_cloud':
+                return <OptionViewerWordCloud {...commonProps} />;
 
             default:
                 return (
