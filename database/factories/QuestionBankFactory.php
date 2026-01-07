@@ -19,7 +19,7 @@ class QuestionBankFactory extends Factory
     public function definition(): array
     {
         // ambil random subject
-        $subject = Subject::inRandomOrder()->first();
+        $subject = Subject::inRandomOrder()->first() ?? Subject::factory()->create();
 
         return [
             'subject_id' => $subject->id,

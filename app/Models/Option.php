@@ -289,4 +289,38 @@ class Option extends Model implements HasMedia
             ],
         ]);
     }
+
+    /**
+     * Create options untuk Word Cloud (Sentence Ordering)
+     * 
+     * @param string $questionId
+     * @param string $content Kalimat atau paragraf penuh
+     * @param string $delimiter Pemisah antar kata/bagian (default spasi)
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public static function createWordCloudOptions(string $questionId, string $content, string $delimiter = ' ')
+    {
+        $createdOptions = collect();
+
+        // Split content by delimiter, filter empty strings
+        $parts = array_filter(explode($delimiter, $content), fn($value) => !is_null($value) && $value !== '');
+
+        // Re-index array
+        $parts = array_values($parts);
+
+        foreach ($parts as $index => $part) {
+            $createdOptions->push(self::create([
+                'question_id' => $questionId,
+                'option_key' => (string)($index + 1),
+                'content' => trim($part),
+                'order' => $index,
+                'is_correct' => true, // Semua bagian adalah benar
+                'metadata' => [
+                    'correct_order' => $index + 1, // Urutan yang benar (1-based)
+                ],
+            ]));
+        }
+
+        return $createdOptions;
+    }
 }

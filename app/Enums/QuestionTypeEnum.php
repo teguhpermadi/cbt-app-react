@@ -7,23 +7,26 @@ enum QuestionTypeEnum: string
     // 1. Pilihan Tunggal (Jawaban Benar Hanya Satu)
     case MultipleChoice = 'multiple_choice';
 
-    // 2. Benar/Salah
+        // 2. Benar/Salah
     case TrueFalse = 'true_false';
 
-    // 3. Uraian (Koreksi Manual/Rubrik AI)
+        // 3. Uraian (Koreksi Manual/Rubrik AI)
     case Essay = 'essay';
 
-    // 4. Menjodohkan
+        // 4. Menjodohkan
     case Matching = 'matching';
 
-    // 5. Mengurutkan
+        // 5. Mengurutkan
     case Ordering = 'ordering';
-    
-    // 6. Pilihan Kompleks (Jawaban Benar Lebih Dari Satu)
+
+        // 6. Pilihan Kompleks (Jawaban Benar Lebih Dari Satu)
     case MultipleSelection = 'multiple_selection';
 
-    // 7. Input Angka (Jawaban Angka Tepat)
+        // 7. Input Angka (Jawaban Angka Tepat)
     case NumericalInput = 'numerical_input';
+
+        // 8. Word Cloud (Jawaban Kata Kunci)
+    case WordCloud = 'word_cloud';
 
 
     /**
@@ -39,6 +42,7 @@ enum QuestionTypeEnum: string
             self::Ordering => 'Mengurutkan',
             self::MultipleSelection => 'Pilihan Ganda Kompleks',
             self::NumericalInput => 'Input Angka',
+            self::WordCloud => 'Word Cloud',
         };
     }
 }

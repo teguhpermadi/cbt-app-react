@@ -1,5 +1,2 @@
-App\Models\Exam::find('01ke713dfvwgrrgwfagzmx4tqp')
-App\Models\Exam::find('01ke713dfvwgrrgwfagzmx4tqp')
-App\Models\Exam::find('01ke713dfvwgrrgwfagzmx4tqp')
-App\Models\Exam::find('01ke713dfvwgrrgwfagzmx4tqp')->load('questionBank')
-App\Models\Exam::find('01ke713dfvwgrrgwfagzmx4tqp')->load('questionBank.questions')
+App\Models\QuestionBank::find('01keb9jp5ep4qm11h34xhfk7v5')->load('questions')
+App\Models\QuestionBank::find('01keb9jp5ep4qm11h34xhfk7v5')->load('questions.options')
