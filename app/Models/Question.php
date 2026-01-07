@@ -190,12 +190,6 @@ class Question extends Model implements HasMedia
                 'rubric' => $this->options->first()?->metadata
             ],
 
-            QuestionTypeEnum::WordCloud => [
-                'order' => $this->options->sortBy(function ($option) {
-                    return $option->getMetadata('correct_order');
-                })->pluck('option_key')->values()->toArray()
-            ],
-
             default => []
         };
     }
