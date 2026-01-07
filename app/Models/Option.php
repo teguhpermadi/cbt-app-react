@@ -289,4 +289,26 @@ class Option extends Model implements HasMedia
             ],
         ]);
     }
+
+    /**
+     * Create option untuk Arrange Words
+     *
+     * @param string $questionId
+     * @param string $sentence Kalimat lengkap
+     * @param string $delimiter Delimiter pemisah kata
+     * @return Option
+     */
+    public static function createArrangeWordsOption(string $questionId, string $sentence, string $delimiter = ' ')
+    {
+        return self::create([
+            'question_id' => $questionId,
+            'option_key' => 'SENTENCE',
+            'content' => $sentence,
+            'order' => 0,
+            'is_correct' => true,
+            'metadata' => [
+                'delimiter' => $delimiter,
+            ],
+        ]);
+    }
 }

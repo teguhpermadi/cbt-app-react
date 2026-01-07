@@ -73,6 +73,7 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::Matching => 'Jodohkan item di Kolom Kiri dengan item yang tepat di Kolom Kanan.',
             QuestionTypeEnum::Ordering => 'Urutkan langkah-langkah berikut secara kronologis.',
             QuestionTypeEnum::NumericalInput => $this->generateNumericalQuestion(),
+            QuestionTypeEnum::ArrangeWords => 'Susunlah kata-kata berikut menjadi kalimat yang benar.',
         };
     }
 
@@ -105,6 +106,7 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::Matching => $this->createMatchingOptions($question),
             QuestionTypeEnum::Ordering => $this->createOrderingOptions($question),
             QuestionTypeEnum::NumericalInput => $this->createNumericalInputOption($question),
+            QuestionTypeEnum::ArrangeWords => $this->createArrangeWordsOptions($question),
             QuestionTypeEnum::Essay => null, // Essay tidak memerlukan options
         };
     }
@@ -248,6 +250,30 @@ class QuestionFactory extends Factory
 
         if (extension_loaded('gd')) {
             $this->attachDummyMedia($option, 'option_media', "Num {$option->option_key}");
+        }
+    }
+
+    /**
+     * Create arrange words options
+     */
+    private function createArrangeWordsOptions(Question $question): void
+    {
+        $sentences = [
+            'Saya pergi ke pasar membeli sayur',
+            'Ibu memasak nasi di dapur',
+            'Ayah membaca koran di teras',
+            'Adik bermain bola di lapangan',
+            'The quick brown fox jumps over the lazy dog',
+        ];
+
+        $sentence = $this->faker->randomElement($sentences);
+        $delimiter = ' ';
+
+        $option = Option::createArrangeWordsOption($question->id, $sentence, $delimiter);
+
+        if (extension_loaded('gd')) {
+            // Optional: attach media if needed, though usually not for arrange words container
+            $this->attachDummyMedia($option, 'option_media', "Arrange Words");
         }
     }
 
