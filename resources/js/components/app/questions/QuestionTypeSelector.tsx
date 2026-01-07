@@ -20,6 +20,7 @@ const questionTypeOptions = [
     { value: 'ordering', label: 'Mengurutkan' },
     { value: 'essay', label: 'Esai/Uraian' },
     { value: 'numerical_input', label: 'Input Angka' },
+    { value: 'word_cloud', label: 'Awan Kata' },
 ];
 
 export function QuestionTypeSelector({ value, onValueChange, disabled }: QuestionTypeSelectorProps) {

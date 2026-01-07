@@ -173,6 +173,9 @@ class CalculateExamScore implements ShouldQueue
             case QuestionTypeEnum::NumericalInput:
                 return $this->scoreNumericalInput($examQuestion, $studentAnswer, $keyAnswer, $maxScore);
 
+            case QuestionTypeEnum::WordCloud:
+                return $this->scoreWordCloud($examQuestion, $studentAnswer, $keyAnswer, $maxScore);
+
             case QuestionTypeEnum::Essay:
                 return ['score' => $detail->score_earned ?? 0, 'is_correct' => null]; // Mantain existing or manual
 
@@ -329,6 +332,53 @@ class CalculateExamScore implements ShouldQueue
             'key_val' => $correctVal,
             'tolerance' => $tolerance,
             'diff' => abs($studentVal - $correctVal),
+            'match' => $isCorrect ? 'true' : 'false'
+        ]);
+
+        return [
+            'score' => $isCorrect ? $maxScore : 0,
+            'is_correct' => $isCorrect
+        ];
+    }
+
+    private function scoreWordCloud($question, $studentAnswer, $keyAnswer, $maxScore): array
+    {
+        $correctOrderKeys = $keyAnswer['order'] ?? [];
+        $studentOrderKeys = is_array($studentAnswer) ? $studentAnswer : [];
+
+        // options is an array of arrays/objects in ExamQuestion model
+        $options = $question->options ?? [];
+
+        $keyToContent = [];
+        foreach ($options as $opt) {
+            $key = is_array($opt) ? ($opt['option_key'] ?? '') : ($opt->option_key ?? '');
+            $content = is_array($opt) ? ($opt['content'] ?? '') : ($opt->content ?? '');
+
+            if ($key) {
+                $keyToContent[$key] = trim($content);
+            }
+        }
+
+        $studentContent = [];
+        foreach ($studentOrderKeys as $k) {
+            if (isset($keyToContent[$k])) {
+                $studentContent[] = $keyToContent[$k];
+            }
+        }
+
+        $correctContent = [];
+        foreach ($correctOrderKeys as $k) {
+            if (isset($keyToContent[$k])) {
+                $correctContent[] = $keyToContent[$k];
+            }
+        }
+
+        $isCorrect = ($studentContent === $correctContent);
+
+        Log::info("Scoring WordCloud. QID: {$question->id}", [
+            'type' => 'WordCloud',
+            'student_content' => $studentContent,
+            'correct_content' => $correctContent,
             'match' => $isCorrect ? 'true' : 'false'
         ]);
 

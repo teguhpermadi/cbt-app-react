@@ -11,7 +11,9 @@ import {
     DragOverEvent,
     DragEndEvent,
     defaultDropAnimationSideEffects,
-    DropAnimation
+    DropAnimation,
+    useDroppable,
+    rectIntersection
 } from '@dnd-kit/core';
 import {
     arrayMove,
@@ -59,12 +61,29 @@ function SortableItem({ id, content, disabled, isOverlay }: SortableItemProps) {
             {...listeners}
             className={cn(
                 "relative group flex items-center justify-center px-4 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-sm cursor-grab active:cursor-grabbing select-none hover:border-primary/50 hover:shadow-md transition-all text-sm font-medium",
-                isDragging && "opacity-30",
-                isOverlay && "opacity-100 ring-2 ring-primary scale-105 z-50 shadow-xl",
+                isDragging && "opacity-50 ring-2 ring-primary/20 border-2 border-dashed border-primary/40 bg-primary/5 shadow-none text-transparent grayscale",
+                isOverlay && "opacity-100 ring-2 ring-primary scale-105 z-50 shadow-xl cursor-grabbing",
                 disabled && "opacity-50 cursor-not-allowed"
             )}
         >
             {content}
+        </div>
+    );
+}
+
+// --- Droppable Container ---
+function DroppableContainer({ id, children, className }: { id: string, children: React.ReactNode, className?: string }) {
+    const { setNodeRef, isOver } = useDroppable({ id });
+    return (
+        <div
+            ref={setNodeRef}
+            className={cn(
+                className,
+                isOver && "ring-2 ring-primary bg-primary/5 border-primary"
+            )}
+            id={id}
+        >
+            {children}
         </div>
     );
 }
@@ -139,33 +158,7 @@ export default function OptionViewerWordCloud({ options, value, onChange, disabl
         setActiveId(event.active.id as string);
     };
 
-    const handleDragOver = (event: DragOverEvent) => {
-        if (disabled) return;
-        const { active, over } = event;
-        if (!over) return;
-
-        const activeIdStr = active.id as string;
-        const overIdStr = over.id as string;
-
-        // Find containers
-        const activeContainer = findContainer(activeIdStr);
-        // Over container could be the 'sortable-context' ID or an item ID
-        const overContainer = overIdStr === 'pool-area' ? 'pool' :
-            overIdStr === 'answer-area' ? 'answer' :
-                findContainer(overIdStr);
-
-        if (!activeContainer || !overContainer || activeContainer === overContainer) {
-            return;
-        }
-
-        // Moving between containers during drag (visual update)
-        // We defer state updates to DragEnd for simpler logic usually, 
-        // BUT for smooth sortable between lists, we typically need to update state on DragOver.
-        // However, updating `onChange` (prop) on DragOver might be too aggressive/expensive.
-        // Let's stick to DragEnd for moving items for now unless it feels laggy.
-        // Actually dnd-kit recommends updating items on DragOver for connected lists.
-        // But since `onChange` informs parent, let's try to handle it all in DragEnd for simplicity first.
-    };
+    // Skipping handleDragOver for simplicity, relying on handleDragEnd
 
     const handleDragEnd = (event: DragEndEvent) => {
         if (disabled) {
@@ -194,11 +187,16 @@ export default function OptionViewerWordCloud({ options, value, onChange, disabl
                 if (activeContainer === 'answer') {
                     const oldIndex = answerKeys.indexOf(activeIdStr);
                     const newIndex = answerKeys.indexOf(overIdStr);
-                    onChange(arrayMove(answerKeys, oldIndex, newIndex));
+                    // If dropped on container (not item), newIndex might be -1
+                    if (newIndex !== -1) {
+                        onChange(arrayMove(answerKeys, oldIndex, newIndex));
+                    }
                 } else {
                     const oldIndex = poolKeys.indexOf(activeIdStr);
                     const newIndex = poolKeys.indexOf(overIdStr);
-                    setPoolKeys(arrayMove(poolKeys, oldIndex, newIndex));
+                    if (newIndex !== -1) {
+                        setPoolKeys(arrayMove(poolKeys, oldIndex, newIndex));
+                    }
                 }
             }
             return;
@@ -247,22 +245,21 @@ export default function OptionViewerWordCloud({ options, value, onChange, disabl
     return (
         <DndContext
             sensors={sensors}
-            collisionDetection={closestCorners}
+            collisionDetection={rectIntersection}
             onDragStart={handleDragStart}
-            // onDragOver={handleDragOver} // Skipping DragOver for now, relying on DragEnd
             onDragEnd={handleDragEnd}
         >
             <div className="space-y-6 select-none">
                 {/* Answer Area */}
                 <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-500">Jawaban Anda:</p>
-                    <div
+                    <DroppableContainer
+                        id="answer-area"
                         className={cn(
-                            "min-h-[120px] p-4 rounded-xl border-2 border-dashed transition-colors flex flex-wrap content-start gap-2",
+                            "min-h-[120px] p-4 rounded-xl border-2 border-dashed transition-all flex flex-wrap content-start gap-2",
                             answerKeys.length > 0 ? "bg-white border-slate-300" : "bg-slate-50 border-slate-300",
                             !disabled && "hover:border-primary/40"
                         )}
-                        id="answer-area"
                     >
                         <SortableContext
                             id="answer-context"
@@ -283,15 +280,15 @@ export default function OptionViewerWordCloud({ options, value, onChange, disabl
                                 />
                             ))}
                         </SortableContext>
-                    </div>
+                    </DroppableContainer>
                 </div>
 
                 {/* Pool Area */}
                 <div className="space-y-2">
                     <p className="text-sm font-medium text-slate-500">Pilihan Kata:</p>
-                    <div
-                        className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-xl min-h-[80px] flex flex-wrap gap-2"
+                    <DroppableContainer
                         id="pool-area"
+                        className="bg-slate-100 dark:bg-slate-900/50 p-4 rounded-xl min-h-[80px] flex flex-wrap gap-2"
                     >
                         <SortableContext
                             id="pool-context"
@@ -307,7 +304,7 @@ export default function OptionViewerWordCloud({ options, value, onChange, disabl
                                 />
                             ))}
                         </SortableContext>
-                    </div>
+                    </DroppableContainer>
                 </div>
             </div>
 
