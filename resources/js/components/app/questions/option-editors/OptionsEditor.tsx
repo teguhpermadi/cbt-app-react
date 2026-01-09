@@ -8,6 +8,7 @@ import OptionEditorOrdering from './OptionEditorOrdering';
 import OptionEditorNumerical from './OptionEditorNumerical';
 import OptionEditorEssay from './OptionEditorEssay';
 import OptionEditorWordCloud from './OptionEditorWordCloud';
+import OptionEditorArrangeWords from './OptionEditorArrangeWords';
 
 interface Props {
     type: string;
@@ -55,8 +56,8 @@ export default function OptionsEditor({ type, options, onChange, errors }: Props
         return <OptionEditorEssay options={options} onChange={onChange} errors={errors} />;
     }
 
-    if (type === 'word_cloud') {
-        return <OptionEditorWordCloud options={options} onChange={onChange} errors={errors} />;
+    if (type === 'arrange_words') {
+        return <OptionEditorArrangeWords options={options} onChange={onChange} />;
     }
 
     return <div className="text-muted-foreground italic">Editor untuk tipe soal ini belum tersedia.</div>;

@@ -173,15 +173,36 @@ class CalculateExamScore implements ShouldQueue
             case QuestionTypeEnum::NumericalInput:
                 return $this->scoreNumericalInput($examQuestion, $studentAnswer, $keyAnswer, $maxScore);
 
-            case QuestionTypeEnum::WordCloud:
-                return $this->scoreWordCloud($examQuestion, $studentAnswer, $keyAnswer, $maxScore);
-
             case QuestionTypeEnum::Essay:
                 return ['score' => $detail->score_earned ?? 0, 'is_correct' => null]; // Mantain existing or manual
+
+            case QuestionTypeEnum::ArrangeWords:
+                return $this->scoreArrangeWords($examQuestion, $studentAnswer, $keyAnswer, $maxScore);
 
             default:
                 return ['score' => 0, 'is_correct' => false];
         }
+    }
+
+    private function scoreArrangeWords($question, $studentAnswer, $keyAnswer, $maxScore): array
+    {
+        $correctWords = $keyAnswer['words'] ?? [];
+        $studentWords = is_array($studentAnswer) ? $studentAnswer : [];
+
+        // Strict comparison of the sequence
+        $isCorrect = ($studentWords === $correctWords);
+
+        Log::info("Scoring ArrangeWords. QID: {$question->id}", [
+            'type' => 'ArrangeWords',
+            'student_words' => $studentWords,
+            'correct_words' => $correctWords,
+            'match' => $isCorrect ? 'true' : 'false'
+        ]);
+
+        return [
+            'score' => $isCorrect ? $maxScore : 0,
+            'is_correct' => $isCorrect
+        ];
     }
 
     private function scoreMultipleChoice($question, $studentAnswer, $keyAnswer, $maxScore): array

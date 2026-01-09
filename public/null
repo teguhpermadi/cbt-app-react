@@ -1,4 +1,19 @@
-Question::where('question_type', 'arrange_words')->first()->options->first()->only(['content', 'metadata']))
-Question::where('question_type', 'arrange_words')->first()->options->first()->only(['content', 'metadata'])
-Question::where('question_type', 'arrange_words')->first()
-Question::where('question_type', 'arrange_words')->first()->load('options')
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+ExamSession::find('01keevyw0fj3swbre30zzcxyr4')->load('details')
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+
+ExamSession::find('01keevyw0fj3swbre30zzcxyr4')->load('details')
+ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+
+
+

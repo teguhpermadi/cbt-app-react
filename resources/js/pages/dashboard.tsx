@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
-import { CalendarRange, GraduationCap, Users, Calendar, Trophy, ArrowRight, User } from 'lucide-react';
+import { CalendarRange, GraduationCap, Users, Calendar, Trophy, ArrowRight, User, Clock } from 'lucide-react';
 // @ts-ignore
 import Animal from 'react-animals';
 

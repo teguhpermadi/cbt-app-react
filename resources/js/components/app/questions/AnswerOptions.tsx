@@ -7,6 +7,7 @@ import AnswerOptionsNumericalInput from "./answers/AnswerOptionsNumericalInput";
 import AnswerOptionsOrdering from "./answers/AnswerOptionsOrdering";
 import AnswerOptionsTrueFalse from "./answers/AnswerOptionsTrueFalse";
 import AnswerOptionsWordCloud from "./answers/AnswerOptionsWordCloud";
+import AnswerOptionsArrangeWords from "./answers/AnswerOptionsArrangeWords";
 
 interface AnswerOptionsProps {
     question: Question;
@@ -45,8 +46,8 @@ export default function AnswerOptions({ question, showKeyAnswer = true }: Answer
         case 'essay':
             return <AnswerOptionsEssay options={options} showKeyAnswer={showKeyAnswer} />;
 
-        case 'word_cloud':
-            return <AnswerOptionsWordCloud options={options} showKeyAnswer={showKeyAnswer} />;
+        case 'arrange_words':
+            return <AnswerOptionsArrangeWords options={options} showKeyAnswer={showKeyAnswer} />;
 
         default:
             return <div className="text-red-500 text-sm">Tipe soal tidak didukung: {question_type}</div>;

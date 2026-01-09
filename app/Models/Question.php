@@ -190,6 +190,12 @@ class Question extends Model implements HasMedia
                 'rubric' => $this->options->first()?->metadata
             ],
 
+            QuestionTypeEnum::ArrangeWords => [
+                'words' => ($opt = $this->options->first())
+                    ? explode($opt->getMetadata('delimiter', ' '), $opt->content)
+                    : []
+            ],
+
             default => []
         };
     }
