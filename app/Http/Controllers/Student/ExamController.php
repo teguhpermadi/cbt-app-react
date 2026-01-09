@@ -336,7 +336,8 @@ class ExamController extends Controller
         if ($request->has('answer')) {
             // Always json_encode since student_answer is a JSON column in PostgreSQL
             // Fix: Store null if answer is null to avoid "null" string
-            $updateData['student_answer'] = $request->answer === null ? null : json_encode($request->answer);
+            // Model casts to array/json, so we pass the array directly if it exists
+            $updateData['student_answer'] = $request->answer;
             $updateData['answered_at'] = now();
         }
 
