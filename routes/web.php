@@ -19,7 +19,8 @@ Route::get('/', function () {
 })->name('home');
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Dashboard route moved to admin group
+
 
     // Student Routes
     Route::group(['middleware' => ['role:student']], function () {
@@ -46,6 +47,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::prefix('admin')->name('admin.')->group(function () {
 
             // Admin Only Access
+            Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
             Route::group(['middleware' => ['role:admin']], function () {
                 Route::resource('users', UserController::class);
                 Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);

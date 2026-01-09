@@ -10,7 +10,7 @@ import {
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import { dashboard } from '@/routes';
+
 import { index as gradesIndex } from '@/routes/admin/grades';
 import { index as examsIndex } from '@/routes/admin/exams';
 import { type NavItem, type SharedData } from '@/types';
@@ -26,7 +26,7 @@ export function AppSidebar() {
     const adminNavItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: dashboard(),
+            href: 'admin/dashboard',
             icon: LayoutGrid,
         },
         {
@@ -95,7 +95,7 @@ export function AppSidebar() {
         dashboardLink = '/student/dashboard';
     } else if (hasRole('admin') || hasRole('teacher')) {
         mainNavItems = adminNavItems;
-        dashboardLink = dashboard();
+        dashboardLink = '/admin/dashboard';
     }
 
     // Fallback for user_type if roles are not yet synced or legacy user
@@ -106,7 +106,7 @@ export function AppSidebar() {
             dashboardLink = '/student/dashboard';
         } else {
             mainNavItems = adminNavItems;
-            dashboardLink = dashboard();
+            dashboardLink = 'admin/dashboard';
         }
     }
 
