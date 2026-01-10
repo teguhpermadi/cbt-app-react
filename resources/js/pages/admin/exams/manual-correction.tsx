@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, CheckCircle, Save, AlertCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Save, AlertCircle, Menu, List } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -18,6 +18,13 @@ import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController'
 import MathRenderer from '@/components/app/questions/MathRenderer';
 import PreviewStudentAnswer from "@/components/app/questions/results/PreviewStudentAnswer";
 import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
+import {
+    Sheet,
+    SheetContent,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+} from "@/components/ui/sheet";
 
 interface Question {
     id: string;
@@ -66,6 +73,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
     const [bulkScore, setBulkScore] = useState<string>('');
     const [loadingAnswers, setLoadingAnswers] = useState(false); // Used for saving state now
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [isSheetOpen, setIsSheetOpen] = useState(false);
 
     // Reset selection when question changes
     useEffect(() => {
@@ -81,7 +89,10 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                 preserveState: true,
                 preserveScroll: true,
                 only: ['selectedQuestion', 'answers'],
-                onStart: () => setLoadingAnswers(true),
+                onStart: () => {
+                    setLoadingAnswers(true);
+                    setIsSheetOpen(false); // Close sheet on mobile select
+                },
                 onFinish: () => setLoadingAnswers(false),
             }
         );
@@ -169,6 +180,39 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
         }
     };
 
+    const QuestionList = () => (
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {questions.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">No questions found.</div>
+            ) : (
+                questions.map((q) => (
+                    <div
+                        key={q.id}
+                        onClick={() => handleQuestionSelect(q)}
+                        className={cn(
+                            "cursor-pointer rounded-lg border p-4 transition-all hover:bg-accent",
+                            selectedQuestion?.id === q.id ? "bg-accent border-primary ring-1 ring-primary" : "bg-card"
+                        )}
+                    >
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="font-bold text-sm">No. {q.question_number}</span>
+                            <Badge variant="outline" className={getTypeColor(q.question_type)}>
+                                {q.question_type}
+                            </Badge>
+                        </div>
+                        <MathRenderer
+                            content={q.content}
+                            className="text-xs text-muted-foreground line-clamp-3 prose prose-sm dark:prose-invert"
+                        />
+                        <div className="mt-2 text-xs font-medium text-right text-muted-foreground">
+                            Max Score: {q.score_value}
+                        </div>
+                    </div>
+                ))
+            )}
+        </div>
+    );
+
     return (
         <AppLayout breadcrumbs={[
             { title: 'Exams', href: examsIndexRoute.url() },
@@ -179,75 +223,63 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
 
             <div className="h-[calc(100vh-4rem)] flex flex-col">
                 {/* Header */}
-                <header className="border-b bg-background px-6 py-3 flex items-center justify-between shrink-0">
-                    <div className="flex items-center gap-4">
-                        <Button variant="ghost" size="icon" asChild>
+                <header className="border-b bg-background px-4 md:px-6 py-3 flex items-center justify-between shrink-0 gap-2">
+                    <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
+                        <Button variant="ghost" size="icon" asChild className="shrink-0">
                             <Link href={ExamController.monitor({ exam: exam.id }).url}>
                                 <ArrowLeft className="h-5 w-5" />
                             </Link>
                         </Button>
-                        <div>
-                            <h1 className="text-lg font-semibold">{exam.title}</h1>
-                            <p className="text-sm text-muted-foreground">Manual Correction Mode</p>
+                        <div className="overflow-hidden">
+                            <h1 className="text-lg font-semibold truncate">{exam.title}</h1>
+                            <p className="text-sm text-muted-foreground hidden md:block">Manual Correction Mode</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={saveAllScores} disabled={loadingAnswers}>
-                            <Save className="mr-2 h-4 w-4" /> Save All
+                    <div className="flex items-center gap-2 shrink-0">
+                        {/* Mobile Question Trigger */}
+                        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                            <SheetTrigger asChild>
+                                <Button variant="outline" size="icon" className="md:hidden">
+                                    <List className="h-5 w-5" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="left" className="w-[85vw] sm:w-[400px] p-0 flex flex-col">
+                                <SheetHeader className="p-4 border-b">
+                                    <SheetTitle>Questions ({questions.length})</SheetTitle>
+                                </SheetHeader>
+                                <QuestionList />
+                            </SheetContent>
+                        </Sheet>
+
+                        <Button variant="outline" onClick={saveAllScores} disabled={loadingAnswers} size="sm">
+                            <Save className="mr-2 h-4 w-4" />
+                            <span className="hidden sm:inline">Save All</span>
+                            <span className="inline sm:hidden">Save</span>
                         </Button>
                     </div>
                 </header>
 
-                <div className="flex-1 overflow-hidden flex">
-                    {/* Left Column: Questions List */}
-                    <aside className="w-1/4 max-w-sm border-r bg-muted/10 flex flex-col">
+                <div className="flex-1 overflow-hidden flex flex-col md:flex-row">
+                    {/* Left Column: Questions List (Desktop) */}
+                    <aside className="hidden md:flex w-1/4 max-w-sm border-r bg-muted/10 flex-col">
                         <div className="p-4 border-b font-medium bg-background/50 backdrop-blur">
                             Questions ({questions.length})
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                            {questions.length === 0 ? (
-                                <div className="text-center py-10 text-muted-foreground">No questions found.</div>
-                            ) : (
-                                questions.map((q) => (
-                                    <div
-                                        key={q.id}
-                                        onClick={() => handleQuestionSelect(q)}
-                                        className={cn(
-                                            "cursor-pointer rounded-lg border p-4 transition-all hover:bg-accent",
-                                            selectedQuestion?.id === q.id ? "bg-accent border-primary ring-1 ring-primary" : "bg-card"
-                                        )}
-                                    >
-                                        <div className="flex items-center justify-between mb-2">
-                                            <span className="font-bold text-sm">No. {q.question_number}</span>
-                                            <Badge variant="outline" className={getTypeColor(q.question_type)}>
-                                                {q.question_type}
-                                            </Badge>
-                                        </div>
-                                        <MathRenderer
-                                            content={q.content}
-                                            className="text-xs text-muted-foreground line-clamp-3 prose prose-sm dark:prose-invert"
-                                        />
-                                        <div className="mt-2 text-xs font-medium text-right text-muted-foreground">
-                                            Max Score: {q.score_value}
-                                        </div>
-                                    </div>
-                                ))
-                            )}
-                        </div>
+                        <QuestionList />
                     </aside>
 
                     {/* Right Column: Answers List */}
-                    <main className="flex-1 flex flex-col bg-background">
+                    <main className="flex-1 flex flex-col bg-background overflow-hidden relative">
                         {selectedQuestion ? (
                             <>
-                                <div className="p-4 border-b flex items-center justify-between bg-muted/10">
-                                    <h2 className="font-semibold flex items-center gap-2">
+                                <div className="p-4 border-b flex flex-col sm:flex-row items-start sm:items-center justify-between bg-muted/10 gap-4">
+                                    <h2 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
                                         Grading Question #{selectedQuestion.question_number}
-                                        <Badge variant="secondary">Max: {selectedQuestion.score_value}</Badge>
+                                        <Badge variant="secondary" className="whitespace-nowrap">Max: {selectedQuestion.score_value}</Badge>
                                     </h2>
 
                                     {/* Bulk Actions */}
-                                    <div className="flex items-center gap-4">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full sm:w-auto">
                                         <div className="flex items-center space-x-2">
                                             <Checkbox
                                                 id="select-all"
@@ -259,8 +291,8 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                             </label>
                                         </div>
 
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm text-muted-foreground">Bulk Score:</span>
+                                        <div className="flex items-center gap-2 w-full sm:w-auto">
+                                            <span className="text-sm text-muted-foreground whitespace-nowrap">Bulk Score:</span>
                                             <Input
                                                 type="number"
                                                 className="w-20 h-8"
@@ -268,19 +300,19 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                 onChange={(e) => setBulkScore(e.target.value)}
                                                 placeholder="Score"
                                             />
-                                            <Button size="sm" variant="secondary" onClick={applyBulkScore} disabled={selectedIds.length === 0}>
-                                                Apply to Selected ({selectedIds.length})
+                                            <Button size="sm" variant="secondary" onClick={applyBulkScore} disabled={selectedIds.length === 0} className="whitespace-nowrap flex-1 sm:flex-none">
+                                                Apply ({selectedIds.length})
                                             </Button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6">
                                     {/* Full Question Display */}
                                     <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800">
                                         <CardHeader>
                                             <CardTitle className="text-base flex items-center gap-2">
-                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                                                <span className="bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs shrink-0">
                                                     {selectedQuestion.question_number}
                                                 </span>
                                                 Question Content
@@ -304,18 +336,24 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                     ) : (
                                         answers.map((answer) => (
                                             <Card key={answer.id} className={cn("transition-colors", selectedIds.includes(answer.id) ? "border-primary/50 bg-primary/5" : "")}>
-                                                <CardContent className="p-4 flex gap-4">
+                                                <CardContent className="p-4 flex flex-col md:flex-row gap-4">
                                                     {/* Selection Checkbox */}
-                                                    <div className="pt-1">
+                                                    <div className="pt-1 flex items-start gap-3 md:block">
                                                         <Checkbox
                                                             checked={selectedIds.includes(answer.id)}
                                                             onCheckedChange={(c) => toggleSelectOne(answer.id, !!c)}
                                                         />
+                                                        {/* Mobile Student Info (when stacked) */}
+                                                        <div className="flex md:hidden flex-col">
+                                                            <div className="font-medium text-sm">{answer.student_name}</div>
+                                                            <div className="text-xs text-muted-foreground">{answer.student_email}</div>
+                                                        </div>
                                                     </div>
 
                                                     {/* Student Info & Answer */}
                                                     <div className="flex-1 space-y-3">
-                                                        <div className="flex items-center gap-2">
+                                                        {/* Desktop Student Info */}
+                                                        <div className="hidden md:flex items-center gap-2">
                                                             <div className="font-medium">{answer.student_name}</div>
                                                             <div className="text-xs text-muted-foreground">({answer.student_email})</div>
                                                             <Badge variant="outline" className="text-xs">Upaya ke-{answer.attempt_number}</Badge>
@@ -325,6 +363,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                         <div className="space-y-3">
                                                             <div className="flex items-center justify-between mb-2">
                                                                 <div className="text-sm font-medium text-muted-foreground">Student Answer:</div>
+                                                                <Badge variant="outline" className="text-xs md:hidden">Att #{answer.attempt_number}</Badge>
                                                             </div>
 
                                                             {!answer.student_answer && (
@@ -333,25 +372,16 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                                 </div>
                                                             )}
 
-                                                            {/* {console.log('DEBUG OPTION RENDER:', {
-                                                                questionType: selectedQuestion.question_type,
-                                                                options: selectedQuestion.options,
-                                                                studentAnswer: answer.student_answer,
-                                                                answerType: typeof answer.student_answer
-                                                            })} */}
-
                                                             {(() => {
                                                                 // Sanitize Answer Logic
                                                                 let sanitizedValue = answer.student_answer;
 
                                                                 // Handle potential double-serialization or quoted strings
                                                                 if (typeof sanitizedValue === 'string') {
-                                                                    // Check if it's a JSON string representative (e.g. "\"A\"" or "[\"A\"]")
                                                                     try {
                                                                         const parsed = JSON.parse(sanitizedValue);
                                                                         sanitizedValue = parsed;
                                                                     } catch (e) {
-                                                                        // If regular string with quotes, strip them
                                                                         if (sanitizedValue.startsWith('"') && sanitizedValue.endsWith('"')) {
                                                                             sanitizedValue = sanitizedValue.slice(1, -1);
                                                                         }
@@ -374,7 +404,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                     </div>
 
                                                     {/* Scoring Controls */}
-                                                    <div className="w-[300px] border-l pl-6 space-y-4 flex flex-col">
+                                                    <div className="w-full md:w-[300px] border-t pt-4 md:border-t-0 md:pt-0 md:border-l md:pl-6 space-y-4 flex flex-col">
                                                         <div className="space-y-2">
                                                             <Label>Score (Max: {selectedQuestion.score_value})</Label>
                                                             <div className="flex items-center gap-2">
@@ -420,8 +450,12 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                 </div>
                             </>
                         ) : (
-                            <div className="flex-1 flex items-center justify-center text-muted-foreground">
-                                Select a question to start grading
+                            <div className="flex-1 flex items-center justify-center text-center text-muted-foreground p-8">
+                                <div className="max-w-md space-y-2">
+                                    <List className="h-12 w-12 mx-auto opacity-20" />
+                                    <p className="font-semibold">No Question Selected</p>
+                                    <p className="text-sm">Select a question from the list to start manual grading.</p>
+                                </div>
                             </div>
                         )}
                     </main>

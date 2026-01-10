@@ -180,7 +180,7 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                     </CardHeader>
                     <CardContent>
                         <div className="rounded-md border">
-                            <Table>
+                            <Table className="min-w-[800px]">
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Student</TableHead>

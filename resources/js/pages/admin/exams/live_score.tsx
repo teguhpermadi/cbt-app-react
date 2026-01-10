@@ -302,7 +302,7 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                     </CardHeader>
                     <CardContent>
                         <div className="rounded-md border">
-                            <Table>
+                            <Table className="min-w-[1000px]">
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Status</TableHead>

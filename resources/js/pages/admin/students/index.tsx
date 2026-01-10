@@ -198,7 +198,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
                                             <Input id="st-password" type="password" value={createForm.data.password} onChange={e => createForm.setData('password', e.target.value)} className="rounded-xl h-11 border-slate-200" />
                                             <InputError message={createForm.errors.password} />
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid gap-4 sm:grid-cols-2">
                                             <div className="space-y-2">
                                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Grade</Label>
                                                 <Select onValueChange={(val) => createForm.setData('grade_id', val)}>
@@ -242,7 +242,7 @@ export default function Index({ students, grades, academicYears }: IndexProps) {
 
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
+                        <table className="min-w-[800px] w-full text-left text-sm">
                             <thead className="border-b bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
                                 <tr>
                                     <th className="px-6 py-4">Student Name</th>

@@ -286,7 +286,7 @@ export default function Index({ exams, academicYears, grades, subjects, teachers
 
                 <div className="rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-950 overflow-hidden">
                     <div className="overflow-x-auto">
-                        <table className="w-full text-left text-sm">
+                        <table className="min-w-[1000px] w-full text-left text-sm">
                             <thead className="border-b bg-slate-50/50 text-xs font-bold uppercase tracking-wider text-muted-foreground dark:bg-slate-900/50">
                                 <tr>
                                     <th className="px-6 py-4">Title</th>

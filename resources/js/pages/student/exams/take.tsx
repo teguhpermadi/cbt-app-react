@@ -309,20 +309,20 @@ export default function ExamTake({ exam, session, questions }: Props) {
 
             {/* Header */}
             <header className="sticky top-0 z-30 w-full border-b bg-white dark:bg-slate-900 shadow-sm">
-                <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+                <div className="container mx-auto px-4 h-14 md:h-16 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="font-bold text-lg truncate max-w-[200px] md:max-w-md text-slate-800 dark:text-slate-100">
+                        <div className="font-bold text-base md:text-lg truncate max-w-[150px] md:max-w-md text-slate-800 dark:text-slate-100">
                             {exam.title}
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 md:gap-4">
                         {exam.timer_type === 'strict' && (
                             <div className={cn(
-                                "flex items-center gap-2 px-4 py-1.5 rounded-full font-mono font-bold text-xl border shadow-sm",
+                                "flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-mono font-bold text-sm md:text-xl border shadow-sm",
                                 timeLeft < 300 ? "bg-red-50 text-red-600 border-red-200 animate-pulse" : "bg-slate-100 text-slate-700 border-slate-200"
                             )}>
-                                <Clock className="w-5 h-5" />
+                                <Clock className="w-4 h-4 md:w-5 md:h-5" />
                                 {formatTime(timeLeft)}
                             </div>
                         )}
@@ -350,28 +350,28 @@ export default function ExamTake({ exam, session, questions }: Props) {
                 </div>
             </header>
 
-            <div className="flex-1 container mx-auto px-4 py-6 flex gap-6 max-w-7xl">
+            <div className="flex-1 container mx-auto px-4 py-4 md:py-6 flex gap-6 max-w-7xl">
                 {/* Main Content */}
                 <main className="flex-1 w-full min-w-0">
                     <Card className="h-full flex flex-col shadow-md border-slate-200 dark:border-slate-800">
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b bg-white dark:bg-slate-900 sticky top-0 z-10">
                             <div className="flex items-center gap-3">
-                                <Badge variant="secondary" className="text-base px-4 py-1 font-bold bg-slate-100 text-slate-700 border-slate-200">
+                                <Badge variant="secondary" className="text-sm md:text-base px-3 md:px-4 py-1 font-bold bg-slate-100 text-slate-700 border-slate-200">
                                     SOAL NO. {currentIndex + 1}
                                 </Badge>
                             </div>
                         </CardHeader>
 
                         <ScrollArea className="flex-1 bg-white dark:bg-slate-900">
-                            <CardContent className="p-8 md:p-10 space-y-10">
+                            <CardContent className="p-4 md:p-10 space-y-6 md:space-y-10">
                                 {/* Question Content */}
-                                <div className="text-lg leading-relaxed text-slate-800 dark:text-slate-200" key={`question-content-${currentIndex}`}>
+                                <div className="text-base md:text-lg leading-relaxed text-slate-800 dark:text-slate-200" key={`question-content-${currentIndex}`}>
                                     {questions[currentIndex].media_url && (
                                         <div className="mb-6">
                                             <img
                                                 src={questions[currentIndex].media_url}
                                                 alt="Question Media"
-                                                className="max-h-[300px] w-auto rounded-lg border shadow-sm cursor-pointer hover:shadow-lg transition-shadow"
+                                                className="max-h-[200px] md:max-h-[300px] w-auto rounded-lg border shadow-sm cursor-pointer hover:shadow-lg transition-shadow"
                                                 onClick={() => handleImageClick(questions[currentIndex].media_url!)}
                                             />
                                         </div>
@@ -418,13 +418,13 @@ export default function ExamTake({ exam, session, questions }: Props) {
                             </CardContent>
                         </ScrollArea>
 
-                        <CardFooter className="border-t p-6 flex justify-between bg-slate-50 dark:bg-slate-900/50">
+                        <CardFooter className="border-t p-4 md:p-6 flex justify-between bg-slate-50 dark:bg-slate-900/50">
                             <Button
                                 variant="outline"
                                 size="lg"
                                 onClick={() => changeQuestion(currentIndex - 1)}
                                 disabled={currentIndex === 0 || isSubmitting}
-                                className="gap-2 px-6"
+                                className="gap-2 px-4 md:px-6"
                             >
                                 <ChevronLeft className="w-5 h-5" />
                                 <span className="hidden sm:inline">Sebelumnya</span>
@@ -436,12 +436,13 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                 onClick={handleToggleFlag}
                                 disabled={isSubmitting}
                                 className={cn(
-                                    "gap-2 px-6",
+                                    "gap-2 px-4 md:px-6",
                                     flagged[questions[currentIndex].detail_id] ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600" : "text-slate-600"
                                 )}
                             >
                                 <Flag className={cn("w-4 h-4", flagged[questions[currentIndex].detail_id] && "fill-current")} />
-                                {flagged[questions[currentIndex].detail_id] ? "Ragu-ragu Terpasang" : "Ragu-ragu?"}
+                                {flagged[questions[currentIndex].detail_id] ? <span className="hidden sm:inline">Ragu-ragu Terpasang</span> : <span className="hidden sm:inline">Ragu-ragu?</span>}
+                                {flagged[questions[currentIndex].detail_id] ? <span className="sm:hidden">Ragu</span> : <span className="sm:hidden">Ragu?</span>}
                             </Button>
 
                             <div className="flex gap-2">
@@ -449,7 +450,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     <Button
                                         size="lg"
                                         className={cn(
-                                            "px-8 font-bold",
+                                            "px-4 md:px-8 font-bold",
                                             isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
                                         )}
                                         disabled={!isAllAnswered || isSubmitting}
@@ -462,15 +463,16 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                             }
                                         }}
                                     >
-                                        <CheckCircle2 className="w-5 h-5 mr-2" />
-                                        {isAllAnswered ? (isSubmitting ? "Menyimpan..." : "Selesai & Kumpulkan") : "Jawab Semua Soal"}
+                                        <CheckCircle2 className="w-5 h-5 md:mr-2" />
+                                        <span className="hidden md:inline">{isAllAnswered ? (isSubmitting ? "Menyimpan..." : "Selesai & Kumpulkan") : "Jawab Semua Soal"}</span>
+                                        <span className="md:hidden">{isAllAnswered ? "Selesai" : "Jawab Semua"}</span>
                                     </Button>
                                 ) : (
                                     <Button
                                         size="lg"
                                         onClick={() => changeQuestion(currentIndex + 1)}
                                         disabled={isSubmitting}
-                                        className="gap-2 px-8 bg-blue-600 hover:bg-blue-700"
+                                        className="gap-2 px-4 md:px-8 bg-blue-600 hover:bg-blue-700"
                                     >
                                         <span className="hidden sm:inline">Selanjutnya</span>
                                         <ChevronRight className="w-5 h-5" />
