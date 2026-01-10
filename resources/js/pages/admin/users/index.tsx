@@ -27,7 +27,7 @@ import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import UserController from '@/actions/App/Http/Controllers/Admin/UserController';
 import { index } from '@/routes/admin/users';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 
 interface Role {
     id: string;

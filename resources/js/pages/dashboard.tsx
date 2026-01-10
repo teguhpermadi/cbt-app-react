@@ -1,3 +1,4 @@
+import { dashboard as adminDashboard } from '@/routes/admin';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, Link } from '@inertiajs/react';
@@ -79,7 +80,7 @@ interface DashboardProps {
 const breadcrumbs: BreadcrumbItem[] = [
     {
         title: 'Dashboard',
-        href: '/admin/dashboard',
+        href: adminDashboard(),
     },
 ];
 

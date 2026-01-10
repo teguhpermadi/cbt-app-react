@@ -26,7 +26,7 @@ import {
 import { useEffect, useState, useMemo } from 'react';
 import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 // @ts-ignore

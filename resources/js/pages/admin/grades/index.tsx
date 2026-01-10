@@ -27,7 +27,7 @@ import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import GradeController from '@/actions/App/Http/Controllers/Admin/GradeController';
 import { index } from '@/routes/admin/grades';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import { Users } from 'lucide-react';
 import ManageStudentsModal from './ManageStudentsModal';
 

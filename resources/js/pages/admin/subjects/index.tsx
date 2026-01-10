@@ -28,7 +28,7 @@ import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import SubjectController from '@/actions/App/Http/Controllers/Admin/SubjectController';
 import { index } from '@/routes/admin/subjects';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 
 interface Subject {
     id: string;

@@ -13,6 +13,8 @@ import {
 
 import { index as gradesIndex } from '@/routes/admin/grades';
 import { index as examsIndex } from '@/routes/admin/exams';
+import { dashboard as adminDashboard } from '@/routes/admin';
+import { dashboard as studentDashboard } from '@/routes/student';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
@@ -26,7 +28,7 @@ export function AppSidebar() {
     const adminNavItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: 'admin/dashboard',
+            href: adminDashboard(),
             icon: LayoutGrid,
         },
         {
@@ -70,7 +72,7 @@ export function AppSidebar() {
     const studentNavItems: NavItem[] = [
         {
             title: 'Dashboard',
-            href: '/student/dashboard',
+            href: studentDashboard(),
             icon: LayoutGrid,
         },
         {
@@ -92,10 +94,10 @@ export function AppSidebar() {
     // Prioritize Roles
     if (hasRole('student')) {
         mainNavItems = studentNavItems;
-        dashboardLink = '/student/dashboard';
+        dashboardLink = studentDashboard();
     } else if (hasRole('admin') || hasRole('teacher')) {
         mainNavItems = adminNavItems;
-        dashboardLink = '/admin/dashboard';
+        dashboardLink = adminDashboard();
     }
 
     // Fallback for user_type if roles are not yet synced or legacy user
@@ -103,10 +105,10 @@ export function AppSidebar() {
     if (mainNavItems.length === 0) {
         if (auth.user.user_type === 'student') {
             mainNavItems = studentNavItems;
-            dashboardLink = '/student/dashboard';
+            dashboardLink = studentDashboard();
         } else {
             mainNavItems = adminNavItems;
-            dashboardLink = 'admin/dashboard';
+            dashboardLink = adminDashboard();
         }
     }
 

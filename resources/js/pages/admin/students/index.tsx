@@ -27,7 +27,7 @@ import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import StudentController from '@/actions/App/Http/Controllers/Admin/StudentController';
 import { index } from '@/routes/admin/students';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import ImportStudentModal from './import-student-modal';
 import { FileSpreadsheet } from 'lucide-react';
 

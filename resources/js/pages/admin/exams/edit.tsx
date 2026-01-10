@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useState, useMemo } from 'react';
 import InputError from '@/components/input-error';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 import { index as examsIndexRoute } from '@/routes/admin/exams';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';

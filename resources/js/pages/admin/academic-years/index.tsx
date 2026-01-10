@@ -28,7 +28,7 @@ import InputError from '@/components/input-error';
 import Pagination from '@/components/Pagination';
 import AcademicYearController from '@/actions/App/Http/Controllers/Admin/AcademicYearController';
 import { index } from '@/routes/admin/academic-years';
-import { dashboard } from '@/routes';
+import { dashboard } from '@/routes/admin';
 
 interface AcademicYear {
     id: string;

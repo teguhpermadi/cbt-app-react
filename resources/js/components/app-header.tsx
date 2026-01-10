@@ -29,20 +29,17 @@ import {
 import { UserMenuContent } from '@/components/user-menu-content';
 import { useInitials } from '@/hooks/use-initials';
 import { cn, isSameUrl, resolveUrl } from '@/lib/utils';
-import { dashboard } from '@/routes';
-import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
+import { type BreadcrumbItem, type NavItem, type SharedData } from '@/types';
 import { BookOpen, Folder, LayoutGrid, Menu, Search } from 'lucide-react';
 import AppLogo from './app-logo';
 import AppLogoIcon from './app-logo-icon';
+import { usePermission } from '@/hooks/usePermission';
+import { dashboard as adminDashboard } from '@/routes/admin';
+import { dashboard as studentDashboard } from '@/routes/student';
 
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard(),
-        icon: LayoutGrid,
-    },
-];
+// Remove static mainNavItems
+// const mainNavItems: NavItem[] = ...
 
 const rightNavItems: NavItem[] = [
     {
@@ -68,6 +65,22 @@ export function AppHeader({ breadcrumbs = [] }: AppHeaderProps) {
     const page = usePage<SharedData>();
     const { auth } = page.props;
     const getInitials = useInitials();
+    const { hasRole } = usePermission();
+
+    let dashboardLink = '#';
+    if (hasRole('student') || auth.user.user_type === 'student') {
+        dashboardLink = studentDashboard();
+    } else {
+        dashboardLink = adminDashboard();
+    }
+
+    const mainNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: dashboardLink,
+            icon: LayoutGrid,
+        },
+    ];
     return (
         <>
             <div className="border-b border-sidebar-border/80">

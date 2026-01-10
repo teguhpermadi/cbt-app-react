@@ -1,4 +1,5 @@
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
+import { dashboard as studentDashboard } from '@/routes/student';
 import { Head, Link } from '@inertiajs/react';
 import { CalendarRange, GraduationCap, Users, Calendar, Trophy, ArrowRight, User, BookOpen, Clock, CheckCircle2, Star, Zap } from 'lucide-react';
 // @ts-ignore
@@ -80,7 +81,7 @@ interface DashboardProps {
 const breadcrumbs = [
     {
         title: 'Dashboard',
-        href: '/student/dashboard',
+        href: studentDashboard(),
     },
 ];
 
