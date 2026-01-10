@@ -56,8 +56,7 @@ export default function CorrectionPage({
 
                 <Tabs
                     value={session.id.toString()}
-                    // @ts-ignore
-                    onValueChange={(val) => router.visit(route('admin.exams.sessions.correction', val))}
+                    onValueChange={(val) => router.visit(ExamController.correction({ session: val }).url)}
                     className="w-full"
                 >
                     <div className="w-full overflow-x-auto pb-2">
