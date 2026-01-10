@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, CheckCircle, Save, AlertCircle, Menu, List } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Save, AlertCircle, Menu, List, Sparkles, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -74,6 +74,7 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
     const [loadingAnswers, setLoadingAnswers] = useState(false); // Used for saving state now
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [aiGradingId, setAiGradingId] = useState<string | null>(null);
 
     // Reset selection when question changes
     useEffect(() => {
@@ -136,6 +137,38 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
         ));
 
         toast.success(`Applied score ${score} to ${selectedIds.length} students`);
+    };
+
+    const handleAiGrading = async (answer: AnswerDetail) => {
+        if (selectedQuestion?.question_type !== 'essay') return;
+
+        setAiGradingId(answer.id);
+
+        try {
+            const response = await axios.post(ExamManualCorrectionController.gradeWithAI().url, {
+                detail_id: answer.id
+            });
+
+            if (response.data.success) {
+                // Update local state with new score and notes
+                setAnswers(prev => prev.map(a => a.id === answer.id ? {
+                    ...a,
+                    score_earned: parseFloat(response.data.scaled_score),
+                    correction_notes: response.data.notes
+                } : a));
+
+                toast.success("AI Grading Complete", {
+                    description: `Score: ${response.data.scaled_score}/${response.data.max_score}`
+                });
+            }
+        } catch (error: any) {
+            console.error('AI Grading Failed:', error);
+            toast.error("AI Grading Failed", {
+                description: error.response?.data?.message || "Please check configuration."
+            });
+        } finally {
+            setAiGradingId(null);
+        }
     };
 
     const toggleSelectAll = (checked: boolean) => {
@@ -434,7 +467,26 @@ export default function ManualCorrectionPage({ exam, questions, selectedQuestion
                                                         </div>
 
                                                         <div className="space-y-2">
-                                                            <Label>Notes</Label>
+                                                            <div className="flex items-center justify-between">
+                                                                <Label>Notes</Label>
+                                                                {selectedQuestion.question_type === 'essay' && (
+                                                                    <Button
+                                                                        type="button"
+                                                                        variant="outline"
+                                                                        size="xs"
+                                                                        className="h-6 gap-1.5 text-xs bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border-indigo-200"
+                                                                        onClick={() => handleAiGrading(answer)}
+                                                                        disabled={!!aiGradingId || !answer.student_answer}
+                                                                    >
+                                                                        {aiGradingId === answer.id ? (
+                                                                            <Loader2 className="h-3 w-3 animate-spin" />
+                                                                        ) : (
+                                                                            <Sparkles className="h-3 w-3" />
+                                                                        )}
+                                                                        AI Grade
+                                                                    </Button>
+                                                                )}
+                                                            </div>
                                                             <Textarea
                                                                 placeholder="Feedback..."
                                                                 className="h-20 resize-none text-xs"

@@ -429,6 +429,9 @@ class ExamController extends Controller
 
         \App\Jobs\CalculateExamScore::dispatchSync($session);
 
+        // Dispatch AI Essay Grading (Async)
+        \App\Jobs\GradeExamEssays::dispatch($session)->afterCommit();
+
         if ($exam->show_result_on_finish) {
             return redirect()->route('student.exams.result', $exam->id);
         }

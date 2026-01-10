@@ -88,6 +88,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
             Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
             Route::post('/exams/manual-correction/bulk-score', [ExamManualCorrectionController::class, 'bulkStoreScore'])->name('exams.manual-correction.bulk-score');
+            Route::post('/exams/manual-correction/ai-grade', [ExamManualCorrectionController::class, 'gradeWithAI'])->name('exams.manual-correction.ai-grade');
             Route::resource('exams', \App\Http\Controllers\Admin\ExamController::class);
 
             // Question Banks

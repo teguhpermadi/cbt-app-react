@@ -311,4 +311,24 @@ class Option extends Model implements HasMedia
             ],
         ]);
     }
+    /**
+     * Create option untuk Essay (Rubrik)
+     *
+     * @param string $questionId
+     * @param string $rubric Konten rubrik / kunci jawaban
+     * @return Option
+     */
+    public static function createEssayOption(string $questionId, string $rubric)
+    {
+        return self::create([
+            'question_id' => $questionId,
+            'option_key' => 'ESSAY',
+            'content' => $rubric,
+            'order' => 0,
+            'is_correct' => true, // Tidak digunakan untuk auto-grading biasa, tapi sebagai penanda
+            'metadata' => [
+                'type' => 'rubric',
+            ],
+        ]);
+    }
 }

@@ -69,7 +69,7 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::MultipleChoice => 'Pilih satu jawaban yang paling tepat dari pilihan yang tersedia: ' . $this->faker->sentence(),
             QuestionTypeEnum::MultipleSelection => 'Pilih semua jawaban yang benar (bisa lebih dari satu): ' . $this->faker->sentence(),
             QuestionTypeEnum::TrueFalse => 'Tentukan apakah pernyataan berikut benar atau salah: ' . $this->faker->sentence(),
-            QuestionTypeEnum::Essay => 'Jelaskan secara mendalam mengenai: ' . $this->faker->sentence(),
+            QuestionTypeEnum::Essay => $this->generateEssayQuestion(),
             QuestionTypeEnum::Matching => 'Jodohkan item di Kolom Kiri dengan item yang tepat di Kolom Kanan.',
             QuestionTypeEnum::Ordering => 'Urutkan langkah-langkah berikut secara kronologis.',
             QuestionTypeEnum::NumericalInput => $this->generateNumericalQuestion(),
@@ -95,6 +95,34 @@ class QuestionFactory extends Factory
     }
 
     /**
+     * Generate essay question with prefixes
+     */
+    private function generateEssayQuestion(): string
+    {
+        $prefixes = [
+            'Jelaskan mengapa',
+            'Bagaimana proses',
+            'Berikan contoh dari',
+            'Uraikan dampak dari',
+            'Apa perbedaan antara',
+            'Analisis faktor-faktor yang mempengaruhi'
+        ];
+
+        $topics = [
+            'pemanasan global',
+            'demokrasi di Indonesia',
+            'kecerdasan buatan',
+            'siklus air',
+            'revolusi industri 4.0',
+            'keanekaragaman hayati',
+            'sistem tata surya',
+            'perang dunia kedua'
+        ];
+
+        return $this->faker->randomElement($prefixes) . ' ' . $this->faker->randomElement($topics) . '?';
+    }
+
+    /**
      * Create options for question based on type
      */
     private function createOptionsForQuestion(Question $question): void
@@ -107,7 +135,7 @@ class QuestionFactory extends Factory
             QuestionTypeEnum::Ordering => $this->createOrderingOptions($question),
             QuestionTypeEnum::NumericalInput => $this->createNumericalInputOption($question),
             QuestionTypeEnum::ArrangeWords => $this->createArrangeWordsOptions($question),
-            QuestionTypeEnum::Essay => null, // Essay tidak memerlukan options
+            QuestionTypeEnum::Essay => $this->createEssayOption($question),
         };
     }
 
@@ -275,6 +303,35 @@ class QuestionFactory extends Factory
             // Optional: attach media if needed, though usually not for arrange words container
             $this->attachDummyMedia($option, 'option_media', "Arrange Words");
         }
+    }
+
+    /**
+     * Create essay option (Rubric)
+     */
+    private function createEssayOption(Question $question): void
+    {
+        // Generate contextual rubric based on content
+        $content = $question->content;
+        $rubric = "Rubrik Penilaian:\n";
+
+        if (str_contains(strtolower($content), 'jelaskan')) {
+            $rubric .= "- Menjelaskan definisi secara tepat (Skor 3)\n";
+            $rubric .= "- Menguraikan alasan utama (Skor 4)\n";
+            $rubric .= "- Memberikan kesimpulan yang logis (Skor 3)";
+        } elseif (str_contains(strtolower($content), 'contoh')) {
+            $rubric .= "- Memberikan minimal 3 contoh yang relevan (Skor 5)\n";
+            $rubric .= "- Menjelaskan konteks setiap contoh (Skor 5)";
+        } elseif (str_contains(strtolower($content), 'perbedaan')) {
+            $rubric .= "- Menyebutkan minimal 3 perbedaan (Skor 6)\n";
+            $rubric .= "- Menjelaskan dari segi konsep (Skor 4)";
+        } else {
+            $rubric .= "- Jawaban relevan dengan pertanyaan (Skor 5)\n";
+            $rubric .= "- Struktur kalimat baik dan mudah dipahami (Skor 5)";
+        }
+
+        $rubric .= "\n\nKunci Jawaban Singkat: Jawaban harus mencakup aspek A, B, dan C.";
+
+        Option::createEssayOption($question->id, $rubric);
     }
 
     /**

@@ -191,4 +191,52 @@ class ExamManualCorrectionController extends Controller
 
         return response()->json(['message' => 'Bulk scores updated successfully']);
     }
+
+    /**
+     * AI Grading Endpoint for Manual Correction
+     */
+    public function gradeWithAI(Request $request, \App\Services\AICorrectionService $aiService)
+    {
+        $request->validate([
+            'detail_id' => 'required|exists:exam_result_details,id',
+        ]);
+
+        $detail = ExamResultDetail::with('examQuestion.options')->findOrFail($request->detail_id);
+
+        // Security check
+        if ($detail->examQuestion->question_type !== QuestionTypeEnum::Essay) {
+            return response()->json(['message' => 'Hanya soal essay yang didukung.'], 400);
+        }
+
+        $rubricOption = $detail->examQuestion->options->sortBy('order')->first();
+        $rubric = $rubricOption ? $rubricOption->content : '';
+
+        if (empty($rubric)) {
+            return response()->json(['message' => 'Rubrik penilaian belum diatur untuk soal ini.'], 400);
+        }
+
+        if (empty($detail->student_answer)) {
+            return response()->json(['message' => 'Siswa belum menjawab soal ini.'], 400);
+        }
+
+        $result = $aiService->gradeEssay(
+            $detail->examQuestion->content,
+            $rubric,
+            $detail->student_answer
+        );
+
+        // Return the raw AI result (0-10 scale), let frontend or teacher adjust
+        // Or return scaled? Let's return both for flexibility, or just the suggested inputs
+
+        $maxScore = $detail->examQuestion->score_value;
+        $scaledScore = round(($result['score'] / 10) * $maxScore, 1);
+
+        return response()->json([
+            'success' => true,
+            'original_score' => $result['score'],
+            'scaled_score' => $scaledScore,
+            'max_score' => $maxScore,
+            'notes' => $result['notes']
+        ]);
+    }
 }

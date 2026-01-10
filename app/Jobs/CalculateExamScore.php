@@ -85,6 +85,10 @@ class CalculateExamScore implements ShouldQueue
                 $scoreEarned = $result['score'];
                 $isCorrect = $result['is_correct'];
 
+                if ($qTypeValue === 'essay') {
+                    Log::info("Recalculating Essay Detail {$detail->id}. Existing Score: {$detail->score_earned}, Preserved Score: {$scoreEarned}");
+                }
+
                 $detail->update([
                     'is_correct' => $isCorrect,
                     'score_earned' => $scoreEarned,
