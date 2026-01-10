@@ -90,6 +90,13 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
+                        <Button
+                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                            onClick={() => router.visit(`/admin/exams/${exam.id}/live-score`)}
+                        >
+                            <RefreshCw className="mr-2 h-4 w-4" />
+                            Live Score
+                        </Button>
                         <Button variant="outline" onClick={() => router.visit(`/admin/exams/${exam.id}/analysis`)}>
                             Item Analysis
                         </Button>

@@ -308,9 +308,9 @@ class ExamController extends Controller
         ]);
     }
 
-    public function saveAnswer(Request $request, Exam $exam)
+    public function saveAnswer(Request $request, Exam $exam, \App\Services\ExamScoringService $scoringService)
     {
-        \Illuminate\Support\Facades\Log::info('SaveAnswer Request:', $request->all());
+        // \Illuminate\Support\Facades\Log::info('SaveAnswer Request:', $request->all());
 
         $request->validate([
             'detail_id' => 'required|exists:exam_result_details,id',
@@ -320,8 +320,6 @@ class ExamController extends Controller
         ]);
 
         $detail = \App\Models\ExamResultDetail::findOrFail($request->detail_id);
-
-        \Illuminate\Support\Facades\Log::info('Found Detail:', ['id' => $detail->id, 'current_answer' => $detail->student_answer]);
 
         // Security check: ensure this detail belongs to current user's active session
         if ($detail->examSession->user_id !== \Illuminate\Support\Facades\Auth::id()) {
@@ -334,22 +332,71 @@ class ExamController extends Controller
         ];
 
         if ($request->has('answer')) {
-            // Always json_encode since student_answer is a JSON column in PostgreSQL
-            // Fix: Store null if answer is null to avoid "null" string
-            // Model casts to array/json, so we pass the array directly if it exists
             $updateData['student_answer'] = $request->answer;
             $updateData['answered_at'] = now();
+
+            // Calculate Score immediately
+            // We need to temporarily set the student_answer on the model instance 
+            // so the service can use it, without saving it yet if we want to be atomic, 
+            // but here we are passing $detail which we will update.
+            // Actually, let's update the model instance locally first.
+            $detail->student_answer = $request->answer;
+
+            $scoreResult = $scoringService->calculateDetailScore($detail);
+            $updateData['score_earned'] = $scoreResult['score'];
+            $updateData['is_correct'] = $scoreResult['is_correct'];
         }
 
         if ($request->has('is_flagged')) {
             $updateData['is_flagged'] = $request->is_flagged;
         }
 
-        \Illuminate\Support\Facades\Log::info('Update Data:', $updateData);
+        $detail->update($updateData);
 
-        $result = $detail->update($updateData);
+        // Dispatch Progress Update Event
+        try {
+            $session = $detail->examSession;
 
-        \Illuminate\Support\Facades\Log::info('Update Result:', ['success' => $result]);
+            // Aggregate stats efficiently
+            // We can count from DB for accuracy
+            $stats = $session->examResultDetails()
+                ->selectRaw('
+                    COUNT(*) as total_questions,
+                    COUNT(CASE WHEN answered_at IS NOT NULL THEN 1 END) as total_answered,
+                    COUNT(CASE WHEN is_correct = true THEN 1 END) as total_correct,
+                    COUNT(CASE WHEN is_correct = false AND answered_at IS NOT NULL THEN 1 END) as total_wrong
+                ')
+                ->first();
+
+            $totalQuestions = $stats->total_questions ?? 0;
+            $totalAnswered = $stats->total_answered ?? 0;
+            $totalCorrect = $stats->total_correct ?? 0;
+            $totalWrong = $stats->total_wrong ?? 0;
+
+            // Calculate duration if needed, or just pass what we have
+            // The frontend might want total duration spent across all questions or session duration
+            // Session duration so far:
+            $durationSeconds = 0;
+            if ($session->start_time) {
+                $durationSeconds = now()->diffInSeconds($session->start_time);
+            }
+
+            \App\Events\StudentProgressUpdated::dispatch(
+                (string) $exam->id,
+                (string) $session->user_id,
+                [
+                    'student_name' => $session->user->name ?? 'Unknown',
+                    'correct_count' => $totalCorrect,
+                    'wrong_count' => $totalWrong,
+                    'total_answered' => $totalAnswered,
+                    'total_questions' => $totalQuestions,
+                    'duration_seconds' => $durationSeconds,
+                    'score_current' => $session->examResultDetails()->sum('score_earned'), // Optional: Sum score
+                ]
+            );
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to dispatch progress event: ' . $e->getMessage());
+        }
 
         return response()->json(['success' => true]);
     }
