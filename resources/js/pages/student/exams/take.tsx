@@ -173,7 +173,31 @@ export default function ExamTake({ exam, session, questions }: Props) {
         }, 1000);
 
         return () => clearInterval(timer);
+        return () => clearInterval(timer);
     }, [exam.id, isSubmitting, exam.timer_type]);
+
+    // Presence Channel Join
+    useEffect(() => {
+        const channelName = `exam.presence.${exam.id}`;
+        if ((window as any).Echo) {
+            (window as any).Echo.join(channelName)
+                .here((users: any) => {
+                    // console.log('Presence here', users);
+                })
+                .joining((user: any) => {
+                    // console.log('Presence joining', user);
+                })
+                .leaving((user: any) => {
+                    // console.log('Presence leaving', user);
+                });
+        }
+
+        return () => {
+            if ((window as any).Echo) {
+                (window as any).Echo.leave(channelName);
+            }
+        }
+    }, [exam.id]);
 
     // Format time
     const formatTime = (seconds: number) => {

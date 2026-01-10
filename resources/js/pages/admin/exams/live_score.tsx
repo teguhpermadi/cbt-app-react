@@ -117,24 +117,23 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
 
     const [students, setStudents] = useState<StudentSession[]>(initialStudents);
     const [isConnected, setIsConnected] = useState(false);
+    const [onlineUserIds, setOnlineUserIds] = useState<Set<string>>(new Set());
 
     // Sorting state
     const [sortConfig, setSortConfig] = useState<{ key: keyof StudentSession, direction: 'asc' | 'desc' } | null>({ key: 'score_current', direction: 'desc' });
 
     useEffect(() => {
-        // Subscribe to Private Channel
-        const channelName = `exam.monitor.${exam.id}`;
+        // Subscribe to Private Channel for Progress
+        const progressChannelName = `exam.monitor.${exam.id}`;
 
-        console.log(`Subscribing to channel: ${channelName}`);
+        console.log(`Subscribing to channel: ${progressChannelName}`);
 
-        // Ensure Echo is available
         if (!(window as any).Echo) return;
 
-        const channel = (window as any).Echo.private(channelName);
+        const progressChannel = (window as any).Echo.private(progressChannelName);
 
-        channel.listen('.student.progress', (e: any) => {
-            console.log('Event received:', e);
-            // e.data contains the payload
+        progressChannel.listen('.student.progress', (e: any) => {
+            // ... same progress logic ...
             const data = e.data;
             const studentId = e.studentId;
 
@@ -144,10 +143,6 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                 if (index !== -1) {
                     // Update existing
                     const updated = [...prev];
-
-                    // Check if finished status changed based on payload or local logic (backend might create finished event later)
-                    // For answer updates, we just update stats.
-
                     updated[index] = {
                         ...updated[index],
                         correct_count: data.correct_count,
@@ -156,27 +151,26 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                         total_questions: data.total_questions,
                         duration_seconds: data.duration_seconds,
                         score_current: data.score_current,
-                        // Ensure these fields persist or get updated if payload has them
                         student_name: data.student_name ?? updated[index].student_name,
-                        is_finished: data.is_finished ?? updated[index].is_finished, // Update is_finished if present in payload
-                        start_time: data.start_time ?? updated[index].start_time, // Update start_time if present in payload
+                        is_finished: data.is_finished ?? updated[index].is_finished,
+                        start_time: data.start_time ?? updated[index].start_time,
                     };
                     return updated;
                 } else {
                     // New student
                     const newStudent: StudentSession = {
-                        id: 'unknown-session', // We might not have session ID in event unless we send it
+                        id: 'unknown-session',
                         user_id: studentId,
                         student_name: data.student_name ?? 'Unknown',
-                        student_email: '', // Not in event currently
+                        student_email: '',
                         correct_count: data.correct_count,
                         wrong_count: data.wrong_count,
                         total_answered: data.total_answered,
                         total_questions: data.total_questions,
                         duration_seconds: data.duration_seconds,
                         score_current: data.score_current,
-                        is_finished: data.is_finished ?? false, // Assume not finished if not in payload
-                        start_time: data.start_time ?? new Date().toISOString(), // Fallback for new connect
+                        is_finished: data.is_finished ?? false,
+                        start_time: data.start_time ?? new Date().toISOString(),
                     };
                     return [...prev, newStudent];
                 }
@@ -184,16 +178,43 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
         })
             .subscribed(() => {
                 setIsConnected(true);
-                console.log('Successfully subscribed!');
             })
             .error((error: any) => {
                 console.error('Subscription error:', error);
                 setIsConnected(false);
             });
 
+        // Presence Channel
+        const presenceChannelName = `exam.presence.${exam.id}`;
+        const presenceChannel = (window as any).Echo.join(presenceChannelName)
+            .here((users: any[]) => {
+                console.log('Here users:', users);
+                const ids = new Set(users.map(u => String(u.id))); // Ensure string comparison
+                setOnlineUserIds(ids);
+            })
+            .joining((user: any) => {
+                console.log('Joining:', user);
+                setOnlineUserIds(prev => {
+                    const next = new Set(prev);
+                    next.add(String(user.id));
+                    return next;
+                });
+            })
+            .leaving((user: any) => {
+                console.log('Leaving:', user);
+                setOnlineUserIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(String(user.id));
+                    return next;
+                });
+            });
+
+
         return () => {
-            console.log(`Leaving channel: ${channelName}`);
-            (window as any).Echo.leave(channelName);
+            console.log(`Leaving channel: ${progressChannelName}`);
+            (window as any).Echo.leave(progressChannelName);
+            console.log(`Leaving channel: ${presenceChannelName}`);
+            (window as any).Echo.leave(presenceChannelName);
         };
     }, [exam.id]);
 
@@ -265,6 +286,9 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                             <div className="text-2xl font-bold">
                                 {students.length}
                             </div>
+                            <div className="text-xs text-muted-foreground mt-1">
+                                Online: {onlineUserIds.size}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -281,6 +305,7 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                             <Table>
                                 <TableHeader>
                                     <TableRow>
+                                        <TableHead>Status</TableHead>
                                         <TableHead className="cursor-pointer" onClick={() => handleSort('student_name')}>Student Name</TableHead>
                                         <TableHead className="cursor-pointer text-center" onClick={() => handleSort('total_answered')}>Progress</TableHead>
                                         <TableHead className="cursor-pointer text-center" onClick={() => handleSort('correct_count')}>
@@ -300,46 +325,52 @@ export default function LiveScorePage({ exam, initialStudents }: LiveScoreProps)
                                 <TableBody>
                                     {sortedStudents.length === 0 ? (
                                         <TableRow>
-                                            <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
+                                            <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
                                                 Waiting for students to start...
                                             </TableCell>
                                         </TableRow>
                                     ) : (
-                                        sortedStudents.map((student) => (
-                                            <TableRow key={student.user_id} className={student.is_finished ? 'bg-slate-50 dark:bg-slate-900/50' : ''}>
-                                                <TableCell className="font-medium">
-                                                    <div className="flex items-center gap-2">
-                                                        {student.student_name}
-                                                        {student.is_finished && (
-                                                            <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-[10px] px-1 py-0 h-5">
-                                                                Selesai
-                                                            </Badge>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell className="text-center">
-                                                    <Badge variant="outline">{student.total_answered} / {student.total_questions}</Badge>
-                                                </TableCell>
-                                                <TableCell className="text-center text-green-600 font-bold">
-                                                    {student.correct_count}
-                                                </TableCell>
-                                                <TableCell className="text-center text-red-600 font-bold">
-                                                    {student.wrong_count}
-                                                </TableCell>
-                                                <TableCell className="text-center font-mono">
-                                                    {student.score_current}
-                                                </TableCell>
-                                                <TableCell className="text-right">
-                                                    <LiveTimer
-                                                        startTime={student.start_time}
-                                                        durationMinutes={exam.duration}
-                                                        timerType={exam.timer_type}
-                                                        isFinished={student.is_finished}
-                                                        finalDurationSeconds={student.duration_seconds}
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
+                                        sortedStudents.map((student) => {
+                                            const isOnline = onlineUserIds.has(String(student.user_id));
+                                            return (
+                                                <TableRow key={student.user_id} className={student.is_finished ? 'bg-slate-50 dark:bg-slate-900/50' : ''}>
+                                                    <TableCell className="w-[50px] text-center">
+                                                        <div className={`w-3 h-3 rounded-full mx-auto ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} title={isOnline ? 'Online' : 'Offline'}></div>
+                                                    </TableCell>
+                                                    <TableCell className="font-medium">
+                                                        <div className="flex items-center gap-2">
+                                                            {student.student_name}
+                                                            {student.is_finished && (
+                                                                <Badge variant="default" className="bg-green-600 hover:bg-green-700 text-white text-[10px] px-1 py-0 h-5">
+                                                                    Selesai
+                                                                </Badge>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-center">
+                                                        <Badge variant="outline">{student.total_answered} / {student.total_questions}</Badge>
+                                                    </TableCell>
+                                                    <TableCell className="text-center text-green-600 font-bold">
+                                                        {student.correct_count}
+                                                    </TableCell>
+                                                    <TableCell className="text-center text-red-600 font-bold">
+                                                        {student.wrong_count}
+                                                    </TableCell>
+                                                    <TableCell className="text-center font-mono">
+                                                        {student.score_current}
+                                                    </TableCell>
+                                                    <TableCell className="text-right">
+                                                        <LiveTimer
+                                                            startTime={student.start_time}
+                                                            durationMinutes={exam.duration}
+                                                            timerType={exam.timer_type}
+                                                            isFinished={student.is_finished}
+                                                            finalDurationSeconds={student.duration_seconds}
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })
                                     )}
                                 </TableBody>
                             </Table>
