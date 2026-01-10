@@ -53,7 +53,7 @@ class AICorrectionService
 
         try {
             $response = Prism::text()
-                ->using(Provider::Gemini, 'gemini-2.5-flash-lite')
+                ->using(Provider::Gemini, 'gemini-1.5-flash')
                 ->withPrompt($prompt)
                 ->asText();
 
