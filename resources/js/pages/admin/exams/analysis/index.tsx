@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from '@/components/ui/button'; // Ensure this path is correct based on your project structure
-import { ArrowLeft, Play, RefreshCw, Info, HelpCircle } from 'lucide-react';
+import { ArrowLeft, Play, RefreshCw, Info, HelpCircle, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
 import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
@@ -149,7 +149,15 @@ export default function AnalysisIndex({ exam, analysis }: Props) {
                                 </p>
                             </div>
                         </div>
-                        <div>
+                        <div className="flex gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => window.open(`/admin/exams/${exam.id}/analysis/export`, '_blank')}
+                                disabled={!analysis || analysis.status === 'processing'}
+                            >
+                                <ArrowLeft className="mr-2 h-4 w-4 rotate-90" /> {/* Improvising icon or use FileSpreadsheet if available, sticking to ArrowLeft rotate for now or just Text */}
+                                Download Excel
+                            </Button>
                             <Button
                                 onClick={handleRunAnalysis}
                                 disabled={analysis?.status === 'processing' || isRefreshing}
@@ -162,6 +170,7 @@ export default function AnalysisIndex({ exam, analysis }: Props) {
                                 {analysis ? 'Analisis Ulang' : 'Jalankan Analisis'}
                             </Button>
                         </div>
+
                     </div>
 
                     {/* Explainer Accordion */}

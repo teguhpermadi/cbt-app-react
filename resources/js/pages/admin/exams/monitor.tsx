@@ -4,7 +4,7 @@ import { Head, router } from '@inertiajs/react'; // Add router import
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { RefreshCw, CheckCircle, ArrowLeft } from 'lucide-react';
+import { RefreshCw, CheckCircle, ArrowLeft, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { useEffect, useState } from 'react';
@@ -75,7 +75,7 @@ export default function MonitorPage({ exam, sessions, total_students, participat
             <Head title={`Monitor - ${exam.title}`} />
 
             <div className="flex flex-col gap-6 p-6">
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col gap-6"> {/* Changed container to column */}
                     <div className="flex items-center gap-4">
                         <Button variant="outline" size="icon" onClick={() => router.visit(examsIndexRoute.url())}>
                             <ArrowLeft className="h-4 w-4" />
@@ -89,7 +89,14 @@ export default function MonitorPage({ exam, sessions, total_students, participat
                             </p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap"> {/* Buttons below title */}
+                        <Button
+                            variant="outline"
+                            onClick={() => window.open(`/admin/exams/${exam.id}/analysis/export`, '_blank')}
+                        >
+                            <Download className="mr-2 h-4 w-4" />
+                            Download Excel
+                        </Button>
                         <Button
                             className="bg-indigo-600 hover:bg-indigo-700 text-white"
                             onClick={() => router.visit(`/admin/exams/${exam.id}/live-score`)}

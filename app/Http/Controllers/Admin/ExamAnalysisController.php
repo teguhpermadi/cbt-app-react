@@ -57,4 +57,9 @@ class ExamAnalysisController extends Controller
             'analysis' => $analysis,
         ]);
     }
+
+    public function export(Exam $exam)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ExamAnalysisExport($exam), 'Analisis-' . $exam->title . '.xlsx');
+    }
 }

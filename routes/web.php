@@ -83,6 +83,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('/exams/{exam}/recalculate-all', [\App\Http\Controllers\Admin\ExamController::class, 'calculateAllScores'])->name('exams.recalculate-all');
             Route::get('exams/{exam}/live-score', [\App\Http\Controllers\Admin\LiveScoreController::class, 'index'])->name('exams.live-score');
             Route::get('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'show'])->name('exams.analysis.index');
+            Route::get('/exams/{exam}/analysis/export', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'export'])->name('exams.analysis.export');
             Route::post('/exams/{exam}/analysis', [\App\Http\Controllers\Admin\ExamAnalysisController::class, 'store'])->name('exams.analysis.store');
             Route::get('/exams/{exam}/manual-correction', [ExamManualCorrectionController::class, 'index'])->name('exams.manual-correction.index');
             Route::post('/exams/manual-correction/score', [ExamManualCorrectionController::class, 'storeScore'])->name('exams.manual-correction.store-score');
