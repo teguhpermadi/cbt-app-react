@@ -50,8 +50,8 @@ export default function History({ sessions }: HistoryProps) {
                 {sessions.length === 0 ? (
                     <Card className="border-dashed">
                         <CardContent className="flex flex-col items-center justify-center py-10 text-center">
-                            <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                                <FileText className="h-6 w-6 text-slate-400" />
+                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mb-4">
+                                <FileText className="h-6 w-6 text-slate-400 dark:text-slate-500" />
                             </div>
                             <h3 className="text-lg font-medium">Belum ada riwayat ujian</h3>
                             <p className="text-muted-foreground max-w-sm mt-1">
@@ -67,7 +67,7 @@ export default function History({ sessions }: HistoryProps) {
                                     <div className="flex flex-col md:flex-row md:items-center">
                                         <div className="p-6 flex-1 space-y-2">
                                             <div className="flex items-center gap-2 mb-2">
-                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-950/50 dark:text-blue-400 dark:border-blue-800">
                                                     {session.subject}
                                                 </Badge>
                                                 <Badge variant="secondary">
@@ -99,11 +99,11 @@ export default function History({ sessions }: HistoryProps) {
                                             </div>
                                         </div>
 
-                                        <div className="bg-slate-50 border-t md:border-t-0 md:border-l p-6 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 min-w-[200px]">
+                                        <div className="bg-slate-50 dark:bg-slate-900/50 border-t md:border-t-0 md:border-l dark:border-slate-800 p-6 flex flex-row md:flex-col items-center justify-between md:justify-center gap-4 min-w-[200px]">
                                             <div className="text-center">
                                                 <p className="text-sm font-medium text-muted-foreground uppercase tracking-wider mb-1">Total Skor</p>
                                                 <div className="flex items-baseline justify-center gap-1">
-                                                    <span className={`text-3xl font-bold ${session.score >= 75 ? 'text-green-600' : 'text-slate-700'}`}>
+                                                    <span className={`text-3xl font-bold ${session.score >= 75 ? 'text-green-600 dark:text-green-500' : 'text-slate-700 dark:text-slate-300'}`}>
                                                         {session.score}
                                                     </span>
                                                 </div>
