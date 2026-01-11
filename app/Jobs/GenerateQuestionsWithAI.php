@@ -4,9 +4,9 @@ namespace App\Jobs;
 
 use App\Enums\DifficultyLevelEnum;
 use App\Enums\QuestionTypeEnum;
-use App\Models\Exam;
 use App\Models\Option;
 use App\Models\Question;
+use App\Models\QuestionBank;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -26,7 +26,7 @@ class GenerateQuestionsWithAI implements ShouldQueue
      * Create a new job instance.
      */
     public function __construct(
-        protected string $examId,
+        protected string $questionBankId,
         protected string $questionType, // Passed as string from command, cast to Enum logic inside
         protected string $topic,
         protected int $count = 5,
@@ -38,10 +38,10 @@ class GenerateQuestionsWithAI implements ShouldQueue
      */
     public function handle(): void
     {
-        $exam = Exam::with('questionBank')->find($this->examId);
+        $questionBank = QuestionBank::find($this->questionBankId);
 
-        if (!$exam || !$exam->questionBank) {
-            Log::error("Exam or QuestionBank not found for ID: {$this->examId}");
+        if (!$questionBank) {
+            Log::error("QuestionBank not found for ID: {$this->questionBankId}");
             return;
         }
 
@@ -71,10 +71,10 @@ class GenerateQuestionsWithAI implements ShouldQueue
             }
 
             // Using transaction to ensure atomicity
-            DB::transaction(function () use ($exam, $questionsData, $typeEnum) {
+            DB::transaction(function () use ($questionBank, $questionsData, $typeEnum) {
                 foreach ($questionsData as $qData) {
                     $question = Question::create([
-                        'question_bank_id' => $exam->question_bank_id,
+                        'question_bank_id' => $questionBank->id,
                         'question_type' => $typeEnum,
                         'difficulty_level' => $this->difficulty,
                         'content' => $qData['content'] ?? 'No Content',
@@ -88,7 +88,7 @@ class GenerateQuestionsWithAI implements ShouldQueue
                 }
             });
 
-            Log::info("Successfully generated {$this->count} questions for Exam ID: {$this->examId}");
+            Log::info("Successfully generated {$this->count} questions for Question Bank ID: {$this->questionBankId}");
         } catch (\Exception $e) {
             Log::error('AI Question Generation Exception', ['message' => $e->getMessage()]);
             throw $e;

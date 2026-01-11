@@ -32,8 +32,8 @@ class MakeQuestionsWithAI extends Command
     {
         $this->info('Welcome to AI Question Generator!');
 
-        $examId = text(
-            label: 'Please enter the Exam ID:',
+        $questionBankId = text(
+            label: 'Please enter the Question Bank ID:',
             required: true,
             placeholder: 'E.g. 01jj...'
         );
@@ -97,7 +97,7 @@ class MakeQuestionsWithAI extends Command
         $this->info("Dispatching job to create $count questions of type '$selectedTypeKey'...");
 
         GenerateQuestionsWithAI::dispatch(
-            $examId,
+            $questionBankId,
             $selectedTypeKey,
             $topic,
             (int) $count,
