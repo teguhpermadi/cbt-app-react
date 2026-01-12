@@ -25,7 +25,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { MultiSelect } from '@/components/ui/multi-select';
 import InputError from '@/components/input-error';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save, Plus, Settings } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Settings, Sparkles, Loader2 } from 'lucide-react';
 import { FormEventHandler } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -128,6 +128,78 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
         e.preventDefault();
         // Using Wayground Action
         put(QuestionBankController.update(questionBank.id).url);
+    };
+
+    // AI Generation State
+    const [isGenerating, setIsGenerating] = useState(false);
+    const [generationStartCount, setGenerationStartCount] = useState(0);
+    const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
+    const aiForm = useForm({
+        topic: '',
+        question_type: 'multiple_choice',
+        count: 5,
+        difficulty: 'sedang',
+    });
+
+    // Polling function to check for new questions
+    const checkForNewQuestions = () => {
+        router.reload({
+            only: ['questions'],
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: (page: any) => {
+                const currentQuestions = page.props.questions || [];
+                if (currentQuestions.length > generationStartCount) {
+                    // New questions detected, stop polling
+                    setIsGenerating(false);
+                    if (pollingInterval) {
+                        clearInterval(pollingInterval);
+                        setPollingInterval(null);
+                    }
+                }
+            }
+        });
+    };
+
+    // Clean up polling on unmount
+    useEffect(() => {
+        return () => {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+            }
+        };
+    }, [pollingInterval]);
+
+    const submitAIGeneration: FormEventHandler = (e) => {
+        e.preventDefault();
+
+        // Record current question count
+        setGenerationStartCount(questions.length);
+        setIsGenerating(true);
+
+        aiForm.post(`/admin/question-banks/${questionBank.id}/generate-ai`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                aiForm.reset();
+
+                // Start polling every 3 seconds
+                const interval = setInterval(checkForNewQuestions, 3000);
+                setPollingInterval(interval);
+
+                // Auto-stop polling after 5 minutes as safety measure
+                setTimeout(() => {
+                    setIsGenerating(false);
+                    if (interval) {
+                        clearInterval(interval);
+                        setPollingInterval(null);
+                    }
+                }, 300000); // 5 minutes
+            },
+            onError: () => {
+                setIsGenerating(false);
+            }
+        });
     };
 
     // Create Exam State
@@ -433,6 +505,131 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
             {/* Main Content */}
             <div className="flex-1 overflow-auto p-6 bg-muted/10">
                 <div className="max-w-4xl mx-auto space-y-6">
+                    {/* AI Question Generator Card */}
+                    <Card className="border-primary/20">
+                        <CardContent className="pt-6">
+                            <div className="flex items-center gap-2 mb-4">
+                                <Sparkles className="h-5 w-5 text-primary" />
+                                <h3 className="text-lg font-semibold">Generator Soal AI</h3>
+                            </div>
+                            <form onSubmit={submitAIGeneration} className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-2 md:col-span-2">
+                                        <Label htmlFor="topic">Topik Soal</Label>
+                                        <Input
+                                            id="topic"
+                                            value={aiForm.data.topic}
+                                            onChange={(e) => aiForm.setData('topic', e.target.value)}
+                                            placeholder="Contoh: Sistem Pernapasan Manusia"
+                                            required
+                                        />
+                                        {aiForm.errors.topic && (
+                                            <div className="text-sm text-red-500">{aiForm.errors.topic}</div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="question_type">Tipe Soal</Label>
+                                        <Select
+                                            value={aiForm.data.question_type}
+                                            onValueChange={(value) => aiForm.setData('question_type', value)}
+                                        >
+                                            <SelectTrigger id="question_type">
+                                                <SelectValue placeholder="Pilih Tipe Soal" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="multiple_choice">Pilihan Ganda (Tunggal)</SelectItem>
+                                                <SelectItem value="true_false">Benar/Salah</SelectItem>
+                                                <SelectItem value="essay">Esai/Uraian</SelectItem>
+                                                <SelectItem value="matching">Menjodohkan</SelectItem>
+                                                <SelectItem value="ordering">Mengurutkan</SelectItem>
+                                                <SelectItem value="multiple_selection">Pilihan Ganda Kompleks</SelectItem>
+                                                <SelectItem value="numerical_input">Input Angka</SelectItem>
+                                                <SelectItem value="arrange_words">Susun Kata</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {aiForm.errors.question_type && (
+                                            <div className="text-sm text-red-500">{aiForm.errors.question_type}</div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="count">Jumlah Soal</Label>
+                                        <Input
+                                            id="count"
+                                            type="number"
+                                            min="1"
+                                            max="5"
+                                            value={aiForm.data.count}
+                                            onChange={(e) => aiForm.setData('count', parseInt(e.target.value))}
+                                            required
+                                        />
+                                        {aiForm.errors.count && (
+                                            <div className="text-sm text-red-500">{aiForm.errors.count}</div>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
+                                        <Select
+                                            value={aiForm.data.difficulty}
+                                            onValueChange={(value) => aiForm.setData('difficulty', value)}
+                                        >
+                                            <SelectTrigger id="difficulty">
+                                                <SelectValue placeholder="Pilih Kesulitan" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="mudah">Mudah</SelectItem>
+                                                <SelectItem value="sedang">Sedang</SelectItem>
+                                                <SelectItem value="sulit">Sulit</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        {aiForm.errors.difficulty && (
+                                            <div className="text-sm text-red-500">{aiForm.errors.difficulty}</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <Button type="submit" disabled={aiForm.processing || isGenerating} className="w-full sm:w-auto">
+                                    {isGenerating ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            Sedang Membuat Soal...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="mr-2 h-4 w-4" />
+                                            {aiForm.processing ? 'Mengirim...' : 'Generate Soal dengan AI'}
+                                        </>
+                                    )}
+                                </Button>
+
+                                <p className="text-xs text-muted-foreground">
+                                    💡 AI akan membuat soal berdasarikan topik dan parameter yang Anda berikan. Proses ini mungkin memakan waktu beberapa menit.
+                                </p>
+                            </form>
+                        </CardContent>
+                    </Card>
+
+                    {/* AI Generation Progress Indicator */}
+                    {isGenerating && (
+                        <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+                            <CardContent className="pt-6">
+                                <div className="flex items-center gap-3">
+                                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                                    <div className="flex-1">
+                                        <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                                            AI sedang membuat soal...
+                                        </h4>
+                                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                                            Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
+                                        </p>
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Header for Questions Section */}
                     <div className="flex items-center justify-between">
                         <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\GenerateQuestionsWithAI;
 use App\Models\QuestionBank;
 use App\Models\Subject;
 use App\Services\QuestionImportService;
@@ -261,5 +262,29 @@ class QuestionBankController extends Controller
         $filePath = $templateService->generateTemplate();
 
         return response()->download($filePath, 'Template_Upload_Soal.docx');
+    }
+
+    /**
+     * Generate questions using AI
+     */
+    public function generateWithAI(Request $request, QuestionBank $questionBank)
+    {
+        $validated = $request->validate([
+            'topic' => 'required|string|max:255',
+            'question_type' => 'required|string',
+            'count' => 'required|integer|min:1|max:20',
+            'difficulty' => 'required|string|in:mudah,sedang,sulit',
+        ]);
+
+        // Dispatch the job
+        GenerateQuestionsWithAI::dispatch(
+            $questionBank->id,
+            $validated['question_type'],
+            $validated['topic'],
+            $validated['count'],
+            $validated['difficulty']
+        );
+
+        return redirect()->back()->with('success', 'AI sedang membuat soal. Proses ini mungkin memakan waktu beberapa menit.');
     }
 }

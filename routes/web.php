@@ -95,6 +95,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('question-banks/template/download', [\App\Http\Controllers\Admin\QuestionBankController::class, 'downloadTemplate'])->name('question-banks.template.download');
             Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
             Route::post('question-banks/{questionBank}/upload-questions', [\App\Http\Controllers\Admin\QuestionBankController::class, 'uploadQuestions'])->name('question-banks.upload-questions');
+            Route::post('question-banks/{questionBank}/generate-ai', [\App\Http\Controllers\Admin\QuestionBankController::class, 'generateWithAI'])->name('question-banks.generate-ai');
             Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
             Route::get('tags/search', [\App\Http\Controllers\Admin\QuestionController::class, 'searchTags'])->name('tags.search');
             Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
