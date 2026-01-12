@@ -57,6 +57,8 @@ interface CreateExamFormData {
     is_published: boolean;
     is_randomized: boolean;
     is_answer_randomized: boolean;
+    is_hint_visible: boolean;
+    show_result_on_finish: boolean;
     max_attempts: number | null;
     timer_type: string;
     passing_score: number;
@@ -139,11 +141,16 @@ export default function Show({ questionBank, questions }: ShowProps) {
     const submitCreate = (e: React.FormEvent) => {
         e.preventDefault();
         createForm.post(ExamController.store.url(), {
-            onSuccess: () => {
+            onSuccess: (page: any) => {
                 setIsCreateExamOpen(false);
                 createForm.reset();
-                // Redirect to exams index
-                router.visit(ExamController.index().url);
+                // Redirect to monitor page of the newly created exam
+                const examId = page.props.exam?.id;
+                if (examId) {
+                    router.visit(ExamController.monitor(examId).url);
+                } else {
+                    router.visit(ExamController.index().url);
+                }
             },
         });
     };

@@ -90,7 +90,11 @@ class ExamController extends Controller
 
         $exam->grades()->sync($request->input('grade_ids', []));
 
-        return redirect()->back()->with('success', 'Exam created successfully.');
+        // Return redirect with exam data so frontend can redirect to monitor
+        return redirect()->back()->with([
+            'success' => 'Exam created successfully.',
+            'exam' => $exam
+        ]);
     }
 
     /**

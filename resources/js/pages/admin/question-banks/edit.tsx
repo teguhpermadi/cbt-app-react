@@ -205,10 +205,16 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
     const submitCreate = (e: React.FormEvent) => {
         e.preventDefault();
         createForm.post(ExamController.store.url(), {
-            onSuccess: () => {
+            onSuccess: (page: any) => {
                 setIsCreateExamOpen(false);
                 createForm.reset();
-                router.visit(ExamController.index().url);
+                // Redirect to monitor page of the newly created exam
+                const examId = page.props.exam?.id;
+                if (examId) {
+                    router.visit(ExamController.monitor(examId).url);
+                } else {
+                    router.visit(ExamController.index().url);
+                }
             },
         });
     };
