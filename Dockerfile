@@ -16,7 +16,8 @@ RUN npm install --prefer-offline --no-audit --legacy-peer-deps
 # Copy source files needed for build
 COPY resources ./resources
 COPY public ./public
-COPY vite.config.ts tsconfig.json components.json ./
+COPY vite.config.ts tsconfig.json components.json ./ 
+COPY routes ./routes
 
 # Build frontend assets (skip wayfinder as PHP is not available)
 ENV SKIP_WAYFINDER=1
