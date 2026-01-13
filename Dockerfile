@@ -75,7 +75,7 @@ RUN composer install \
 # ============================================
 # Stage 3: Final FrankenPHP Runtime
 # ============================================
-FROM dunglas/frankenphp:latest-php8.2
+FROM dunglas/frankenphp:latest-php8.3
 
 WORKDIR /app
 
