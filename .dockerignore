@@ -1,0 +1,68 @@
+# Ignore dependencies
+node_modules/
+vendor/
+
+# Ignore Git
+.git/
+.github/
+.gitignore
+.gitattributes
+
+# Ignore IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Ignore environment files
+.env
+.env.*
+!.env.example
+!.env.docker
+
+# Ignore build artifacts
+.phpunit.result.cache
+coverage/
+.phpunit.cache
+
+# Ignore storage and cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+!storage/logs/.gitkeep
+!storage/framework/cache/.gitkeep
+!storage/framework/sessions/.gitkeep
+!storage/framework/views/.gitkeep
+!bootstrap/cache/.gitkeep
+
+# Ignore test files
+tests/
+phpunit.xml
+.phpunit.result.cache
+test_output.txt
+
+# Ignore documentation
+docs/
+*.md
+!docker/README.md
+
+# Ignore development files
+debug-*.js
+prepare_test.php
+check_media.php
+verify_*.php
+
+# Ignore Docker files (we want to include these in the build)
+# docker-compose*.yml will be outside the build context
+
+# Ignore lock files (we copy them explicitly)
+package-lock.json
+composer.lock
+
+# Ignore prettier and eslint
+.prettierrc
+.prettierignore
+eslint.config.js

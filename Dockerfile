@@ -1,0 +1,124 @@
+# syntax=docker/dockerfile:1
+
+# ============================================
+# Stage 1: Build Frontend Assets
+# ============================================
+FROM node:20-alpine AS node-builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --prefer-offline --no-audit
+
+# Copy source files needed for build
+COPY resources ./resources
+COPY public ./public
+COPY vite.config.ts tsconfig.json components.json ./
+
+# Build frontend assets
+RUN npm run build
+
+# ============================================
+# Stage 2: PHP Dependencies
+# ============================================
+FROM dunglas/frankenphp:latest-builder AS php-builder
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    unzip \
+    libpq-dev \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo_pgsql \
+        pgsql \
+        gd \
+        intl \
+        zip \
+        opcache \
+        bcmath \
+        pcntl \
+        sockets \
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy composer files
+COPY composer.json composer.lock ./
+
+# Install PHP dependencies (production only)
+RUN composer install \
+    --no-dev \
+    --no-interaction \
+    --no-progress \
+    --no-scripts \
+    --prefer-dist \
+    --optimize-autoloader
+
+# ============================================
+# Stage 3: Final FrankenPHP Runtime
+# ============================================
+FROM dunglas/frankenphp:latest-php8.2
+
+WORKDIR /app
+
+# Install runtime dependencies
+RUN apt-get update && apt-get install -y \
+    libpq5 \
+    libzip4 \
+    libpng16-16 \
+    libjpeg62-turbo \
+    libfreetype6 \
+    supervisor \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy PHP extensions from builder
+COPY --from=php-builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
+COPY --from=php-builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Copy vendor from builder
+COPY --from=php-builder /app/vendor ./vendor
+
+# Copy application code
+COPY . .
+
+# Copy built frontend assets from node-builder
+COPY --from=node-builder /app/public/build ./public/build
+
+# Create necessary directories and set permissions
+RUN mkdir -p storage/framework/{sessions,views,cache} \
+    storage/logs \
+    bootstrap/cache \
+    && chown -R www-data:www-data storage bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
+# Copy PHP configuration
+COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
+
+# Copy Caddyfile
+COPY Caddyfile /etc/caddy/Caddyfile
+
+# Set environment
+ENV APP_ENV=production
+ENV APP_DEBUG=false
+
+# Expose ports
+EXPOSE 80 443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
+    CMD php artisan about || exit 1
+
+# Start FrankenPHP
+CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]

@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  # ============================================
+  # Development: FrankenPHP with hot reload
+  # ============================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: php-builder  # Use builder stage for dev
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - FRANKENPHP_WORKERS=0  # Disable worker mode in dev
+    volumes:
+      # Mount entire codebase for hot reload
+      - .:/app
+      # Prevent node_modules and vendor from being overwritten
+      - /app/node_modules
+      - /app/vendor
+    ports:
+      - "8000:80"
+    command: frankenphp run --config /etc/caddy/Caddyfile --watch
+
+  # ============================================
+  # Development: Vite Dev Server
+  # ============================================
+  vite:
+    image: node:20-alpine
+    container_name: cbt-vite
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    command: npm run dev
+    networks:
+      - cbt-network
+
+  # ============================================
+  # Development: Queue worker with verbose output
+  # ============================================
+  queue:
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/vendor
+    command: php artisan queue:work --tries=1 --verbose --timeout=60
+
+  # ============================================
+  # PostgreSQL Admin (pgAdmin)
+  # ============================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cbt-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@cbt.local}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - cbt-network
+    depends_on:
+      - postgres
+
+  # ============================================
+  # Redis Commander (Web UI for Redis)
+  # ============================================
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: cbt-redis-commander
+    restart: unless-stopped
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - cbt-network
+    depends_on:
+      - redis
+
+volumes:
+  pgadmin_data:
+    driver: local
