@@ -1,14 +1,9 @@
-{
-    # Main domain configuration
-    {$APP_URL:localhost}
-    
+{$APP_URL:localhost} {
     # Enable FrankenPHP worker mode for better performance
-    {
-        frankenphp {
-            worker {
-                file public/index.php
-                num {$FRANKENPHP_WORKERS:2}
-            }
+    frankenphp {
+        worker {
+            file public/index.php
+            num {$FRANKENPHP_WORKERS:2}
         }
     }
 
