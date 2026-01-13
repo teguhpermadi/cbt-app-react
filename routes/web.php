@@ -96,6 +96,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('question-banks', \App\Http\Controllers\Admin\QuestionBankController::class);
             Route::post('question-banks/{questionBank}/upload-questions', [\App\Http\Controllers\Admin\QuestionBankController::class, 'uploadQuestions'])->name('question-banks.upload-questions');
             Route::post('question-banks/{questionBank}/generate-ai', [\App\Http\Controllers\Admin\QuestionBankController::class, 'generateWithAI'])->name('question-banks.generate-ai');
+            Route::post('question-banks/{questionBank}/generate-tags', [\App\Http\Controllers\Admin\QuestionBankController::class, 'generateTags'])->name('question-banks.generate-tags');
+
             Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
             Route::get('tags/search', [\App\Http\Controllers\Admin\QuestionController::class, 'searchTags'])->name('tags.search');
             Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);

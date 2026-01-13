@@ -142,6 +142,9 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
         difficulty: 'sedang',
     });
 
+    // Tag Generation State
+    const [isGeneratingTags, setIsGeneratingTags] = useState(false);
+
     // Polling function to check for new questions
     const checkForNewQuestions = () => {
         router.reload({
@@ -199,6 +202,36 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
             onError: () => {
                 setIsGenerating(false);
             }
+        });
+    };
+
+    const handleGenerateTags = () => {
+        if (questions.length === 0) {
+            return;
+        }
+
+        setIsGeneratingTags(true);
+        router.post(`/admin/question-banks/${questionBank.id}/generate-tags`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Start polling for tag updates
+                const interval = setInterval(() => {
+                    router.reload({
+                        only: ['questions'],
+                        preserveScroll: true,
+                        preserveState: true,
+                    });
+                }, 3000);
+
+                // Stop polling after 5 minutes
+                setTimeout(() => {
+                    setIsGeneratingTags(false);
+                    clearInterval(interval);
+                }, 300000);
+            },
+            onError: () => {
+                setIsGeneratingTags(false);
+            },
         });
     };
 
@@ -609,6 +642,43 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
                                             Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
                                         </p>
                                     </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
+                    {/* AI Tag Generator Card */}
+                    {questions.length > 0 && (
+                        <Card className="border-purple-500/20">
+                            <CardContent className="pt-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="h-5 w-5 text-purple-500" />
+                                        <div>
+                                            <h3 className="text-lg font-semibold">Generator Tag AI</h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                Buat tag otomatis untuk semua pertanyaan ({questions.length} soal)
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <Button
+                                        onClick={handleGenerateTags}
+                                        disabled={isGeneratingTags}
+                                        variant="outline"
+                                        className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
+                                    >
+                                        {isGeneratingTags ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                Sedang Membuat Tag...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                Generate Tag dengan AI
+                                            </>
+                                        )}
+                                    </Button>
                                 </div>
                             </CardContent>
                         </Card>

@@ -272,12 +272,12 @@ class QuestionBankController extends Controller
         $validated = $request->validate([
             'topic' => 'required|string|max:255',
             'question_type' => 'required|string',
-            'count' => 'required|integer|min:1|max:20',
+            'count' => 'required|integer|min:1|max:5',
             'difficulty' => 'required|string|in:mudah,sedang,sulit',
         ]);
 
-        // Dispatch the job
-        GenerateQuestionsWithAI::dispatch(
+        // Dispatch Job
+        \App\Jobs\GenerateQuestionsWithAI::dispatch(
             $questionBank->id,
             $validated['question_type'],
             $validated['topic'],
@@ -285,6 +285,24 @@ class QuestionBankController extends Controller
             $validated['difficulty']
         );
 
-        return redirect()->back()->with('success', 'AI sedang membuat soal. Proses ini mungkin memakan waktu beberapa menit.');
+        return back()->with('success', 'AI sedang membuat soal. Soal akan muncul dalam beberapa menit.');
+    }
+
+    /**
+     * Generate tags for all questions using AI
+     */
+    public function generateTags(QuestionBank $questionBank)
+    {
+        // Check if question bank has questions
+        $questionCount = $questionBank->questions()->count();
+
+        if ($questionCount === 0) {
+            return back()->with('error', 'Tidak ada pertanyaan untuk di-generate tag-nya.');
+        }
+
+        // Dispatch Job
+        \App\Jobs\GenerateQuestionTags::dispatch($questionBank->id);
+
+        return back()->with('success', "AI sedang membuat tag untuk {$questionCount} pertanyaan. Tag akan muncul dalam beberapa menit.");
     }
 }
