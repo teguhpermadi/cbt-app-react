@@ -219,7 +219,7 @@ class ExamController extends Controller
             ->get();
 
         // Prepare Analysis Data
-        $analysisResult = $this->analysisService->calculateMasteryAnalysis($session);
+        $analysisResult = $this->analysisService->calculateMasteryAnalysis($session, $session->exam);
         $normReference = $this->analysisService->calculateNormReference($session->exam, $session);
         $leaderboard = $this->analysisService->getLeaderboard($session->exam, $session->user_id); // Highlight this user
         $questions = $this->analysisService->getFormattedQuestions($session);

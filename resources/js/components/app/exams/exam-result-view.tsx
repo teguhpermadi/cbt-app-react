@@ -55,7 +55,7 @@ interface ExamResultViewProps {
         score_earned: number;
         max_score: number;
         percentage: number;
-        status: 'mastered' | 'remedial' | 'enrichment';
+        status: 'mastered' | 'remedial' | 'enrichment' | 'sufficient';
     }[];
     norm_reference: {
         class_average: number;
@@ -85,8 +85,9 @@ export default function ExamResultView({
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'mastered': return 'bg-green-500';
-            case 'enrichment': return 'bg-yellow-500'; // Gold
+            case 'enrichment': return 'bg-blue-500';
             case 'remedial': return 'bg-red-500';
+            case 'sufficient': return 'bg-yellow-500';
             default: return 'bg-slate-500';
         }
     };
@@ -96,6 +97,7 @@ export default function ExamResultView({
             case 'mastered': return 'Kompeten';
             case 'enrichment': return 'Sangat Kompeten';
             case 'remedial': return 'Perlu Remedial';
+            case 'sufficient': return 'Cukup';
             default: return '-';
         }
     };
@@ -187,7 +189,11 @@ export default function ExamResultView({
                                         <div>
                                             <div className="font-semibold text-slate-800">{item.tag}</div>
                                             <div className="text-xs text-muted-foreground flex gap-2 items-center mt-1">
-                                                <Badge variant="outline" className={`${item.status === 'remedial' ? 'text-red-600 border-red-200 bg-red-50' : item.status === 'enrichment' ? 'text-yellow-600 border-yellow-200 bg-yellow-50' : 'text-green-600 border-green-200 bg-green-50'}`}>
+                                                <Badge variant="outline" className={`${item.status === 'remedial' ? 'text-red-600 border-red-200 bg-red-50' :
+                                                        item.status === 'sufficient' ? 'text-yellow-600 border-yellow-200 bg-yellow-50' :
+                                                            item.status === 'enrichment' ? 'text-blue-600 border-blue-200 bg-blue-50' :
+                                                                'text-green-600 border-green-200 bg-green-50'
+                                                    }`}>
                                                     {getStatusText(item.status)}
                                                 </Badge>
                                                 <span>{item.score_earned} / {item.max_score} Poin</span>

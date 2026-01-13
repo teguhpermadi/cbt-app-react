@@ -11,7 +11,7 @@ class ExamAnalysisService
     /**
      * Calculate mastery analysis based on tags.
      */
-    public function calculateMasteryAnalysis(ExamSession $session): array
+    public function calculateMasteryAnalysis(ExamSession $session, Exam $exam): array
     {
         $masteryAnalysis = [];
         $totalQuestionsWithTags = 0;
@@ -56,14 +56,30 @@ class ExamAnalysisService
 
         // Finalisasi Mastery Analysis (Hitung Persentase & Status)
         $analysisResult = [];
+
+        // Get passing score from exam, default to 60 if not set
+        $passingScore = $exam->passing_score ?? 60;
+
+        // Calculate dynamic thresholds based on passing_score
+        // Remedial: Below passing score
+        // Sufficient: passing_score to passing_score + 14
+        // Mastered: passing_score + 15 to 84
+        // Enrichment: 85 and above
+        $sufficientThreshold = min($passingScore + 15, 75);
+        $masteredThreshold = 85;
+
         foreach ($masteryAnalysis as $tag => $data) {
             $percentage = $data['total_max_score'] > 0 ? ($data['total_score_earned'] / $data['total_max_score']) * 100 : 0;
 
-            $status = 'mastered';
-            if ($percentage < 60) { // Threshold Remedial (bisa setting dinamis nanti)
-                $status = 'remedial';
-            } elseif ($percentage >= 85) {
-                $status = 'enrichment';
+            // Determine status based on dynamic thresholds
+            if ($percentage < $passingScore) {
+                $status = 'remedial';           // Below passing score - Perlu Remedial
+            } elseif ($percentage < $sufficientThreshold) {
+                $status = 'sufficient';         // Passing to sufficient threshold - Cukup
+            } elseif ($percentage < $masteredThreshold) {
+                $status = 'mastered';           // Sufficient to mastered threshold - Kompeten
+            } else {
+                $status = 'enrichment';         // >= 85% - Sangat Kompeten
             }
 
             $analysisResult[] = [

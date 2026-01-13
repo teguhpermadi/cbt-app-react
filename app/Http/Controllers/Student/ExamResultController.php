@@ -94,7 +94,7 @@ class ExamResultController extends Controller
         $session->load(['examResultDetails.examQuestion.originalQuestion.tags', 'user']);
 
         // --- 1. Masteri Materi (Criterion-Referenced) ---
-        $analysisResult = $this->analysisService->calculateMasteryAnalysis($session);
+        $analysisResult = $this->analysisService->calculateMasteryAnalysis($session, $exam);
 
         // --- 2. Norm-Referenced Assessment & Leaderboard ---
         $normReference = $this->analysisService->calculateNormReference($exam, $session);
