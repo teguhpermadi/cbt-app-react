@@ -11,7 +11,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies (use npm install if package-lock.json doesn't exist)
-RUN npm install --prefer-offline --no-audit
+RUN npm install --prefer-offline --no-audit --legacy-peer-deps
 
 # Copy source files needed for build
 COPY resources ./resources
