@@ -18,9 +18,12 @@ export default defineConfig({
             },
         }),
         tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
+        // Skip wayfinder during Docker build (PHP not available in node stage)
+        ...(process.env.SKIP_WAYFINDER ? [] : [
+            wayfinder({
+                formVariants: true,
+            }),
+        ]),
     ],
     resolve: {
         alias: {

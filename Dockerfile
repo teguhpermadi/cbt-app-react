@@ -18,7 +18,8 @@ COPY resources ./resources
 COPY public ./public
 COPY vite.config.ts tsconfig.json components.json ./
 
-# Build frontend assets
+# Build frontend assets (skip wayfinder as PHP is not available)
+ENV SKIP_WAYFINDER=1
 RUN npm run build
 
 # ============================================
