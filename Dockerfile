@@ -30,6 +30,9 @@ FROM dunglas/frankenphp:latest-builder AS php-builder
 
 WORKDIR /app
 
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     git \
