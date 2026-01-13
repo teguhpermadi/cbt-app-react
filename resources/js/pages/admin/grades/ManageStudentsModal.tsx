@@ -8,19 +8,13 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
-import { Loader2, Trash2, Plus, Search } from 'lucide-react';
+import { Loader2, Trash2, Plus, Search, X } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
 import GradeStudentController from '@/actions/App/Http/Controllers/Admin/GradeStudentController';
 import { Badge } from '@/components/ui/badge';
 import InputError from '@/components/input-error';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface Grade {
     id: string;
@@ -45,7 +39,7 @@ export default function ManageStudentsModal({ grade, open, onOpenChange, onStude
     const [loading, setLoading] = useState(false);
     const [students, setStudents] = useState<User[]>([]);
     const [availableStudents, setAvailableStudents] = useState<User[]>([]);
-    const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+    const [selectedStudentIds, setSelectedStudentIds] = useState<string[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -68,25 +62,29 @@ export default function ManageStudentsModal({ grade, open, onOpenChange, onStude
     useEffect(() => {
         if (open && grade) {
             fetchData();
-            setSelectedStudentId('');
+            setSelectedStudentIds([]);
             setSearchQuery('');
         }
     }, [open, grade]);
 
-    const handleAddStudent = async () => {
-        if (!grade || !selectedStudentId) return;
+    const handleAddStudents = async () => {
+        if (!grade || selectedStudentIds.length === 0) return;
         setLoading(true);
         setError(null);
         try {
-            await axios.post(GradeStudentController.store(grade.id).url, {
-                user_id: selectedStudentId,
-            });
+            // Add students one by one (or batch if API supports it)
+            // For now, we'll do sequential adds
+            for (const studentId of selectedStudentIds) {
+                await axios.post(GradeStudentController.store(grade.id).url, {
+                    user_id: studentId,
+                });
+            }
             await fetchData();
-            setSelectedStudentId('');
+            setSelectedStudentIds([]);
             onStudentAdded?.(); // Trigger reload di parent
         } catch (err: any) {
             console.error(err);
-            setError(err.response?.data?.message || err.response?.data?.errors?.user_id?.[0] || 'Failed to assign student.');
+            setError(err.response?.data?.message || err.response?.data?.errors?.user_id?.[0] || 'Failed to assign students.');
         } finally {
             setLoading(false);
         }
@@ -106,6 +104,22 @@ export default function ManageStudentsModal({ grade, open, onOpenChange, onStude
         } finally {
             setLoading(false);
         }
+    };
+
+    const toggleStudentSelection = (studentId: string) => {
+        setSelectedStudentIds(prev =>
+            prev.includes(studentId)
+                ? prev.filter(id => id !== studentId)
+                : [...prev, studentId]
+        );
+    };
+
+    const selectAllFiltered = () => {
+        setSelectedStudentIds(filteredAvailableStudents.map(s => s.id));
+    };
+
+    const deselectAll = () => {
+        setSelectedStudentIds([]);
     };
 
     // Filter available students based on search query
@@ -133,9 +147,16 @@ export default function ManageStudentsModal({ grade, open, onOpenChange, onStude
                 <div className="p-6 flex-1 overflow-y-auto space-y-6">
                     {/* Add Student Section */}
                     <div className="space-y-4 p-4 bg-slate-50 dark:bg-slate-900/50 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
-                            <Plus className="size-3" /> Add Student
-                        </Label>
+                        <div className="flex items-center justify-between">
+                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+                                <Plus className="size-3" /> Add Students
+                            </Label>
+                            {selectedStudentIds.length > 0 && (
+                                <Badge variant="secondary" className="rounded-full">
+                                    {selectedStudentIds.length} selected
+                                </Badge>
+                            )}
+                        </div>
                         <div className="flex flex-col gap-3">
                             <div className="relative">
                                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -147,33 +168,85 @@ export default function ManageStudentsModal({ grade, open, onOpenChange, onStude
                                 />
                             </div>
 
-                            <div className="flex gap-2">
-                                <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                                    <SelectTrigger className="flex-1 rounded-xl h-10 border-slate-200 bg-white dark:bg-slate-950">
-                                        <SelectValue placeholder="Select a student to add..." />
-                                    </SelectTrigger>
-                                    <SelectContent className="max-h-[200px] rounded-xl border-none shadow-xl">
-                                        {filteredAvailableStudents.length > 0 ? (
-                                            filteredAvailableStudents.map((student) => (
-                                                <SelectItem key={student.id} value={student.id}>
-                                                    {student.name} <span className="text-muted-foreground text-xs">({student.email})</span>
-                                                </SelectItem>
-                                            ))
-                                        ) : (
-                                            <div className="p-2 text-sm text-center text-muted-foreground">
-                                                {searchQuery ? "No matching students found" : "No available students"}
-                                            </div>
-                                        )}
-                                    </SelectContent>
-                                </Select>
-                                <Button
-                                    onClick={handleAddStudent}
-                                    disabled={loading || !selectedStudentId}
-                                    className="rounded-xl font-bold shadow-md"
-                                >
-                                    Add
-                                </Button>
+                            {/* Selection Controls */}
+                            {filteredAvailableStudents.length > 0 && (
+                                <div className="flex gap-2">
+                                    <Button
+                                        type="button"
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={selectAllFiltered}
+                                        disabled={loading}
+                                        className="text-xs rounded-lg"
+                                    >
+                                        Select All {searchQuery && `(${filteredAvailableStudents.length})`}
+                                    </Button>
+                                    {selectedStudentIds.length > 0 && (
+                                        <Button
+                                            type="button"
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={deselectAll}
+                                            disabled={loading}
+                                            className="text-xs rounded-lg"
+                                        >
+                                            <X className="h-3 w-3 mr-1" />
+                                            Clear
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* Available Students List with Checkboxes */}
+                            <div className="max-h-[200px] overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+                                {filteredAvailableStudents.length > 0 ? (
+                                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                                        {filteredAvailableStudents.map((student) => (
+                                            <label
+                                                key={student.id}
+                                                className="flex items-center gap-3 p-3 hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer transition-colors bg-white dark:bg-slate-950"
+                                            >
+                                                <Checkbox
+                                                    checked={selectedStudentIds.includes(student.id)}
+                                                    onCheckedChange={() => toggleStudentSelection(student.id)}
+                                                    disabled={loading}
+                                                />
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
+                                                        {student.name}
+                                                    </div>
+                                                    <div className="text-xs text-muted-foreground truncate">
+                                                        {student.email}
+                                                    </div>
+                                                </div>
+                                            </label>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="p-4 text-sm text-center text-muted-foreground bg-white dark:bg-slate-950">
+                                        {searchQuery ? "No matching students found" : "No available students"}
+                                    </div>
+                                )}
                             </div>
+
+                            {/* Add Button */}
+                            <Button
+                                onClick={handleAddStudents}
+                                disabled={loading || selectedStudentIds.length === 0}
+                                className="rounded-xl font-bold shadow-md w-full"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Adding...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Add {selectedStudentIds.length > 0 ? `${selectedStudentIds.length} Student${selectedStudentIds.length > 1 ? 's' : ''}` : 'Students'}
+                                    </>
+                                )}
+                            </Button>
                         </div>
                         {error && <InputError message={error} />}
                     </div>
