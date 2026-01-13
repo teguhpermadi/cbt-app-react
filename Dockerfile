@@ -113,12 +113,10 @@ RUN mkdir -p storage/framework/{sessions,views,cache} \
 # Copy PHP configuration
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 
-# Copy Caddyfile
-COPY Caddyfile /etc/caddy/Caddyfile
-
 # Set environment
 ENV APP_ENV=production
 ENV APP_DEBUG=false
+ENV SERVER_NAME=:80
 
 # Expose ports
 EXPOSE 80 443
@@ -127,5 +125,5 @@ EXPOSE 80 443
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD php artisan about || exit 1
 
-# Start FrankenPHP
-CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
+# Start FrankenPHP with default config
+CMD ["frankenphp", "php-server", "-r", "/app/public"]
