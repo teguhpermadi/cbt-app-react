@@ -10,8 +10,8 @@ WORKDIR /app
 # Copy package files
 COPY package*.json ./
 
-# Install dependencies
-RUN npm ci --prefer-offline --no-audit
+# Install dependencies (use npm install if package-lock.json doesn't exist)
+RUN npm install --prefer-offline --no-audit
 
 # Copy source files needed for build
 COPY resources ./resources
