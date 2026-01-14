@@ -14,44 +14,47 @@ class DatabaseSeeder extends Seeder
     {
         $this->command->info('Memulai proses Seeding CBT App...');
 
+        // 1. Essential Seeders (Must run in all environments)
         $this->call([
-            // =========================================================
-            // I. Konfigurasi Dasar (Harus ada terlebih dahulu)
-            // =========================================================
-            RoleAndPermissionSeeder::class, // Spatie Roles
-            UserSeeder::class,              // User (Admin, Teacher, Student)
-            AcademicYearSeeder::class,      // Tahun Ajaran
-            GradeSeeder::class,             // Kelas
-            SubjectSeeder::class,           // Mata Pelajaran
-            GradeUserSeeder::class,         // Grade User
-
-            // =========================================================
-            // II. Bank Soal (Questions)
-            // =========================================================
-            ReadingMaterialSeeder::class,   // Materi Bacaan
-            QuestionBankSeeder::class,      // Bank Soal
-            QuestionSeeder::class,          // Soal Utama (dengan media)
-            QuestionPeerReviewSeeder::class, // Review Soal
-
-            // =========================================================
-            // III. Konfigurasi Ujian
-            // =========================================================
-            ExamSeeder::class,              // Konfigurasi Ujian (Exam)
-            ExamQuestionSeeder::class,      // Salinan Soal Ujian (ExamQuestion)
-
-            // =========================================================
-            // IV. Transaksional Ujian (Sesi & Hasil)
-            // =========================================================
-            ExamSessionSeeder::class,       // Sesi Pengerjaan Siswa (ExamSession)
-            ExamResultDetailSeeder::class,  // Detail Jawaban per Soal (ExamResultDetail)
-            // ExamResultSeeder::class,        // Rekapitulasi Hasil Resmi/Akhir (ExamResult)
+            RoleAndPermissionSeeder::class, // Roles & Permissons
+            // UserSeeder::class,              // Default Users (Admin)
+            // AcademicYearSeeder::class,      // Master Data: Academic Years
+            // GradeSeeder::class,             // Master Data: Grades
+            // SubjectSeeder::class,           // Master Data: Subjects
         ]);
 
-        // ⚠️ Gantikan ExamResultSeeder dengan Command Penskoran 
-        $this->command->info('⏳ Menghitung Skor dan Merekap Hasil Akhir...');
-        Artisan::call('exam:calculate-scores', ['--force' => true]);
+        // 2. Dummy Data (Skip in Production)
+        if (app()->environment('local', 'development', 'staging')) {
+            $this->command->info('Running Dummy Data Seeders for Development...');
+            $this->call([
+                UserSeeder::class,              // Dummy Users
+                GradeUserSeeder::class,         // Student-Grade Relationships
 
-        $this->command->info(Artisan::output());
+                // Bank Soal
+                ReadingMaterialSeeder::class,
+                QuestionBankSeeder::class,
+                QuestionSeeder::class,
+                QuestionPeerReviewSeeder::class,
+
+                // Ujian
+                ExamSeeder::class,
+                ExamQuestionSeeder::class,
+
+                // Transaksional
+                ExamSessionSeeder::class,
+                ExamResultDetailSeeder::class,
+            ]);
+
+            $this->command->info('⏳ Menghitung Skor dan Merekap Hasil Akhir...');
+            Artisan::call('exam:calculate-scores', ['--force' => true]);
+            $this->command->info(Artisan::output());
+        } else {
+            // Production: Ensure Admin Exists
+            $this->command->info('Production Environment detected. Skipping dummy data.');
+            $this->call([
+                UserSeeder::class, // Ensure basic Admin/Teacher/Student exists if handled by UserSeeder
+            ]);
+        }
 
         $this->command->info('✅ Proses Seeding CBT App selesai!');
     }
