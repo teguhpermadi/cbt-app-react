@@ -48,7 +48,6 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
       - ./storage:/app/storage
-      - ./bootstrap/cache:/app/bootstrap/cache
       - ./.env:/app/.env
     depends_on:
       postgres:
