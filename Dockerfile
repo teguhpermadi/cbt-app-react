@@ -103,6 +103,9 @@ COPY . .
 # Copy built frontend assets from node-builder
 COPY --from=node-builder /app/public/build ./public/build
 
+# Generate package manifest to ensure Octane is discovered
+RUN php artisan package:discover --ansi
+
 # Create necessary directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
