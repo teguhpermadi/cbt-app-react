@@ -4,7 +4,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-export const index = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const index = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -19,7 +19,7 @@ index.definition = {
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-index.url = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+index.url = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { grade: args }
     }
@@ -52,7 +52,7 @@ index.url = (args: { grade: string | { id: string } } | [grade: string | { id: s
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-index.get = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+index.get = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: index.url(args, options),
     method: 'get',
 })
@@ -61,7 +61,7 @@ index.get = (args: { grade: string | { id: string } } | [grade: string | { id: s
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-index.head = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+index.head = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: index.url(args, options),
     method: 'head',
 })
@@ -71,7 +71,7 @@ index.head = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-    const indexForm = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const indexForm = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: index.url(args, options),
         method: 'get',
     })
@@ -81,7 +81,7 @@ index.head = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-        indexForm.get = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.get = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, options),
             method: 'get',
         })
@@ -90,7 +90,7 @@ index.head = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:17
  * @route '/admin/grades/{grade}/students'
  */
-        indexForm.head = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        indexForm.head = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: index.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -106,7 +106,7 @@ index.head = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:43
  * @route '/admin/grades/{grade}/students'
  */
-export const store = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const store = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -121,7 +121,7 @@ store.definition = {
  * @see app/Http/Controllers/Admin/GradeStudentController.php:43
  * @route '/admin/grades/{grade}/students'
  */
-store.url = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+store.url = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { grade: args }
     }
@@ -154,7 +154,7 @@ store.url = (args: { grade: string | { id: string } } | [grade: string | { id: s
  * @see app/Http/Controllers/Admin/GradeStudentController.php:43
  * @route '/admin/grades/{grade}/students'
  */
-store.post = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+store.post = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: store.url(args, options),
     method: 'post',
 })
@@ -164,7 +164,7 @@ store.post = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:43
  * @route '/admin/grades/{grade}/students'
  */
-    const storeForm = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const storeForm = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: store.url(args, options),
         method: 'post',
     })
@@ -174,7 +174,7 @@ store.post = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:43
  * @route '/admin/grades/{grade}/students'
  */
-        storeForm.post = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        storeForm.post = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: store.url(args, options),
             method: 'post',
         })
@@ -185,7 +185,7 @@ store.post = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeStudentController.php:102
  * @route '/admin/grades/{grade}/students/{student}'
  */
-export const destroy = (args: { grade: string | { id: string }, student: string | { id: string } } | [grade: string | { id: string }, student: string | { id: string } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { grade: string | number | { id: string | number }, student: string | number | { id: string | number } } | [grade: string | number | { id: string | number }, student: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -200,7 +200,7 @@ destroy.definition = {
  * @see app/Http/Controllers/Admin/GradeStudentController.php:102
  * @route '/admin/grades/{grade}/students/{student}'
  */
-destroy.url = (args: { grade: string | { id: string }, student: string | { id: string } } | [grade: string | { id: string }, student: string | { id: string } ], options?: RouteQueryOptions) => {
+destroy.url = (args: { grade: string | number | { id: string | number }, student: string | number | { id: string | number } } | [grade: string | number | { id: string | number }, student: string | number | { id: string | number } ], options?: RouteQueryOptions) => {
     if (Array.isArray(args)) {
         args = {
                     grade: args[0],
@@ -230,7 +230,7 @@ destroy.url = (args: { grade: string | { id: string }, student: string | { id: s
  * @see app/Http/Controllers/Admin/GradeStudentController.php:102
  * @route '/admin/grades/{grade}/students/{student}'
  */
-destroy.delete = (args: { grade: string | { id: string }, student: string | { id: string } } | [grade: string | { id: string }, student: string | { id: string } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { grade: string | number | { id: string | number }, student: string | number | { id: string | number } } | [grade: string | number | { id: string | number }, student: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -240,7 +240,7 @@ destroy.delete = (args: { grade: string | { id: string }, student: string | { id
  * @see app/Http/Controllers/Admin/GradeStudentController.php:102
  * @route '/admin/grades/{grade}/students/{student}'
  */
-    const destroyForm = (args: { grade: string | { id: string }, student: string | { id: string } } | [grade: string | { id: string }, student: string | { id: string } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { grade: string | number | { id: string | number }, student: string | number | { id: string | number } } | [grade: string | number | { id: string | number }, student: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -255,7 +255,7 @@ destroy.delete = (args: { grade: string | { id: string }, student: string | { id
  * @see app/Http/Controllers/Admin/GradeStudentController.php:102
  * @route '/admin/grades/{grade}/students/{student}'
  */
-        destroyForm.delete = (args: { grade: string | { id: string }, student: string | { id: string } } | [grade: string | { id: string }, student: string | { id: string } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { grade: string | number | { id: string | number }, student: string | number | { id: string | number } } | [grade: string | number | { id: string | number }, student: string | number | { id: string | number } ], options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

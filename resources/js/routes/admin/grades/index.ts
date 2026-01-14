@@ -410,7 +410,7 @@ edit.head = (args: { grade: string | number } | [grade: string | number ] | stri
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-export const update = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -425,7 +425,7 @@ update.definition = {
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-update.url = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+update.url = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { grade: args }
     }
@@ -458,7 +458,7 @@ update.url = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-update.put = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -467,7 +467,7 @@ update.put = (args: { grade: string | { id: string } } | [grade: string | { id: 
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-update.patch = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -477,7 +477,7 @@ update.patch = (args: { grade: string | { id: string } } | [grade: string | { id
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-    const updateForm = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateForm = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -492,7 +492,7 @@ update.patch = (args: { grade: string | { id: string } } | [grade: string | { id
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-        updateForm.put = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.put = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -506,7 +506,7 @@ update.patch = (args: { grade: string | { id: string } } | [grade: string | { id
  * @see app/Http/Controllers/Admin/GradeController.php:50
  * @route '/admin/grades/{grade}'
  */
-        updateForm.patch = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.patch = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -522,7 +522,7 @@ update.patch = (args: { grade: string | { id: string } } | [grade: string | { id
  * @see app/Http/Controllers/Admin/GradeController.php:66
  * @route '/admin/grades/{grade}'
  */
-export const destroy = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -537,7 +537,7 @@ destroy.definition = {
  * @see app/Http/Controllers/Admin/GradeController.php:66
  * @route '/admin/grades/{grade}'
  */
-destroy.url = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+destroy.url = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { grade: args }
     }
@@ -570,7 +570,7 @@ destroy.url = (args: { grade: string | { id: string } } | [grade: string | { id:
  * @see app/Http/Controllers/Admin/GradeController.php:66
  * @route '/admin/grades/{grade}'
  */
-destroy.delete = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -580,7 +580,7 @@ destroy.delete = (args: { grade: string | { id: string } } | [grade: string | { 
  * @see app/Http/Controllers/Admin/GradeController.php:66
  * @route '/admin/grades/{grade}'
  */
-    const destroyForm = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -595,7 +595,7 @@ destroy.delete = (args: { grade: string | { id: string } } | [grade: string | { 
  * @see app/Http/Controllers/Admin/GradeController.php:66
  * @route '/admin/grades/{grade}'
  */
-        destroyForm.delete = (args: { grade: string | { id: string } } | [grade: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { grade: string | number | { id: string | number } } | [grade: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

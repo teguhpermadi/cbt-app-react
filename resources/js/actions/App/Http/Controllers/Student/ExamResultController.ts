@@ -82,7 +82,7 @@ index.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-export const show = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -97,7 +97,7 @@ show.definition = {
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-show.url = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+show.url = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { exam: args }
     }
@@ -130,7 +130,7 @@ show.url = (args: { exam: string | { id: string } } | [exam: string | { id: stri
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-show.get = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -139,7 +139,7 @@ show.get = (args: { exam: string | { id: string } } | [exam: string | { id: stri
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-show.head = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -149,7 +149,7 @@ show.head = (args: { exam: string | { id: string } } | [exam: string | { id: str
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-    const showForm = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const showForm = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: show.url(args, options),
         method: 'get',
     })
@@ -159,7 +159,7 @@ show.head = (args: { exam: string | { id: string } } | [exam: string | { id: str
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-        showForm.get = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.get = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, options),
             method: 'get',
         })
@@ -168,7 +168,7 @@ show.head = (args: { exam: string | { id: string } } | [exam: string | { id: str
  * @see app/Http/Controllers/Student/ExamResultController.php:61
  * @route '/student/exams/{exam}/result'
  */
-        showForm.head = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showForm.head = (args: { exam: string | number | { id: string | number } } | [exam: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: show.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -184,7 +184,7 @@ show.head = (args: { exam: string | { id: string } } | [exam: string | { id: str
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-export const showSession = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const showSession = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: showSession.url(args, options),
     method: 'get',
 })
@@ -199,7 +199,7 @@ showSession.definition = {
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-showSession.url = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+showSession.url = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { session: args }
     }
@@ -232,7 +232,7 @@ showSession.url = (args: { session: string | { id: string } } | [session: string
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-showSession.get = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+showSession.get = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: showSession.url(args, options),
     method: 'get',
 })
@@ -241,7 +241,7 @@ showSession.get = (args: { session: string | { id: string } } | [session: string
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-showSession.head = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+showSession.head = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: showSession.url(args, options),
     method: 'head',
 })
@@ -251,7 +251,7 @@ showSession.head = (args: { session: string | { id: string } } | [session: strin
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-    const showSessionForm = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const showSessionForm = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: showSession.url(args, options),
         method: 'get',
     })
@@ -261,7 +261,7 @@ showSession.head = (args: { session: string | { id: string } } | [session: strin
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-        showSessionForm.get = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showSessionForm.get = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: showSession.url(args, options),
             method: 'get',
         })
@@ -270,7 +270,7 @@ showSession.head = (args: { session: string | { id: string } } | [session: strin
  * @see app/Http/Controllers/Student/ExamResultController.php:80
  * @route '/student/results/session/{session}'
  */
-        showSessionForm.head = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        showSessionForm.head = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: showSession.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',

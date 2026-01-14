@@ -678,7 +678,7 @@ destroy.delete = (args: { question_bank: string | number } | [question_bank: str
  * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
-export const uploadQuestions = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const uploadQuestions = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: uploadQuestions.url(args, options),
     method: 'post',
 })
@@ -693,7 +693,7 @@ uploadQuestions.definition = {
  * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
-uploadQuestions.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+uploadQuestions.url = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { questionBank: args }
     }
@@ -726,7 +726,7 @@ uploadQuestions.url = (args: { questionBank: string | { id: string } } | [questi
  * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
-uploadQuestions.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+uploadQuestions.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: uploadQuestions.url(args, options),
     method: 'post',
 })
@@ -736,7 +736,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
  * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
-    const uploadQuestionsForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const uploadQuestionsForm = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: uploadQuestions.url(args, options),
         method: 'post',
     })
@@ -746,7 +746,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
  * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
-        uploadQuestionsForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        uploadQuestionsForm.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: uploadQuestions.url(args, options),
             method: 'post',
         })
@@ -757,7 +757,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
  * @see app/Http/Controllers/Admin/QuestionBankController.php:270
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
-export const generateWithAI = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const generateWithAI = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: generateWithAI.url(args, options),
     method: 'post',
 })
@@ -772,7 +772,7 @@ generateWithAI.definition = {
  * @see app/Http/Controllers/Admin/QuestionBankController.php:270
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
-generateWithAI.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+generateWithAI.url = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { questionBank: args }
     }
@@ -805,7 +805,7 @@ generateWithAI.url = (args: { questionBank: string | { id: string } } | [questio
  * @see app/Http/Controllers/Admin/QuestionBankController.php:270
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
-generateWithAI.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+generateWithAI.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: generateWithAI.url(args, options),
     method: 'post',
 })
@@ -815,7 +815,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
  * @see app/Http/Controllers/Admin/QuestionBankController.php:270
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
-    const generateWithAIForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const generateWithAIForm = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: generateWithAI.url(args, options),
         method: 'post',
     })
@@ -825,7 +825,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
  * @see app/Http/Controllers/Admin/QuestionBankController.php:270
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
-        generateWithAIForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        generateWithAIForm.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: generateWithAI.url(args, options),
             method: 'post',
         })
@@ -836,7 +836,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
  * @see app/Http/Controllers/Admin/QuestionBankController.php:294
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
-export const generateTags = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const generateTags = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: generateTags.url(args, options),
     method: 'post',
 })
@@ -851,7 +851,7 @@ generateTags.definition = {
  * @see app/Http/Controllers/Admin/QuestionBankController.php:294
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
-generateTags.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
+generateTags.url = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { questionBank: args }
     }
@@ -884,7 +884,7 @@ generateTags.url = (args: { questionBank: string | { id: string } } | [questionB
  * @see app/Http/Controllers/Admin/QuestionBankController.php:294
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
-generateTags.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+generateTags.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: generateTags.url(args, options),
     method: 'post',
 })
@@ -894,7 +894,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
  * @see app/Http/Controllers/Admin/QuestionBankController.php:294
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
-    const generateTagsForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const generateTagsForm = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: generateTags.url(args, options),
         method: 'post',
     })
@@ -904,7 +904,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
  * @see app/Http/Controllers/Admin/QuestionBankController.php:294
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
-        generateTagsForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        generateTagsForm.post = (args: { questionBank: string | number | { id: string | number } } | [questionBank: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: generateTags.url(args, options),
             method: 'post',
         })
