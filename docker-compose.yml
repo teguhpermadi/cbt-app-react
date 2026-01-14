@@ -49,6 +49,7 @@ services:
     volumes:
       - ./storage:/app/storage
       - ./bootstrap/cache:/app/bootstrap/cache
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -142,6 +143,7 @@ services:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
     volumes:
       - ./storage:/app/storage
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -184,6 +186,7 @@ services:
       - REDIS_PORT=6379
     volumes:
       - ./storage:/app/storage
+      - ./.env:/app/.env:ro
     depends_on:
       postgres:
         condition: service_healthy
