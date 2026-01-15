@@ -15,7 +15,10 @@ import {
     AlertCircle,
     Menu,
     Save,
-    Lightbulb // Added
+    Lightbulb,
+    Minus,
+    Plus,
+    Type // Added
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -69,6 +72,15 @@ export default function ExamTake({ exam, session, questions }: Props) {
     const handleImageClick = (src: string) => {
         setViewingImage(src);
         setImageViewerOpen(true);
+    };
+
+    // Font Size Control
+    const [fontSizeLevel, setFontSizeLevel] = useState(1); // 0: sm, 1: base, 2: lg, 3: xl, 4: 2xl
+    const fontSizes = ['text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl'];
+    const currentFontSizeClass = fontSizes[fontSizeLevel] || 'text-base';
+
+    const changeFontSize = (delta: number) => {
+        setFontSizeLevel(prev => Math.min(Math.max(prev + delta, 0), 4));
     };
 
     // Time Tracking
@@ -317,6 +329,8 @@ export default function ExamTake({ exam, session, questions }: Props) {
                     </div>
 
                     <div className="flex items-center gap-2 md:gap-4">
+
+
                         {exam.timer_type === 'strict' && (
                             <div className={cn(
                                 "flex items-center gap-2 px-3 py-1 md:px-4 md:py-1.5 rounded-full font-mono font-bold text-sm md:text-xl border shadow-sm",
@@ -335,10 +349,35 @@ export default function ExamTake({ exam, session, questions }: Props) {
                             </SheetTrigger>
                             <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 flex flex-col bg-slate-50 dark:bg-slate-900">
                                 <div className="px-5 py-4 border-b bg-white dark:bg-slate-900">
-                                    <h2 className="text-lg font-bold flex items-center gap-2">
-                                        <Menu className="w-5 h-5" />
-                                        Navigasi Soal
-                                    </h2>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <h2 className="text-lg font-bold flex items-center gap-2">
+                                            <Menu className="w-5 h-5" />
+                                            Navigasi Soal
+                                        </h2>
+
+                                        {/* Mobile Font Controls */}
+                                        <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6"
+                                                onClick={() => changeFontSize(-1)}
+                                                disabled={fontSizeLevel === 0}
+                                            >
+                                                <Minus className="w-3 h-3" />
+                                            </Button>
+                                            <Type className="w-3 h-3 mx-1 text-slate-500" />
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                className="h-6 w-6"
+                                                onClick={() => changeFontSize(1)}
+                                                disabled={fontSizeLevel === 4}
+                                            >
+                                                <Plus className="w-3 h-3" />
+                                            </Button>
+                                        </div>
+                                    </div>
                                     <p className="text-xs text-muted-foreground mt-1">
                                         {Object.keys(answers).length} dari {questions.length} soal terjawab
                                     </p>
@@ -403,12 +442,39 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     SOAL NO. {currentIndex + 1}
                                 </Badge>
                             </div>
+
+                            {/* Font Controls (Moved here) */}
+                            <div className="hidden md:flex items-center gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => changeFontSize(-1)}
+                                    disabled={fontSizeLevel === 0}
+                                    title="Perkecil Text"
+                                >
+                                    <Minus className="w-3 h-3" />
+                                </Button>
+                                <div className="w-8 text-center text-xs font-bold text-slate-600 dark:text-slate-300 select-none flex justify-center">
+                                    <Type className="w-4 h-4" />
+                                </div>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-7 w-7"
+                                    onClick={() => changeFontSize(1)}
+                                    disabled={fontSizeLevel === 4}
+                                    title="Perbesar Text"
+                                >
+                                    <Plus className="w-3 h-3" />
+                                </Button>
+                            </div>
                         </CardHeader>
 
                         <ScrollArea className="flex-1 bg-white dark:bg-slate-900">
                             <CardContent className="p-4 md:p-10 space-y-6 md:space-y-10">
                                 {/* Question Content */}
-                                <div className="text-base md:text-lg leading-relaxed text-slate-800 dark:text-slate-200" key={`question-content-${currentIndex}`}>
+                                <div className={cn("leading-relaxed text-slate-800 dark:text-slate-200", currentFontSizeClass)} key={`question-content-${currentIndex}`}>
                                     {questions[currentIndex].media_url && (
                                         <div className="mb-6">
                                             <img
