@@ -307,6 +307,7 @@ export default function ExamTake({ exam, session, questions }: Props) {
     const renderOptions = (question: Question) => {
         return (
             <OptionViewer
+                key={question.detail_id}
                 type={question.type}
                 options={question.options}
                 value={answers[question.detail_id]}
