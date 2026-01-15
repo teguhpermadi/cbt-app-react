@@ -12,7 +12,7 @@ export default function Welcome({
     const { auth } = usePage<SharedData>().props;
 
     const getDashboardRoute = () => {
-        if (auth.user.user_type === 'student') {
+        if (auth.user?.user_type === 'student') {
             return studentDashboard();
         }
         return adminDashboard();

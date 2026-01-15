@@ -51,30 +51,48 @@ class GradeExamEssays implements ShouldQueue
                 continue;
             }
 
-            // Get Rubric from the first option (ExamQuestion stores options as array)
+            // Get Rubric from options
             $options = $detail->examQuestion->options;
+            $rubricOption = null;
 
-            // For Essay, we expect the rubric in the first option's content
-            $rubric = null;
             if (is_array($options) && !empty($options)) {
-                // Ensure we get the first one (they might not have 'order' key if simple array, 
-                // but usually created with keys. Let's grab first element).
-                $firstOption = reset($options);
-                $rubric = $firstOption['content'] ?? '';
+                // Try to find the option with key 'ESSAY' (standard format from generator)
+                foreach ($options as $opt) {
+                    if (isset($opt['option_key']) && $opt['option_key'] === 'ESSAY') {
+                        $rubricOption = $opt;
+                        break;
+                    }
+                }
+
+                // Fallback: Use the first option if specifically named option not found
+                if (!$rubricOption) {
+                    $rubricOption = reset($options);
+                }
             }
 
+            $rubric = $rubricOption['content'] ?? '';
+            $rubricMetadata = $rubricOption['metadata'] ?? [];
 
+            // If rubric is still empty, check Key Answer field as a fallback
+            if (empty($rubric) && !empty($detail->examQuestion->key_answer)) {
+                // key_answer is cast to array, but might store text in 'content' or just be a string if cast failed (unlikely)
+                // Assuming key_answer might hold the rubric text if options doesn't.
+                $rubric = is_array($detail->examQuestion->key_answer)
+                    ? json_encode($detail->examQuestion->key_answer)
+                    : $detail->examQuestion->key_answer;
+            }
 
             if (empty($rubric)) {
                 Log::warning("AI Grading Skipped: Missing rubric for Question {$detail->examQuestion->id}");
                 continue;
             }
 
-            // Call AI Service
+            // Call AI Service with expanded context
             $result = $aiService->gradeEssay(
                 $detail->examQuestion->content,
                 $rubric,
-                $detail->student_answer
+                $detail->student_answer,
+                $rubricMetadata
             );
 
             Log::info("AI Service Result for Detail {$detail->id}: ", $result);
@@ -94,8 +112,8 @@ class GradeExamEssays implements ShouldQueue
             // Update Detail
             $detail->update([
                 'score_earned' => $scaledScore,
-                'correction_notes' => $result['notes'] . " (AI Graded)",
-                'is_correct' => $scaledScore >= ($maxScore / 2), // Boolean logic for essay is fuzzy, but let's say >= 50% is "correct"
+                'correction_notes' => $result['notes'],
+                'is_correct' => $scaledScore >= ($maxScore / 2),
             ]);
 
             Log::info("Graded Essay Detail {$detail->id}: Score {$scaledScore}/{$maxScore}");

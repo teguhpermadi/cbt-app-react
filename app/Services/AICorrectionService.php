@@ -14,9 +14,10 @@ class AICorrectionService
      * @param string $question The question content.
      * @param string $rubric The grading rubric or key answer.
      * @param string $studentAnswer The student's answer.
+     * @param array $context Additional context like key points or model answer.
      * @return array Contains 'score' (float) and 'notes' (string).
      */
-    public function gradeEssay(string $question, string $rubric, string $studentAnswer): array
+    public function gradeEssay(string $question, string $rubric, string $studentAnswer, array $context = []): array
     {
         // Strip HTML tags from inputs to save tokens and avoid confusion, unless rich text is crucial?
         // Usually safe to strip for simple essay grading.
@@ -24,16 +25,22 @@ class AICorrectionService
         $cleanRubric = strip_tags($rubric);
         $cleanAnswer = strip_tags($studentAnswer);
 
+        $keyPoints = isset($context['key_points']) ? implode("\n- ", (array) $context['key_points']) : 'N/A';
+        $modelAnswer = $context['model_answer'] ?? 'N/A';
+
         $prompt = <<<EOT
             You are an expert teacher grading an essay question.
 
             Context:
             1. Question: "{$cleanQuestion}"
             2. Rubric/Key Answer: "{$cleanRubric}"
-            3. Student Answer: "{$cleanAnswer}"
+            3. Key Points to Cover:
+            - {$keyPoints}
+            4. Model Answer: "{$modelAnswer}"
+            5. Student Answer: "{$cleanAnswer}"
 
             Grading Criteria:
-            - Compare the Student Answer against the Question and Rubric.
+            - Compare the Student Answer against the Question, Rubric, and Model Answer.
             - Determine if the student understood the core concept requested by the Question.
             - Check if the Student Answer aligns with the key points in the Rubric.
             - If the student answer is partially correct, give partial credit.
@@ -53,13 +60,14 @@ class AICorrectionService
 
         try {
             $response = Prism::text()
-                ->using(Provider::Gemini, 'gemini-1.5-flash')
+                ->using(Provider::Gemini, 'gemini-flash-latest')
                 ->withPrompt($prompt)
                 ->asText();
 
-            $textContent = $response->text;
+            // asText() returns the string directly.
+            $textContent = $response;
 
-            Log::info('AI Response', $response);
+            Log::info('AI Response', ['text' => $response]);
 
             // Extract JSON from potential markdown code blocks
             if (preg_match('/```json\s*(\{.*?\})\s*```/s', $textContent, $matches)) {
