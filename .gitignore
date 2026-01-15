@@ -4,9 +4,12 @@
 # /public/build
 /public/hot
 /public/storage
-# /resources/js/actions
-# /resources/js/routes  
-# /resources/js/wayfinder
+# jika deploy ini yang di hapus
+/resources/js/actions
+/resources/js/routes  
+/resources/js/wayfinder
+
+
 /storage/*.key
 /storage/pail
 /vendor
