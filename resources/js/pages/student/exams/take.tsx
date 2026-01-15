@@ -333,17 +333,60 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     <Menu className="w-5 h-5" />
                                 </Button>
                             </SheetTrigger>
-                            <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0">
-                                <QuestionNavigator
-                                    questions={questions}
-                                    currentIndex={currentIndex}
-                                    answers={answers}
-                                    flagged={flagged}
-                                    onSelect={(idx) => {
-                                        changeQuestion(idx);
-                                        setIsSidebarOpen(false);
-                                    }}
-                                />
+                            <SheetContent side="right" className="w-[300px] sm:w-[350px] p-0 flex flex-col bg-slate-50 dark:bg-slate-900">
+                                <div className="px-5 py-4 border-b bg-white dark:bg-slate-900">
+                                    <h2 className="text-lg font-bold flex items-center gap-2">
+                                        <Menu className="w-5 h-5" />
+                                        Navigasi Soal
+                                    </h2>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {Object.keys(answers).length} dari {questions.length} soal terjawab
+                                    </p>
+                                </div>
+
+                                <div className="flex-1 overflow-hidden p-5 bg-white dark:bg-slate-900">
+                                    <QuestionNavigator
+                                        questions={questions}
+                                        currentIndex={currentIndex}
+                                        answers={answers}
+                                        flagged={flagged}
+                                        onSelect={(idx) => {
+                                            changeQuestion(idx);
+                                            setIsSidebarOpen(false);
+                                        }}
+                                        className="h-full pr-2"
+                                    />
+                                </div>
+
+                                <div className="p-5 border-t bg-slate-50 dark:bg-slate-800/50 space-y-4">
+                                    <QuestionStatusLegend
+                                        answers={answers}
+                                        questions={questions}
+                                        flagged={flagged}
+                                    />
+
+                                    <Separator />
+
+                                    <Button
+                                        className={cn(
+                                            "w-full font-bold",
+                                            isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                                        )}
+                                        disabled={!isAllAnswered || isSubmitting}
+                                        onClick={() => {
+                                            setIsSidebarOpen(false);
+                                            if (confirm("Selesaikan ujian sekarang?")) {
+                                                setIsSubmitting(true);
+                                                router.post(finishRoute.url({ exam: exam.id }), {}, {
+                                                    onFinish: () => setIsSubmitting(false)
+                                                });
+                                            }
+                                        }}
+                                    >
+                                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                                        Selesai & Kumpulkan
+                                    </Button>
+                                </div>
                             </SheetContent>
                         </Sheet>
                     </div>
@@ -418,67 +461,68 @@ export default function ExamTake({ exam, session, questions }: Props) {
                             </CardContent>
                         </ScrollArea>
 
-                        <CardFooter className="border-t p-4 md:p-6 flex justify-between bg-slate-50 dark:bg-slate-900/50">
+                        <CardFooter className="border-t p-4 md:p-6 flex items-center justify-between gap-3 bg-white dark:bg-slate-900 sticky bottom-0 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
                             <Button
                                 variant="outline"
                                 size="lg"
                                 onClick={() => changeQuestion(currentIndex - 1)}
                                 disabled={currentIndex === 0 || isSubmitting}
-                                className="gap-2 px-4 md:px-6"
+                                className="flex-1 sm:flex-none gap-2 bg-white"
                             >
-                                <ChevronLeft className="w-5 h-5" />
+                                <ChevronLeft className="w-5 h-5 text-slate-600" />
                                 <span className="hidden sm:inline">Sebelumnya</span>
                             </Button>
 
                             <Button
-                                variant={flagged[questions[currentIndex].detail_id] ? "default" : "outline"}
+                                variant={flagged[questions[currentIndex].detail_id] ? "default" : "secondary"}
                                 size="lg"
                                 onClick={handleToggleFlag}
                                 disabled={isSubmitting}
                                 className={cn(
-                                    "gap-2 px-4 md:px-6",
-                                    flagged[questions[currentIndex].detail_id] ? "bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600" : "text-slate-600"
+                                    "flex-1 sm:flex-none gap-2",
+                                    flagged[questions[currentIndex].detail_id]
+                                        ? "bg-yellow-500 hover:bg-yellow-600 text-white"
+                                        : "bg-slate-100 text-slate-600 hover:bg-slate-200 border border-slate-200"
                                 )}
                             >
                                 <Flag className={cn("w-4 h-4", flagged[questions[currentIndex].detail_id] && "fill-current")} />
-                                {flagged[questions[currentIndex].detail_id] ? <span className="hidden sm:inline">Ragu-ragu Terpasang</span> : <span className="hidden sm:inline">Ragu-ragu?</span>}
-                                {flagged[questions[currentIndex].detail_id] ? <span className="sm:hidden">Ragu</span> : <span className="sm:hidden">Ragu?</span>}
+                                <span className="hidden sm:inline">{flagged[questions[currentIndex].detail_id] ? "Ragu-ragu Is On" : "Tandai Ragu-ragu"}</span>
+                                <span className="sm:hidden">Ragu</span>
                             </Button>
 
-                            <div className="flex gap-2">
-                                {currentIndex === questions.length - 1 ? (
-                                    <Button
-                                        size="lg"
-                                        className={cn(
-                                            "px-4 md:px-8 font-bold",
-                                            isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
-                                        )}
-                                        disabled={!isAllAnswered || isSubmitting}
-                                        onClick={() => {
-                                            if (confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
-                                                setIsSubmitting(true);
-                                                router.post(finishRoute.url({ exam: exam.id }), {}, {
-                                                    onFinish: () => setIsSubmitting(false)
-                                                });
-                                            }
-                                        }}
-                                    >
-                                        <CheckCircle2 className="w-5 h-5 md:mr-2" />
-                                        <span className="hidden md:inline">{isAllAnswered ? (isSubmitting ? "Menyimpan..." : "Selesai & Kumpulkan") : "Jawab Semua Soal"}</span>
-                                        <span className="md:hidden">{isAllAnswered ? "Selesai" : "Jawab Semua"}</span>
-                                    </Button>
-                                ) : (
-                                    <Button
-                                        size="lg"
-                                        onClick={() => changeQuestion(currentIndex + 1)}
-                                        disabled={isSubmitting}
-                                        className="gap-2 px-4 md:px-8 bg-blue-600 hover:bg-blue-700"
-                                    >
-                                        <span className="hidden sm:inline">Selanjutnya</span>
-                                        <ChevronRight className="w-5 h-5" />
-                                    </Button>
-                                )}
-                            </div>
+                            {currentIndex === questions.length - 1 ? (
+                                <Button
+                                    size="lg"
+                                    className={cn(
+                                        "flex-1 sm:flex-none gap-2 font-bold",
+                                        isAllAnswered ? "bg-green-600 hover:bg-green-700 text-white" : "bg-slate-300 text-slate-500 cursor-not-allowed"
+                                    )}
+                                    disabled={!isAllAnswered || isSubmitting}
+                                    onClick={() => {
+                                        if (confirm("Apakah Anda yakin ingin menyelesaikan ujian ini?")) {
+                                            setIsSubmitting(true);
+                                            router.post(finishRoute.url({ exam: exam.id }), {}, {
+                                                onFinish: () => setIsSubmitting(false)
+                                            });
+                                        }
+                                    }}
+                                >
+                                    <CheckCircle2 className="w-5 h-5" />
+                                    <span className="hidden sm:inline">{isAllAnswered ? (isSubmitting ? "Menyimpan..." : "Selesai & Kumpulkan") : "Jawab Semua"}</span>
+                                    <span className="sm:hidden">Selesai</span>
+                                </Button>
+                            ) : (
+                                <Button
+                                    size="lg"
+                                    onClick={() => changeQuestion(currentIndex + 1)}
+                                    disabled={isSubmitting}
+                                    className="flex-1 sm:flex-none gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+                                >
+                                    <span className="hidden sm:inline">Selanjutnya</span>
+                                    <span className="sm:hidden">Lanjut</span>
+                                    <ChevronRight className="w-5 h-5" />
+                                </Button>
+                            )}
                         </CardFooter>
                     </Card>
                 </main>
@@ -505,32 +549,15 @@ export default function ExamTake({ exam, session, questions }: Props) {
                                     answers={answers}
                                     flagged={flagged}
                                     onSelect={changeQuestion}
+                                    className="h-[350px] pr-2"
                                 />
                             </CardContent>
                             <CardFooter className="border-t p-5 bg-slate-50/50 dark:bg-slate-800/30 flex flex-col gap-4">
-                                <div className="w-full space-y-2">
-                                    <div className="flex items-center justify-between text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded bg-blue-600"></div>
-                                            <span className="text-slate-600 dark:text-slate-400">Terjawab</span>
-                                        </div>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{Object.keys(answers).length}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded bg-yellow-500"></div>
-                                            <span className="text-slate-600 dark:text-slate-400">Ragu-ragu</span>
-                                        </div>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{Object.values(flagged).filter(Boolean).length}</span>
-                                    </div>
-                                    <div className="flex items-center justify-between text-xs">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-3 h-3 rounded bg-slate-200 dark:bg-slate-700"></div>
-                                            <span className="text-slate-600 dark:text-slate-400">Belum Dijawab</span>
-                                        </div>
-                                        <span className="font-bold text-slate-800 dark:text-slate-200">{questions.length - Object.keys(answers).length}</span>
-                                    </div>
-                                </div>
+                                <QuestionStatusLegend
+                                    answers={answers}
+                                    questions={questions}
+                                    flagged={flagged}
+                                />
 
                                 <Separator className="my-1" />
 
@@ -569,16 +596,17 @@ export default function ExamTake({ exam, session, questions }: Props) {
 }
 
 // Subcomponent for Grid
-function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect }: {
+function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect, className }: {
     questions: Question[],
     currentIndex: number,
     answers: Record<string, any>,
     flagged: Record<string, boolean>,
-    onSelect: (index: number) => void
+    onSelect: (index: number) => void,
+    className?: string
 }) {
     return (
-        <ScrollArea className="h-[400px] pr-2">
-            <div className="grid grid-cols-5 gap-2.5">
+        <ScrollArea className={cn("h-full", className)}>
+            <div className="grid grid-cols-5 gap-2">
                 {questions.map((q, idx) => {
                     const ans = answers[q.detail_id];
                     let isAnswered = false;
@@ -596,20 +624,19 @@ function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect
                             key={q.detail_id}
                             onClick={() => onSelect(idx)}
                             className={cn(
-                                "h-11 w-full rounded-lg text-sm font-bold transition-all border-2 flex items-center justify-center relative",
+                                "h-10 w-full rounded-md text-sm font-bold transition-all border flex items-center justify-center relative",
                                 isActive
-                                    ? "bg-white dark:bg-slate-900 border-blue-600 text-blue-600 shadow-md ring-2 ring-blue-600/20"
+                                    ? "bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-600/20"
                                     : isFlagged
-                                        ? "bg-yellow-500 border-yellow-500 text-white hover:bg-yellow-600"
+                                        ? "bg-yellow-100 text-yellow-700 border-yellow-300 hover:bg-yellow-200"
                                         : isAnswered
-                                            ? "bg-blue-600 border-blue-600 text-white hover:bg-blue-700"
-                                            : "bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-600 hover:bg-slate-200"
+                                            ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
+                                            : "bg-white dark:bg-slate-800 text-slate-600 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700"
                             )}
                         >
                             {idx + 1}
-                            {isFlagged && !isActive && (
-                                <div className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-yellow-400 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center">
-                                    <Flag className="w-2 h-2 text-white fill-current" />
+                            {isFlagged && (
+                                <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full border border-white flex items-center justify-center">
                                 </div>
                             )}
                         </button>
@@ -617,5 +644,48 @@ function QuestionNavigator({ questions, currentIndex, answers, flagged, onSelect
                 })}
             </div>
         </ScrollArea>
+    );
+}
+
+// Subcomponent for Status Legend
+function QuestionStatusLegend({ answers, questions, flagged }: {
+    answers: Record<string, any>,
+    questions: Question[],
+    flagged: Record<string, boolean>
+}) {
+    const answeredCount = Object.keys(answers).length;
+    const flaggedCount = Object.values(flagged).filter(Boolean).length;
+    const unansweredCount = questions.length - answeredCount;
+
+    return (
+        <div className="w-full space-y-3">
+            <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-blue-50 border border-blue-200"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Terjawab</span>
+                </div>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{answeredCount}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-yellow-100 border border-yellow-300"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Ragu-ragu</span>
+                </div>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{flaggedCount}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-white border border-slate-200 dark:bg-slate-800"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Belum Dijawab</span>
+                </div>
+                <span className="font-bold text-slate-800 dark:text-slate-200">{unansweredCount}</span>
+            </div>
+            <div className="flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded bg-blue-600"></div>
+                    <span className="text-slate-600 dark:text-slate-400">Sedang Dikerjakan</span>
+                </div>
+            </div>
+        </div>
     );
 }
