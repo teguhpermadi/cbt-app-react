@@ -367,7 +367,7 @@ show.head = (args: { question: string | number } | [question: string | number ] 
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-export const edit = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const edit = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -382,7 +382,7 @@ edit.definition = {
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-edit.url = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+edit.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { question: args }
     }
@@ -415,7 +415,7 @@ edit.url = (args: { question: string | number | { id: string | number } } | [que
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-edit.get = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+edit.get = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: edit.url(args, options),
     method: 'get',
 })
@@ -424,7 +424,7 @@ edit.get = (args: { question: string | number | { id: string | number } } | [que
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-edit.head = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+edit.head = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: edit.url(args, options),
     method: 'head',
 })
@@ -434,7 +434,7 @@ edit.head = (args: { question: string | number | { id: string | number } } | [qu
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-    const editForm = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const editForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: edit.url(args, options),
         method: 'get',
     })
@@ -444,7 +444,7 @@ edit.head = (args: { question: string | number | { id: string | number } } | [qu
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-        editForm.get = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        editForm.get = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: edit.url(args, options),
             method: 'get',
         })
@@ -453,7 +453,7 @@ edit.head = (args: { question: string | number | { id: string | number } } | [qu
  * @see app/Http/Controllers/Admin/QuestionController.php:137
  * @route '/admin/questions/{question}/edit'
  */
-        editForm.head = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        editForm.head = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: edit.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -469,7 +469,7 @@ edit.head = (args: { question: string | number | { id: string | number } } | [qu
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-export const update = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+export const update = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -484,7 +484,7 @@ update.definition = {
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-update.url = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+update.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { question: args }
     }
@@ -517,7 +517,7 @@ update.url = (args: { question: string | number | { id: string | number } } | [q
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-update.put = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
+update.put = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
     url: update.url(args, options),
     method: 'put',
 })
@@ -526,7 +526,7 @@ update.put = (args: { question: string | number | { id: string | number } } | [q
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-update.patch = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
+update.patch = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
     url: update.url(args, options),
     method: 'patch',
 })
@@ -536,7 +536,7 @@ update.patch = (args: { question: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-    const updateForm = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const updateForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: update.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'PUT',
@@ -551,7 +551,7 @@ update.patch = (args: { question: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-        updateForm.put = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.put = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PUT',
@@ -565,7 +565,7 @@ update.patch = (args: { question: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/QuestionController.php:161
  * @route '/admin/questions/{question}'
  */
-        updateForm.patch = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        updateForm.patch = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: update.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'PATCH',
@@ -581,7 +581,7 @@ update.patch = (args: { question: string | number | { id: string | number } } | 
  * @see app/Http/Controllers/Admin/QuestionController.php:306
  * @route '/admin/questions/{question}'
  */
-export const destroy = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+export const destroy = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -596,7 +596,7 @@ destroy.definition = {
  * @see app/Http/Controllers/Admin/QuestionController.php:306
  * @route '/admin/questions/{question}'
  */
-destroy.url = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+destroy.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { question: args }
     }
@@ -629,7 +629,7 @@ destroy.url = (args: { question: string | number | { id: string | number } } | [
  * @see app/Http/Controllers/Admin/QuestionController.php:306
  * @route '/admin/questions/{question}'
  */
-destroy.delete = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
+destroy.delete = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
     url: destroy.url(args, options),
     method: 'delete',
 })
@@ -639,7 +639,7 @@ destroy.delete = (args: { question: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/QuestionController.php:306
  * @route '/admin/questions/{question}'
  */
-    const destroyForm = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const destroyForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: destroy.url(args, {
                     [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                         _method: 'DELETE',
@@ -654,7 +654,7 @@ destroy.delete = (args: { question: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/QuestionController.php:306
  * @route '/admin/questions/{question}'
  */
-        destroyForm.delete = (args: { question: string | number | { id: string | number } } | [question: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        destroyForm.delete = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: destroy.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'DELETE',

@@ -18,7 +18,7 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { cn } from "@/lib/utils";
-import { Image as ImageIcon, X, Plus } from 'lucide-react';
+import { Image as ImageIcon, X, Plus, Link as LinkIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Option, OptionEditorProps } from './types';
@@ -65,7 +65,6 @@ const getPairColor = (pairId: any) => {
 const RenderImageUploader = ({ data, id }: { data: EditableNodeData, id: string }) => {
     const { mediaUrl, mediaFile, onFileChange, onRemoveMedia } = data;
 
-    // Local handler to wrap the event
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (onFileChange) onFileChange(id, e);
     };
@@ -102,7 +101,7 @@ const RenderImageUploader = ({ data, id }: { data: EditableNodeData, id: string 
                     type="file"
                     accept="image/*"
                     onChange={handleChange}
-                    className="hidden" // Hiding input, using label to trigger
+                    className="hidden"
                 />
             </div>
         </div>
@@ -113,7 +112,7 @@ function LeftEditableNode({ id, data }: NodeProps) {
     const nodeData = data as EditableNodeData;
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors",
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors pr-8", // Extra padding right for handle
             nodeData.colorClass
         )}>
             <div className="flex items-center gap-2 mb-2">
@@ -128,22 +127,26 @@ function LeftEditableNode({ id, data }: NodeProps) {
                 </Button>
             </div>
 
-            <div className="space-y-2 flex-1">
+            <div className="space-y-2 flex-1 relative z-10">
                 <RichTextEditor
                     value={nodeData.content || ''}
                     onChange={(val) => nodeData.onChange(id, val)}
                     placeholder="Teks premis..."
                     className="min-h-[100px]"
                 />
-
                 <RenderImageUploader data={nodeData} id={id} />
             </div>
 
-            <Handle
-                type="source"
-                position={Position.Right}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background transform translate-x-1/2"
-            />
+            {/* Expanded Right Handle Strip */}
+            <div className="absolute top-0 right-0 h-full w-8 bg-muted/20 hover:bg-muted/40 border-l border-border/50 rounded-r-lg flex items-center justify-center transition-colors cursor-crosshair z-0">
+                <Handle
+                    type="source"
+                    position={Position.Right}
+                    className="w-full h-full opacity-0 absolute inset-0 rounded-r-lg"
+                    style={{ right: 0, transform: 'none' }}
+                />
+                <div className="w-1.5 h-8 bg-muted-foreground/30 rounded-full" />
+            </div>
         </div>
     );
 }
@@ -152,43 +155,50 @@ function RightEditableNode({ id, data }: NodeProps) {
     const nodeData = data as EditableNodeData;
     return (
         <div className={cn(
-            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors",
+            "relative p-3 rounded-lg border-2 text-sm flex flex-col min-h-[150px] bg-card w-[400px] shadow-sm transition-colors pl-8", // Extra padding left for handle
             nodeData.colorClass
         )}>
-            <Handle
-                type="target"
-                position={Position.Left}
-                className="w-3 h-3 bg-muted-foreground border-2 border-background transform -translate-x-1/2"
-            />
-
-            <div className="flex items-center gap-2 mb-2 pl-2">
-                <span className="text-xs font-bold text-muted-foreground">Respon</span>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-5 w-5 ml-auto text-muted-foreground hover:text-destructive"
-                    onClick={() => nodeData.onDelete(id)}
-                >
-                    <X className="h-3 w-3" />
-                </Button>
+            {/* Expanded Left Handle Strip */}
+            <div className="absolute top-0 left-0 h-full w-8 bg-muted/20 hover:bg-muted/40 border-r border-border/50 rounded-l-lg flex items-center justify-center transition-colors cursor-crosshair z-0">
+                <Handle
+                    type="target"
+                    position={Position.Left}
+                    className="w-full h-full opacity-0 absolute inset-0 rounded-l-lg"
+                    style={{ left: 0, transform: 'none' }}
+                />
+                <div className="w-1.5 h-8 bg-muted-foreground/30 rounded-full" />
             </div>
 
-            <div className="space-y-2 flex-1 relative">
-                <RichTextEditor
-                    value={nodeData.content || ''}
-                    onChange={(val) => nodeData.onChange(id, val)}
-                    placeholder="Teks respon..."
-                    className="min-h-[100px]"
-                />
+            <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center gap-2 mb-2 pl-2">
+                    <span className="text-xs font-bold text-muted-foreground">Respon</span>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-5 w-5 ml-auto text-muted-foreground hover:text-destructive"
+                        onClick={() => nodeData.onDelete(id)}
+                    >
+                        <X className="h-3 w-3" />
+                    </Button>
+                </div>
 
-                <div className="flex justify-end mt-2">
-                    <RenderImageUploader data={nodeData} id={id} />
+                <div className="space-y-2 flex-1 relative">
+                    <RichTextEditor
+                        value={nodeData.content || ''}
+                        onChange={(val) => nodeData.onChange(id, val)}
+                        placeholder="Teks respon..."
+                        className="min-h-[100px]"
+                    />
+
+                    <div className="flex justify-end mt-2">
+                        <RenderImageUploader data={nodeData} id={id} />
+                    </div>
                 </div>
             </div>
 
             {/* Pair Indicator */}
             {nodeData.pairId && (
-                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm z-10">
+                <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground text-[10px] px-1.5 py-0.5 rounded-full font-bold shadow-sm z-20">
                     {nodeData.pairId as string}
                 </div>
             )}
@@ -219,19 +229,18 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
 
         // Layout
         const startX = 50;
-        const rightX = 700; // Increased
+        const rightX = 700;
         const startY = 50;
-        const gapY = 300; // Increased significantly for RichTextEditor
+        const gapY = 300;
 
         leftOptions.forEach((opt, index) => {
             newNodes.push({
                 id: opt.id || `temp-L-${index}`,
                 type: 'leftNode',
                 position: { x: startX, y: startY + (index * gapY) },
+                draggable: false, // Fix position
                 data: {
                     ...opt,
-                    // Ensure all required fields of EditableNodeData are present or placeholder
-                    // Handlers are attached later, but for type safety here:
                     content: opt.content || '',
                     onChange: () => { },
                     onFileChange: () => { },
@@ -247,6 +256,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 id: opt.id || `temp-R-${index}`,
                 type: 'rightNode',
                 position: { x: rightX, y: startY + (index * gapY) },
+                draggable: false, // Fix position
                 data: {
                     ...opt,
                     content: opt.content || '',
@@ -260,7 +270,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
         });
 
         // Edges
-        // We find pairs based on metadata.pair_id
         leftOptions.forEach(lOpt => {
             if (lOpt.metadata?.pair_id) {
                 const partner = rightOptions.find(r => r.metadata?.pair_id == lOpt.metadata?.pair_id);
@@ -281,7 +290,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             }
         });
 
-        // Attach actual handlers
         setNodes(newNodes.map(n => ({
             ...n,
             data: {
@@ -294,11 +302,9 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             }
         })));
         setEdges(newEdges);
-    }, []); // Run once on mount
+    }, []);
 
     // --- Handlers ---
-
-    // 1. Node Content Change
     const handleNodeContentChange = useCallback((id: string, content: string) => {
         setNodes(nds => nds.map(node => {
             if (node.id === id) {
@@ -308,7 +314,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
         }));
     }, [setNodes]);
 
-    // 2. Node File Change
     const handleNodeFileChange = useCallback((id: string, e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -328,7 +333,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
         }));
     }, [setNodes]);
 
-    // 3. Remove Media
     const handleNodeRemoveMedia = useCallback((id: string) => {
         setNodes(nds => nds.map(node => {
             if (node.id === id) {
@@ -338,7 +342,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                         ...(node.data as EditableNodeData),
                         mediaFile: null,
                         mediaUrl: null,
-                        media_url: null, // clear both
+                        media_url: null,
                         delete_media: true
                     }
                 };
@@ -347,18 +351,16 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
         }));
     }, [setNodes]);
 
-    // 4. Delete Node
     const handleNodeDelete = useCallback((id: string) => {
         setNodes(nds => nds.filter(n => n.id !== id));
         setEdges(eds => eds.filter(e => e.source !== id && e.target !== id));
     }, [setNodes, setEdges]);
 
-    // Effect to sync options up
+    // Sync options up
     useEffect(() => {
-        if (nodes.length === 0 && options.length === 0) return; // Init
+        if (nodes.length === 0 && options.length === 0) return;
 
         const newOptions: Option[] = nodes.map((node, index) => {
-            // Find edges connected to this node
             const connectedEdge = edges.find(e => {
                 if (node.type === 'leftNode') return e.source === node.id;
                 else return e.target === node.id;
@@ -367,23 +369,21 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             const nodeData = node.data as EditableNodeData;
             let pairId = nodeData.metadata?.pair_id;
 
-            // If not connected, clear pairId
             if (!connectedEdge) {
                 pairId = undefined;
             } else {
-                // Let's use the index of the edge + 1 for simple 1, 2, 3.. visual
                 const edgeIndex = edges.indexOf(connectedEdge);
                 pairId = edgeIndex + 1;
             }
 
             return {
-                id: node.id.startsWith('temp-') ? undefined : node.id, // Keep ID if real
+                id: node.id.startsWith('temp-') ? undefined : node.id,
                 question_id: nodeData.question_id,
                 option_key: (node.type === 'leftNode' ? `L` : `R`) + (index + 1),
                 content: (nodeData.content as string) || '',
                 media_path: (nodeData.media_path as string),
-                media_url: (nodeData.media_url as string), // For preview
-                media_file: (nodeData.mediaFile as File), // For upload
+                media_url: (nodeData.media_url as string),
+                media_file: (nodeData.mediaFile as File),
                 delete_media: (nodeData.delete_media as boolean),
                 is_correct: true,
                 order: index,
@@ -398,7 +398,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
 
     }, [nodes, edges]);
 
-    // Color Update Effect
+    // Color Update
     useEffect(() => {
         setNodes(nds => nds.map(n => {
             const connectedEdge = edges.find(e =>
@@ -413,7 +413,6 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
 
             const data = n.data as EditableNodeData;
 
-            // Only update if changed
             if (data.metadata?.pair_id !== pairId || data.pairId !== pairId) {
                 return {
                     ...n,
@@ -445,6 +444,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             id,
             type: 'leftNode',
             position: { x: 50, y: maxY + 300 },
+            draggable: false, // Fix
             data: {
                 content: '',
                 metadata: { side: 'left' },
@@ -466,6 +466,7 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
             id,
             type: 'rightNode',
             position: { x: 700, y: maxY + 300 },
+            draggable: false, // Fix
             data: {
                 content: '',
                 metadata: { side: 'right' },
@@ -494,6 +495,10 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
+                nodesDraggable={false} // Disable dragging
+                panOnDrag={true}
+                panOnScroll={true} // Mouse wheel pans
+                zoomOnScroll={false} // Mouse zoom off
                 proOptions={{ hideAttribution: true }}
                 fitView
             >

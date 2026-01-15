@@ -4,7 +4,7 @@ import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFo
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-export const correction = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const correction = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: correction.url(args, options),
     method: 'get',
 })
@@ -19,7 +19,7 @@ correction.definition = {
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-correction.url = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+correction.url = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { session: args }
     }
@@ -52,7 +52,7 @@ correction.url = (args: { session: string | number | { id: string | number } } |
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-correction.get = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+correction.get = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: correction.url(args, options),
     method: 'get',
 })
@@ -61,7 +61,7 @@ correction.get = (args: { session: string | number | { id: string | number } } |
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-correction.head = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+correction.head = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: correction.url(args, options),
     method: 'head',
 })
@@ -71,7 +71,7 @@ correction.head = (args: { session: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-    const correctionForm = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+    const correctionForm = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
         action: correction.url(args, options),
         method: 'get',
     })
@@ -81,7 +81,7 @@ correction.head = (args: { session: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-        correctionForm.get = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        correctionForm.get = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: correction.url(args, options),
             method: 'get',
         })
@@ -90,7 +90,7 @@ correction.head = (args: { session: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/ExamController.php:210
  * @route '/admin/exams/sessions/{session}/correction'
  */
-        correctionForm.head = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+        correctionForm.head = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
             action: correction.url(args, {
                         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
                             _method: 'HEAD',
@@ -106,7 +106,7 @@ correction.head = (args: { session: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/ExamController.php:265
  * @route '/admin/exams/sessions/{session}/recalculate'
  */
-export const recalculate = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+export const recalculate = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: recalculate.url(args, options),
     method: 'post',
 })
@@ -121,7 +121,7 @@ recalculate.definition = {
  * @see app/Http/Controllers/Admin/ExamController.php:265
  * @route '/admin/exams/sessions/{session}/recalculate'
  */
-recalculate.url = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions) => {
+recalculate.url = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { session: args }
     }
@@ -154,7 +154,7 @@ recalculate.url = (args: { session: string | number | { id: string | number } } 
  * @see app/Http/Controllers/Admin/ExamController.php:265
  * @route '/admin/exams/sessions/{session}/recalculate'
  */
-recalculate.post = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
+recalculate.post = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     url: recalculate.url(args, options),
     method: 'post',
 })
@@ -164,7 +164,7 @@ recalculate.post = (args: { session: string | number | { id: string | number } }
  * @see app/Http/Controllers/Admin/ExamController.php:265
  * @route '/admin/exams/sessions/{session}/recalculate'
  */
-    const recalculateForm = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+    const recalculateForm = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
         action: recalculate.url(args, options),
         method: 'post',
     })
@@ -174,7 +174,7 @@ recalculate.post = (args: { session: string | number | { id: string | number } }
  * @see app/Http/Controllers/Admin/ExamController.php:265
  * @route '/admin/exams/sessions/{session}/recalculate'
  */
-        recalculateForm.post = (args: { session: string | number | { id: string | number } } | [session: string | number | { id: string | number } ] | string | number | { id: string | number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
+        recalculateForm.post = (args: { session: string | { id: string } } | [session: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
             action: recalculate.url(args, options),
             method: 'post',
         })

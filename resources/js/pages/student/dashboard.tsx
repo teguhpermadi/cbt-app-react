@@ -1,5 +1,6 @@
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
 import { dashboard as studentDashboard } from '@/routes/student';
+import { show as showExam } from '@/routes/student/exams';
 import { Head, Link } from '@inertiajs/react';
 import { CalendarRange, GraduationCap, Users, Calendar, Trophy, ArrowRight, User, BookOpen, Clock, CheckCircle2, Star, Zap } from 'lucide-react';
 // @ts-ignore
@@ -198,14 +199,20 @@ export default function Dashboard({
                                                 </div>
                                             </div>
 
-                                            <button
-                                                // Link logic here would ideally be handled by router
-                                                className={`flex h-12 items-center gap-2 rounded-xl px-6 text-sm font-bold transition-all ${exam.has_started
-                                                    ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
-                                                    : 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
-                                                    }`}>
-                                                {exam.has_started ? 'Continue' : 'Start'}
-                                            </button>
+                                            {new Date(exam.start_time) > new Date() ? (
+                                                <div className="flex h-12 items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-400 cursor-not-allowed">
+                                                    Starts {new Date(exam.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
+                                            ) : (
+                                                <Link
+                                                    href={showExam(exam)}
+                                                    className={`flex h-12 items-center gap-2 rounded-xl px-6 text-sm font-bold transition-all ${exam.has_started
+                                                        ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400'
+                                                        : 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 hover:scale-[1.02] active:scale-[0.98]'
+                                                        }`}>
+                                                    {exam.has_started ? 'Continue' : 'Start'}
+                                                </Link>
+                                            )}
                                         </div>
                                     </div>
                                 ))

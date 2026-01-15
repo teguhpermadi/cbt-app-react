@@ -54,7 +54,7 @@ class DashboardController extends Controller
         // Exams Today (Exam yang berjalan hari ini / saat ini)
         $examsToday = \App\Models\Exam::with(['subject', 'grades'])
             ->where('is_published', true)
-            ->where('start_time', '<=', now())
+            ->where('start_time', '<=', now()->endOfDay())
             ->where('end_time', '>=', now())
             ->whereHas('grades', function ($query) use ($gradeIds) {
                 $query->whereIn('grades.id', $gradeIds);
