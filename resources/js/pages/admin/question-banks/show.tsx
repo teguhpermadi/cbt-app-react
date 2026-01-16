@@ -19,10 +19,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 import 'katex/dist/katex.min.css';
 import QuestionSuggestionSidebar from '@/components/app/questions/QuestionSuggestionSidebar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import QuestionSuggestionList from '@/components/app/questions/QuestionSuggestionList';
 
 interface QuestionBank {
-    id: number;
-    user_id: string; // Added user_id
+    id: number; // Note: id here is actually number in interface but might come as string from model if ULID? Keeping as is for now as existing code works.
+    user_id: string;
     name: string;
     subject_id: number;
     description: string | null;
@@ -45,7 +47,8 @@ interface QuestionBank {
 interface ShowProps {
     questionBank: QuestionBank;
     questions: Question[];
-    auth: { // Added auth prop which is typically shared
+    suggestions?: any[]; // Added suggestions prop
+    auth: {
         user: {
             id: string;
             name: string;
@@ -74,7 +77,7 @@ interface CreateExamFormData {
     end_time: string;
 }
 
-export default function Show({ questionBank, questions, auth }: ShowProps) {
+export default function Show({ questionBank, questions, suggestions = [], auth }: ShowProps) {
     const [isCreateExamOpen, setIsCreateExamOpen] = useState(false);
     const [formData, setFormData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
@@ -168,14 +171,15 @@ export default function Show({ questionBank, questions, auth }: ShowProps) {
     };
 
     // Check ownership
-    // Note: auth usually comes from shared props, ensuring it's typed
-    // Assuming auth.user.id is string/number matching questionBank.user_id
     const isOwner = auth?.user?.id == questionBank.user_id;
 
     const handleSuggestClick = (question: Question) => {
         setSelectedQuestionForSuggestion(question);
         setIsSuggestionSidebarOpen(true);
     };
+
+    // Filter suggestions
+    const pendingSuggestionsCount = suggestions.filter(s => s.state === 'pending').length;
 
     return (
         <AppShell variant="header">
@@ -209,6 +213,8 @@ export default function Show({ questionBank, questions, auth }: ShowProps) {
                     {/* Card 1: Informasi Question Bank */}
                     <Card>
                         <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+                            {/* ... (Existing Header Logic) ... */}
+                            {/* Re-using existing content without change roughly */}
                             <div className="space-y-1 flex-1">
                                 <CardTitle className="text-2xl font-bold">Informasi Bank Soal</CardTitle>
                                 <p className="text-sm text-muted-foreground">
@@ -274,64 +280,80 @@ export default function Show({ questionBank, questions, auth }: ShowProps) {
                         </CardContent>
                     </Card>
 
-                    {/* Card 2: Daftar Pertanyaan */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-xl font-bold">
-                                Daftar Pertanyaan ({questions.length})
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {questions.length > 0 ? (
-                                <div className="space-y-4">
-                                    {questions.map((question, index) => (
-                                        <div key={question.id} className="relative group/card-wrapper">
-                                            {/* Question Number Badge */}
-                                            <div className="absolute -left-3 top-4 z-10">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-md">
-                                                    {index + 1}
-                                                </div>
-                                            </div>
-
-                                            {/* Question Card */}
-                                            <div className="ml-6 relative">
-                                                <QuestionCard
-                                                    question={question}
-                                                    readOnly={true}
-                                                />
-
-                                                {/* Suggest Button Overlay - Visible on Hover for non-owners */}
-                                                {!isOwner && questionBank.is_public && (
-                                                    <div className="absolute top-2 right-2 opacity-0 group-hover/card-wrapper:opacity-100 transition-opacity">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="secondary"
-                                                            className="shadow-sm border bg-background/95 hover:bg-background"
-                                                            onClick={() => handleSuggestClick(question)}
-                                                        >
-                                                            <Lightbulb className="w-4 h-4 mr-2 text-amber-500" />
-                                                            Saran Perubahan
-                                                        </Button>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center text-muted-foreground py-12">
-                                    <p>Belum ada pertanyaan di bank soal ini.</p>
-                                    {isOwner && (
-                                        <Button variant="link" className="mt-2" asChild>
-                                            <Link href={QuestionBankController.edit(questionBank.id).url}>
-                                                Tambah Pertanyaan
-                                            </Link>
-                                        </Button>
-                                    )}
-                                </div>
+                    {/* TABS SECTION */}
+                    <Tabs defaultValue="questions" className="w-full">
+                        <TabsList className="mb-4">
+                            <TabsTrigger value="questions">Daftar Pertanyaan ({questions.length})</TabsTrigger>
+                            {isOwner && (
+                                <TabsTrigger value="suggestions" className="relative">
+                                    Saran Masuk
+                                    <div className="ml-2 bg-muted-foreground/20 text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center">
+                                        {pendingSuggestionsCount}
+                                    </div>
+                                    {pendingSuggestionsCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+                                </TabsTrigger>
                             )}
-                        </CardContent>
-                    </Card>
+                        </TabsList>
+
+                        <TabsContent value="questions">
+                            <Card>
+                                <CardContent className="pt-6">
+                                    {questions.length > 0 ? (
+                                        <div className="space-y-4">
+                                            {questions.map((question, index) => (
+                                                <div key={question.id} className="relative group/card-wrapper">
+                                                    <div className="absolute -left-3 top-4 z-10">
+                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-md">
+                                                            {index + 1}
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="ml-6 relative">
+                                                        <QuestionCard
+                                                            question={question}
+                                                            readOnly={true}
+                                                        />
+
+                                                        {/* Suggest Button */}
+                                                        {!isOwner && questionBank.is_public && (
+                                                            <div className="absolute top-2 right-2 opacity-0 group-hover/card-wrapper:opacity-100 transition-opacity">
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="secondary"
+                                                                    className="shadow-sm border bg-background/95 hover:bg-background"
+                                                                    onClick={() => handleSuggestClick(question)}
+                                                                >
+                                                                    <Lightbulb className="w-4 h-4 mr-2 text-amber-500" />
+                                                                    Saran Perubahan
+                                                                </Button>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center text-muted-foreground py-12">
+                                            <p>Belum ada pertanyaan di bank soal ini.</p>
+                                            {isOwner && (
+                                                <Button variant="link" className="mt-2" asChild>
+                                                    <Link href={QuestionBankController.edit(questionBank.id).url}>
+                                                        Tambah Pertanyaan
+                                                    </Link>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    )}
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+
+                        {isOwner && (
+                            <TabsContent value="suggestions">
+                                <QuestionSuggestionList suggestions={suggestions} />
+                            </TabsContent>
+                        )}
+                    </Tabs>
                 </div>
             </div>
 

@@ -71,6 +71,14 @@ class QuestionBank extends Model
     }
 
     /**
+     * Relasi HasManyThrough: Bank Soal memiliki banyak Saran melalui Question.
+     */
+    public function suggestions(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(QuestionSuggestion::class, Question::class);
+    }
+
+    /**
      * Konfigurasi untuk Spatie Activity Log
      */
     public function getActivitylogOptions(): LogOptions

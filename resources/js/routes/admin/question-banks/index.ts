@@ -310,7 +310,7 @@ show.head = (args: { question_bank: string | number } | [question_bank: string |
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
 export const edit = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -325,7 +325,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
 edit.url = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -353,7 +353,7 @@ edit.url = (args: { question_bank: string | number } | [question_bank: string | 
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
 edit.get = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -362,7 +362,7 @@ edit.get = (args: { question_bank: string | number } | [question_bank: string | 
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
 edit.head = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -372,7 +372,7 @@ edit.head = (args: { question_bank: string | number } | [question_bank: string |
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
     const editForm = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -382,7 +382,7 @@ edit.head = (args: { question_bank: string | number } | [question_bank: string |
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
         editForm.get = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -391,7 +391,7 @@ edit.head = (args: { question_bank: string | number } | [question_bank: string |
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::edit
- * @see app/Http/Controllers/Admin/QuestionBankController.php:111
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:122
  * @route '/admin/question-banks/{question_bank}/edit'
  */
         editForm.head = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -407,7 +407,7 @@ edit.head = (args: { question_bank: string | number } | [question_bank: string |
     edit.form = editForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
 export const update = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -422,7 +422,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
 update.url = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -450,7 +450,7 @@ update.url = (args: { question_bank: string | number } | [question_bank: string 
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
 update.put = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -459,7 +459,7 @@ update.put = (args: { question_bank: string | number } | [question_bank: string 
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
 update.patch = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -469,7 +469,7 @@ update.patch = (args: { question_bank: string | number } | [question_bank: strin
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
     const updateForm = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -484,7 +484,7 @@ update.patch = (args: { question_bank: string | number } | [question_bank: strin
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
         updateForm.put = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -498,7 +498,7 @@ update.patch = (args: { question_bank: string | number } | [question_bank: strin
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::update
- * @see app/Http/Controllers/Admin/QuestionBankController.php:152
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:163
  * @route '/admin/question-banks/{question_bank}'
  */
         updateForm.patch = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -514,7 +514,7 @@ update.patch = (args: { question_bank: string | number } | [question_bank: strin
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::destroy
- * @see app/Http/Controllers/Admin/QuestionBankController.php:170
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{question_bank}'
  */
 export const destroy = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -529,7 +529,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::destroy
- * @see app/Http/Controllers/Admin/QuestionBankController.php:170
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{question_bank}'
  */
 destroy.url = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -557,7 +557,7 @@ destroy.url = (args: { question_bank: string | number } | [question_bank: string
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::destroy
- * @see app/Http/Controllers/Admin/QuestionBankController.php:170
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{question_bank}'
  */
 destroy.delete = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -567,7 +567,7 @@ destroy.delete = (args: { question_bank: string | number } | [question_bank: str
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::destroy
- * @see app/Http/Controllers/Admin/QuestionBankController.php:170
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{question_bank}'
  */
     const destroyForm = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -582,7 +582,7 @@ destroy.delete = (args: { question_bank: string | number } | [question_bank: str
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::destroy
- * @see app/Http/Controllers/Admin/QuestionBankController.php:170
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:181
  * @route '/admin/question-banks/{question_bank}'
  */
         destroyForm.delete = (args: { question_bank: string | number } | [question_bank: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -598,7 +598,7 @@ destroy.delete = (args: { question_bank: string | number } | [question_bank: str
     destroy.form = destroyForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::uploadQuestions
- * @see app/Http/Controllers/Admin/QuestionBankController.php:181
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:192
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
 export const uploadQuestions = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -613,7 +613,7 @@ uploadQuestions.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::uploadQuestions
- * @see app/Http/Controllers/Admin/QuestionBankController.php:181
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:192
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
 uploadQuestions.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -646,7 +646,7 @@ uploadQuestions.url = (args: { questionBank: string | { id: string } } | [questi
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::uploadQuestions
- * @see app/Http/Controllers/Admin/QuestionBankController.php:181
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:192
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
 uploadQuestions.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -656,7 +656,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::uploadQuestions
- * @see app/Http/Controllers/Admin/QuestionBankController.php:181
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:192
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
     const uploadQuestionsForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -666,7 +666,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::uploadQuestions
- * @see app/Http/Controllers/Admin/QuestionBankController.php:181
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:192
  * @route '/admin/question-banks/{questionBank}/upload-questions'
  */
         uploadQuestionsForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -677,7 +677,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
     uploadQuestions.form = uploadQuestionsForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateAi
- * @see app/Http/Controllers/Admin/QuestionBankController.php:270
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:281
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 export const generateAi = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -692,7 +692,7 @@ generateAi.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateAi
- * @see app/Http/Controllers/Admin/QuestionBankController.php:270
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:281
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 generateAi.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -725,7 +725,7 @@ generateAi.url = (args: { questionBank: string | { id: string } } | [questionBan
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateAi
- * @see app/Http/Controllers/Admin/QuestionBankController.php:270
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:281
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 generateAi.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -735,7 +735,7 @@ generateAi.post = (args: { questionBank: string | { id: string } } | [questionBa
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateAi
- * @see app/Http/Controllers/Admin/QuestionBankController.php:270
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:281
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
     const generateAiForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -745,7 +745,7 @@ generateAi.post = (args: { questionBank: string | { id: string } } | [questionBa
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateAi
- * @see app/Http/Controllers/Admin/QuestionBankController.php:270
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:281
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
         generateAiForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -756,7 +756,7 @@ generateAi.post = (args: { questionBank: string | { id: string } } | [questionBa
     generateAi.form = generateAiForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:294
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:305
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 export const generateTags = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -771,7 +771,7 @@ generateTags.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:294
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:305
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 generateTags.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -804,7 +804,7 @@ generateTags.url = (args: { questionBank: string | { id: string } } | [questionB
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:294
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:305
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 generateTags.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -814,7 +814,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:294
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:305
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
     const generateTagsForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -824,7 +824,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:294
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:305
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
         generateTagsForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
