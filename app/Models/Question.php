@@ -11,16 +11,19 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Overtrue\LaravelVersionable\Versionable;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Spatie\Tags\HasTags;
+use Spatie\ModelStates\HasStates;
 
 class Question extends Model implements HasMedia
 {
-    use HasFactory, HasUlids, LogsActivity, InteractsWithMedia, SoftDeletes, HasTags;
+    use HasFactory, HasUlids, LogsActivity, InteractsWithMedia, SoftDeletes, HasTags, Versionable;
+    use HasStates;
 
     protected $fillable = [
         'question_bank_id',
@@ -54,6 +57,11 @@ class Question extends Model implements HasMedia
     public function readingMaterial(): BelongsTo
     {
         return $this->belongsTo(ReadingMaterial::class);
+    }
+
+    public function suggestions(): HasMany
+    {
+        return $this->hasMany(QuestionSuggestion::class);
     }
 
     public function peerReviews(): HasMany
