@@ -69,6 +69,30 @@ export function AppSidebar() {
         }
     ];
 
+    const teacherNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: adminDashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Bank Soal',
+            href: '/admin/question-banks',
+            icon: BookOpen,
+        },
+        {
+            title: 'Exam Management',
+            href: examsIndex(),
+            icon: ClipboardList,
+            // active: true, // Example of marking active
+        },
+        {
+            title: 'Grade Management',
+            href: gradesIndex(),
+            icon: GraduationCap,
+        },
+    ];
+
     const studentNavItems: NavItem[] = [
         {
             title: 'Dashboard',
@@ -95,8 +119,11 @@ export function AppSidebar() {
     if (hasRole('student')) {
         mainNavItems = studentNavItems;
         dashboardLink = studentDashboard();
-    } else if (hasRole('admin') || hasRole('teacher')) {
+    } else if (hasRole('admin')) {
         mainNavItems = adminNavItems;
+        dashboardLink = adminDashboard();
+    } else if (hasRole('teacher')) {
+        mainNavItems = teacherNavItems;
         dashboardLink = adminDashboard();
     }
 
