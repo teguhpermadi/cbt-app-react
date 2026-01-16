@@ -101,6 +101,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('questions/reorder', [\App\Http\Controllers\Admin\QuestionController::class, 'reorder'])->name('questions.reorder');
             Route::get('tags/search', [\App\Http\Controllers\Admin\QuestionController::class, 'searchTags'])->name('tags.search');
             Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
+
+            // Question Suggestions
+            Route::post('questions/{question}/suggestions', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'store'])->name('questions.suggestions.store');
+            Route::post('question-suggestions/{suggestion}/approve', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'approve'])->name('question-suggestions.approve');
+            Route::post('question-suggestions/{suggestion}/reject', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'reject'])->name('question-suggestions.reject');
         });
     });
 });

@@ -2,6 +2,7 @@
 
 namespace App\States\QuestionSuggestion;
 
+use App\States\QuestionSuggestion\Transitions;
 use Spatie\ModelStates\State;
 use Spatie\ModelStates\StateConfig;
 
@@ -13,7 +14,7 @@ abstract class SuggestionState extends State
     {
         return parent::config()
             ->default(Pending::class)
-            ->allowTransition(Pending::class, Approved::class)
+            ->allowTransition(Pending::class, Approved::class, Transitions\ApproveSuggestion::class)
             ->allowTransition(Pending::class, Rejected::class);
     }
 }

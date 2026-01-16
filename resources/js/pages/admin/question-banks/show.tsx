@@ -2,8 +2,8 @@ import { AppShell } from '@/components/app-shell';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Edit, Globe, Lock, Plus } from 'lucide-react';
+import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
+import { ArrowLeft, Edit, Globe, Lock, Plus, Lightbulb } from 'lucide-react';
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import QuestionCard from '@/components/app/questions/QuestionCard';
@@ -18,9 +18,11 @@ import InputError from '@/components/input-error';
 import { useState, useEffect, useMemo } from 'react';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 import 'katex/dist/katex.min.css';
+import QuestionSuggestionSidebar from '@/components/app/questions/QuestionSuggestionSidebar';
 
 interface QuestionBank {
     id: number;
+    user_id: string; // Added user_id
     name: string;
     subject_id: number;
     description: string | null;
@@ -43,6 +45,12 @@ interface QuestionBank {
 interface ShowProps {
     questionBank: QuestionBank;
     questions: Question[];
+    auth: { // Added auth prop which is typically shared
+        user: {
+            id: string;
+            name: string;
+        }
+    }
 }
 
 interface CreateExamFormData {
@@ -66,10 +74,14 @@ interface CreateExamFormData {
     end_time: string;
 }
 
-export default function Show({ questionBank, questions }: ShowProps) {
+export default function Show({ questionBank, questions, auth }: ShowProps) {
     const [isCreateExamOpen, setIsCreateExamOpen] = useState(false);
     const [formData, setFormData] = useState<any>(null);
     const [loading, setLoading] = useState(false);
+
+    // Suggestion State
+    const [selectedQuestionForSuggestion, setSelectedQuestionForSuggestion] = useState<Question | null>(null);
+    const [isSuggestionSidebarOpen, setIsSuggestionSidebarOpen] = useState(false);
 
     // Helper untuk format datetime-local input
     const getDefaultStartTime = () => {
@@ -155,6 +167,16 @@ export default function Show({ questionBank, questions }: ShowProps) {
         });
     };
 
+    // Check ownership
+    // Note: auth usually comes from shared props, ensuring it's typed
+    // Assuming auth.user.id is string/number matching questionBank.user_id
+    const isOwner = auth?.user?.id == questionBank.user_id;
+
+    const handleSuggestClick = (question: Question) => {
+        setSelectedQuestionForSuggestion(question);
+        setIsSuggestionSidebarOpen(true);
+    };
+
     return (
         <AppShell variant="header">
             <Head title={questionBank.name} />
@@ -171,12 +193,14 @@ export default function Show({ questionBank, questions }: ShowProps) {
                     <h1 className="text-lg font-semibold">{questionBank.name}</h1>
                 </div>
 
-                <Button variant="outline" size="sm" asChild>
-                    <Link href={QuestionBankController.edit(questionBank.id).url}>
-                        <Edit className="mr-2 h-4 w-4" />
-                        Edit
-                    </Link>
-                </Button>
+                {isOwner && (
+                    <Button variant="outline" size="sm" asChild>
+                        <Link href={QuestionBankController.edit(questionBank.id).url}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                        </Link>
+                    </Button>
+                )}
             </div>
 
             {/* Main Content */}
@@ -261,7 +285,7 @@ export default function Show({ questionBank, questions }: ShowProps) {
                             {questions.length > 0 ? (
                                 <div className="space-y-4">
                                     {questions.map((question, index) => (
-                                        <div key={question.id} className="relative">
+                                        <div key={question.id} className="relative group/card-wrapper">
                                             {/* Question Number Badge */}
                                             <div className="absolute -left-3 top-4 z-10">
                                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-md">
@@ -270,11 +294,26 @@ export default function Show({ questionBank, questions }: ShowProps) {
                                             </div>
 
                                             {/* Question Card */}
-                                            <div className="ml-6">
+                                            <div className="ml-6 relative">
                                                 <QuestionCard
                                                     question={question}
                                                     readOnly={true}
                                                 />
+
+                                                {/* Suggest Button Overlay - Visible on Hover for non-owners */}
+                                                {!isOwner && questionBank.is_public && (
+                                                    <div className="absolute top-2 right-2 opacity-0 group-hover/card-wrapper:opacity-100 transition-opacity">
+                                                        <Button
+                                                            size="sm"
+                                                            variant="secondary"
+                                                            className="shadow-sm border bg-background/95 hover:bg-background"
+                                                            onClick={() => handleSuggestClick(question)}
+                                                        >
+                                                            <Lightbulb className="w-4 h-4 mr-2 text-amber-500" />
+                                                            Saran Perubahan
+                                                        </Button>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     ))}
@@ -282,17 +321,28 @@ export default function Show({ questionBank, questions }: ShowProps) {
                             ) : (
                                 <div className="text-center text-muted-foreground py-12">
                                     <p>Belum ada pertanyaan di bank soal ini.</p>
-                                    <Button variant="link" className="mt-2" asChild>
-                                        <Link href={QuestionBankController.edit(questionBank.id).url}>
-                                            Tambah Pertanyaan
-                                        </Link>
-                                    </Button>
+                                    {isOwner && (
+                                        <Button variant="link" className="mt-2" asChild>
+                                            <Link href={QuestionBankController.edit(questionBank.id).url}>
+                                                Tambah Pertanyaan
+                                            </Link>
+                                        </Button>
+                                    )}
                                 </div>
                             )}
                         </CardContent>
                     </Card>
                 </div>
             </div>
+
+            {/* Suggestion Sidebar */}
+            {selectedQuestionForSuggestion && (
+                <QuestionSuggestionSidebar
+                    open={isSuggestionSidebarOpen}
+                    onOpenChange={setIsSuggestionSidebarOpen}
+                    question={selectedQuestionForSuggestion}
+                />
+            )}
 
             {/* Create Exam Modal */}
             <Dialog open={isCreateExamOpen} onOpenChange={setIsCreateExamOpen}>

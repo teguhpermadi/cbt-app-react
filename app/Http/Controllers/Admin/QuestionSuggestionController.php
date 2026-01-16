@@ -1,0 +1,80 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Question;
+use App\Models\QuestionSuggestion;
+use App\States\QuestionSuggestion\Approved;
+use App\States\QuestionSuggestion\Rejected;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class QuestionSuggestionController extends Controller
+{
+    /**
+     * Store a newly created suggestion in storage.
+     */
+    public function store(Request $request, Question $question)
+    {
+        $request->validate([
+            'description' => 'required|string',
+            'data' => 'required|array', // The suggested question data
+        ]);
+
+        // Prevent owner from upgrading their own question via suggestion (they should just edit)
+        if ($request->user()->id === $question->questionBank->user_id) {
+            return back()->with('error', 'You cannot submit a suggestion for your own question. Use Edit instead.');
+        }
+
+        QuestionSuggestion::create([
+            'question_id' => $question->id,
+            'user_id' => $request->user()->id,
+            'description' => $request->description,
+            'data' => $request->data,
+        ]);
+
+        return back()->with('success', 'Suggestion submitted successfully.');
+    }
+
+    /**
+     * Approve the specified suggestion.
+     */
+    public function approve(QuestionSuggestion $suggestion)
+    {
+        // Authorization: Only the owner of the question bank can approve
+        if (request()->user()->id !== $suggestion->question->questionBank->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        try {
+            DB::transaction(function () use ($suggestion) {
+                // Determine if state transition is allowed
+                if ($suggestion->state->canTransitionTo(Approved::class)) {
+                    $suggestion->state->transitionTo(Approved::class);
+                }
+            });
+
+            return back()->with('success', 'Suggestion approved and applied.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to approve suggestion: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject the specified suggestion.
+     */
+    public function reject(QuestionSuggestion $suggestion)
+    {
+        // Authorization: Only the owner
+        if (request()->user()->id !== $suggestion->question->questionBank->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        if ($suggestion->state->canTransitionTo(Rejected::class)) {
+            $suggestion->state->transitionTo(Rejected::class);
+        }
+
+        return back()->with('success', 'Suggestion rejected.');
+    }
+}

@@ -117,11 +117,6 @@ class QuestionController extends Controller
                 $question->attachTags($request->tags);
             }
 
-            // 4. Handle Tags
-            if ($request->has('tags')) {
-                $question->attachTags($request->tags);
-            }
-
             return $question;
         });
 
@@ -136,7 +131,7 @@ class QuestionController extends Controller
      */
     public function edit(Question $question)
     {
-        $question->load('options');
+        $question->load(['options', 'questionBank']);
 
         // Inject Media URLs for Frontend
         $question->media_url = $question->getFirstMediaUrl('question_content');
@@ -221,10 +216,6 @@ class QuestionController extends Controller
                 $requestOptions = collect($request->input('options', []));
                 $existingOptionIds = $question->options()->pluck('id')->toArray();
 
-                // Note: Request options might not have ID if they are new, but indices align if structure is maintained.
-                // However, Inertia sends JSON. When file uploads are involved, inputs are converted to FormData.
-                // Key mapping is crucial.
-
                 $incomingOptionIds = collect($requestOptions)->pluck('id')->filter()->toArray();
 
                 // Delete removed options
@@ -250,7 +241,6 @@ class QuestionController extends Controller
                     }
 
                     // Handle Option Media
-                    // Retrieve file using dot notation for nested array
                     if ($request->hasFile("options.$index.media_file")) {
                         $file = $request->file("options.$index.media_file");
                         $option->clearMediaCollection('option_media');
@@ -316,12 +306,6 @@ class QuestionController extends Controller
     public function searchTags(Request $request)
     {
         $query = $request->query('query');
-        // Spatie tags store names as JSON if translatable, but if using simple tags...
-        // Assuming default config. If translatable, 'name->en' or similar.
-        // containing() scope usually handles it.
-        // We pluck 'name' which returns array/string.
-        // Frontend expects array of strings.
-
         $tags = \Spatie\Tags\Tag::containing($query)->take(10)->get();
 
         return $tags->map(function ($tag) {
