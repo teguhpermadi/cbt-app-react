@@ -12,15 +12,18 @@ return new class extends Migration
     public function up()
     {
         Schema::create('versions', function (Blueprint $table) {
-            $uuid = config('versionable.uuid');
+            // Package generates UUID for version ID, so use uuid()
+            $table->uuid('id')->primary();
 
-            $uuid ? $table->uuid('id')->primary() : $table->bigIncrements('id');
-            $table->unsignedBigInteger(config('versionable.user_foreign_key', 'user_id'));
+            // Explicitly support ULIDs for User and Versionable
+            $table->foreignUlid('user_id')->nullable();
 
-            $uuid ? $table->uuidMorphs('versionable') : $table->morphs('versionable');
+            // versionable_id for Question is ULID
+            $table->ulidMorphs('versionable');
 
             $table->json('contents')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

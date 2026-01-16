@@ -17,7 +17,7 @@ class ReadingMaterialFactory extends Factory
     {
         return [
             // Pastikan ada Subject yang sudah dibuat, atau gunakan callback
-            'subject_id' => Subject::get()->random()->id, 
+            'subject_id' => Subject::inRandomOrder()->first()?->id ?? Subject::factory()->create()->id,
             'title' => 'Materi: ' . $this->faker->words(3, true),
             'content' => $this->faker->paragraphs(5, true),
         ];

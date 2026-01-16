@@ -25,5 +25,5 @@ return [
     /**
      * Use uuid for version id.
      */
-    'uuid' => false,
+    'uuid' => true,
 ];

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\AcademicYear;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +20,7 @@ class GradeFactory extends Factory
         return [
             'name' => $this->faker->word(),
             'level' => random_int(1, 6),
-            'academic_year_id' => \App\Models\AcademicYear::get()->random()->id,
+            'academic_year_id' => AcademicYear::inRandomOrder()->first()?->id ?? AcademicYear::factory()->create()->id,
         ];
     }
 }

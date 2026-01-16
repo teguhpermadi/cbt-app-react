@@ -15,8 +15,8 @@ class QuestionPeerReviewFactory extends Factory
     public function definition(): array
     {
         $reviewer = User::where('user_type', 'teacher')->inRandomOrder()->first() ?? User::factory()->create(['user_type' => 'teacher']);
-        
-        $question = Question::get()->random();
+
+        $question = Question::inRandomOrder()->first() ?? Question::factory()->create();
 
         // Mengambil salah satu case dari Enum secara acak
         $status = $this->faker->randomElement(ReviewStatusEnum::cases());
@@ -32,7 +32,7 @@ class QuestionPeerReviewFactory extends Factory
                 ReviewStatusEnum::Pending => 'Belum ada catatan detail, masih menunggu review dari tim.',
             },
             // Hanya mengisi reviewed_at jika status bukan 'pending'
-            'reviewed_at' => ($status !== ReviewStatusEnum::Pending) ? now() : null, 
+            'reviewed_at' => ($status !== ReviewStatusEnum::Pending) ? now() : null,
         ];
     }
 }

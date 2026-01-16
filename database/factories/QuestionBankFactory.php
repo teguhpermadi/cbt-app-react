@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Subject;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -19,7 +18,7 @@ class QuestionBankFactory extends Factory
     public function definition(): array
     {
         // ambil random subject
-        $subject = Subject::inRandomOrder()->first();
+        $subject = Subject::inRandomOrder()->first() ?? Subject::factory()->create();
 
         return [
             'subject_id' => $subject->id,
