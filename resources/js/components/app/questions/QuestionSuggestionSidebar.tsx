@@ -4,18 +4,9 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetFo
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
-import { DifficultySelector } from '@/components/app/questions/DifficultySelector';
-import { QuestionTypeSelector } from '@/components/app/questions/QuestionTypeSelector';
-import { TimerSelector } from '@/components/app/questions/TimerSelector';
-import { ScoreSelector } from '@/components/app/questions/ScoreSelector';
-import OptionsEditor from '@/components/app/questions/option-editors/OptionsEditor';
 import { Question } from '@/components/app/questions/types';
 import { Option } from '@/components/app/questions/option-editors/types';
 import QuestionSuggestionController from '@/actions/App/Http/Controllers/Admin/QuestionSuggestionController';
-
-// Add Ziggy route helper declaration
-declare function route(name: string, params?: any): string;
 
 interface QuestionSuggestionSidebarProps {
     open: boolean;
@@ -65,7 +56,7 @@ export default function QuestionSuggestionSidebar({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        post(route(QuestionSuggestionController.store(question.id).url), {
+        post(QuestionSuggestionController.store(question.id).url, {
             transform: (data) => ({
                 description: data.description,
                 data: {
@@ -84,111 +75,53 @@ export default function QuestionSuggestionSidebar({
 
     return (
         <Sheet open={open} onOpenChange={onOpenChange}>
-            {/* Increased width to sm:max-w-4xl for better visibility */}
-            <SheetContent side="right" className="w-full sm:max-w-4xl overflow-y-auto">
-                <SheetHeader className="mb-6">
-                    <SheetTitle>Saran Perubahan Soal</SheetTitle>
-                    <SheetDescription>
-                        Berikan saran perbaikan atau perubahan untuk soal ini.
-                    </SheetDescription>
-                </SheetHeader>
+            {/* Added p-0 gap-0 to remove default padding and use flex layout */}
+            <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col gap-0 h-full">
 
-                <form onSubmit={handleSubmit} className="space-y-8 pb-20">
+                {/* Header Section */}
+                <div className="p-6 border-b shrink-0">
+                    <SheetHeader>
+                        <SheetTitle>Saran Perubahan Soal</SheetTitle>
+                        <SheetDescription>
+                            Berikan saran perbaikan atau perubahan untuk soal ini.
+                        </SheetDescription>
+                    </SheetHeader>
+                </div>
 
-                    {/* Reason Section - Highlighted */}
-                    <div className="bg-amber-50 p-4 rounded-lg border border-amber-100 space-y-2">
-                        <Label className="text-amber-900 font-semibold">Alasan Perubahan (Wajib)</Label>
-                        <Textarea
-                            placeholder="Jelaskan detail perubahan yang Anda sarankan..."
-                            value={data.description}
-                            onChange={e => setData('description', e.target.value)}
-                            className="bg-white border-amber-200 focus-visible:ring-amber-500 min-h-[80px]"
-                            required
-                        />
-                        {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
-                    </div>
-
-                    <div className="border-t pt-6">
-                        <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-                            Detail Soal
-                        </h3>
-
-                        {/* 2-Column Grid for Metadata */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 p-4 bg-muted/30 rounded-lg">
-                            <div className="space-y-1.5">
-                                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Tipe Soal</Label>
-                                <QuestionTypeSelector
-                                    value={data.question_type}
-                                    onValueChange={v => setData('question_type', v)}
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Kesulitan</Label>
-                                <DifficultySelector
-                                    value={data.difficulty_level}
-                                    onValueChange={v => setData('difficulty_level', v)}
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Waktu (Detik)</Label>
-                                <TimerSelector
-                                    value={data.timer}
-                                    onValueChange={v => setData('timer', v)}
-                                />
-                            </div>
-                            <div className="space-y-1.5">
-                                <Label className="text-xs text-muted-foreground uppercase tracking-wider">Poin</Label>
-                                <ScoreSelector
-                                    value={data.score_value}
-                                    onValueChange={v => setData('score_value', v)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Content - Increased Height */}
-                        <div className="space-y-3 mb-8">
-                            <Label className="text-base">Pertanyaan</Label>
-                            <div className="min-h-[200px] border rounded-md">
-                                <RichTextEditor
-                                    value={data.content}
-                                    onChange={v => setData('content', v)}
-                                    className="min-h-[200px]" // Force larger height
-                                />
-                            </div>
-                        </div>
-
-                        {/* Options */}
-                        <div className="space-y-3 mb-8">
-                            <Label className="text-base">Opsi Jawaban</Label>
-                            <div className="border rounded-lg p-4 bg-background">
-                                <OptionsEditor
-                                    type={data.question_type}
-                                    options={data.options}
-                                    onChange={(newOptions) => setData('options', newOptions)}
-                                />
-                            </div>
-                        </div>
-
-                        {/* Hint */}
+                {/* Content Section - Scrollable */}
+                <div className="flex-1 overflow-y-auto p-6">
+                    <form id="suggestion-form" onSubmit={handleSubmit} className="space-y-6">
+                        {/* Reason Section */}
                         <div className="space-y-3">
-                            <Label className="text-base">Hint / Bantuan</Label>
-                            <RichTextEditor
-                                value={data.hint}
-                                onChange={v => setData('hint', v)}
-                                className="min-h-[100px]"
+                            <Label htmlFor="description" className="text-base font-medium">Alasan Perubahan <span className="text-red-500">*</span></Label>
+                            <Textarea
+                                id="description"
+                                placeholder="Jelaskan detail perubahan yang Anda sarankan..."
+                                value={data.description}
+                                onChange={e => setData('description', e.target.value)}
+                                className="min-h-[200px] resize-none"
+                                required
                             />
+                            {errors.description && <p className="text-sm text-red-500">{errors.description}</p>}
+                            <p className="text-sm text-muted-foreground">
+                                Masukan Anda akan dikirim ke pemilik bank soal untuk ditinjau.
+                            </p>
                         </div>
-                    </div>
+                    </form>
+                </div>
 
-                    <SheetFooter className="absolute bottom-0 left-0 right-0 p-4 bg-background border-t gap-2 sm:gap-0">
-                        <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} className="mr-auto">
+                {/* Footer Section */}
+                <div className="p-6 border-t bg-background shrink-0 mt-auto">
+                    <SheetFooter className="flex-row gap-3 sm:justify-end w-full">
+                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)} className="flex-1 sm:flex-none">
                             Batal
                         </Button>
-                        <Button type="submit" disabled={processing} className="w-full sm:w-auto">
+                        <Button type="submit" form="suggestion-form" disabled={processing} className="flex-1 sm:flex-none">
                             {processing ? 'Mengirim...' : 'Kirim Saran'}
                         </Button>
                     </SheetFooter>
-                </form>
+                </div>
+
             </SheetContent>
         </Sheet>
     );

@@ -19,7 +19,7 @@ class QuestionSuggestionController extends Controller
     {
         $request->validate([
             'description' => 'required|string',
-            'data' => 'required|array', // The suggested question data
+            'data' => 'sometimes|array', // The suggested question data
         ]);
 
         // Prevent owner from upgrading their own question via suggestion (they should just edit)

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->ulid('id')->primary();
             $table->foreignUlid('question_id')->constrained()->cascadeOnDelete();
             $table->foreignUlid('user_id')->constrained()->cascadeOnDelete();
-            $table->json('data');
+            $table->json('data')->nullable();
             $table->text('description')->nullable();
             $table->string('state');
             $table->timestamps();
