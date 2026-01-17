@@ -22,6 +22,7 @@ class QuestionBankController extends Controller
     {
         $questionBanks = QuestionBank::query()
             ->with(['subject.grade', 'teacher'])
+            ->accessibleBy(Auth::user())
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%");
             })
