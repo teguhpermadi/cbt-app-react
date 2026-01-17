@@ -1,1 +1,4 @@
 QuestionSuggestion::get()
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')->load('questions.options')
+QuestionSuggestion::get()

@@ -25,16 +25,38 @@ interface Suggestion {
 
 interface SuggestionInlineCardProps {
     suggestion: Suggestion;
+    isOwner?: boolean;
+    currentUserId?: string | number;
 }
 
-export default function SuggestionInlineCard({ suggestion }: SuggestionInlineCardProps) {
+export default function SuggestionInlineCard({ suggestion, isOwner = false, currentUserId }: SuggestionInlineCardProps) {
     const [isEditOpen, setIsEditOpen] = useState(false);
+
+    // Check if the current user is the creator of the suggestion
+    // Ensure we handle potential type mismatches (string vs number)
+    const isCreator = currentUserId && suggestion.user && (currentUserId.toString() === suggestion.user.id?.toString() || currentUserId.toString() === (suggestion as any).user_id?.toString());
+
+    // Fallback if suggestion.user.id is not available directly, check if we passed it or if it's in a different field
+    // The interface says user: { name, email }, but typical Laravel API usage usually includes ID or user_id in root.
+    // Let's assume passed 'suggestion.user' implies relation loaded. If not, we might need to check 'user_id'. 
+    // In `show.tsx`, `suggestions` are passed. Usually they have `user_id`.
+
+    // Let's refine isCreator check:
+    // We'll rely on `currentUserId` matching `suggestion.user_id` if available, or we might need to rely on what information is physically present.
+    // Looking at `show.tsx`, `suggestion` comes from `suggestions` prop.
+    // Let's use `suggestion.user_id` if available (it is in the QuestionBank interface earlier but checking `Suggestion` interface here).
+    // The `Suggestion` interface in this file does NOT have `user_id`, only `user` object. 
+    // However, the backend normally sends `user_id` or `id` in `user`.
+    // I will cast to `any` for `suggestion` to safely access `user_id` if needed, or update interface.
+
+    const canEditOrDelete = isCreator || isOwner;
+    const canApproveReject = isOwner;
 
     // Simple edit form for description and content (basic usage)
     // If you need full question editing capabilities, this would need to replicate the full QuestionForm
     const { data: editData, setData: setEditData, put, processing, reset } = useForm({
         description: suggestion.description,
-        content: suggestion.data.content || '',
+        content: suggestion.data?.content || '',
     });
 
     const handleAction = (action: 'approve' | 'reject' | 'delete') => {
@@ -52,16 +74,11 @@ export default function SuggestionInlineCard({ suggestion }: SuggestionInlineCar
             });
         } else {
             // For approve/reject only
-            const routeName = action === 'approve'
-                ? 'admin.questions.suggestions.approve'
-                : 'admin.questions.suggestions.reject'; // Assuming these routes exist or using controller helper if available
+            const url = action === 'approve'
+                ? QuestionSuggestionController.approve(suggestion.id).url
+                : QuestionSuggestionController.reject(suggestion.id).url;
 
-            // Note: Since QuestionSuggestionController might not have specific approve/reject methods exposed via simple URL mapping without ID in typical resource controller, 
-            // we often use custom routes. 
-            // Based on previous files, let's use the explicit routes or verify controller structure.
-            // Earlier file `QuestionSuggestionList` used: route(`admin.questions.suggestions.${action}`, suggestion.id)
-
-            router.post(route(`admin.questions.suggestions.${action}`, suggestion.id), {}, {
+            router.post(url, {}, {
                 preserveScroll: true
             });
         }
@@ -113,52 +130,62 @@ export default function SuggestionInlineCard({ suggestion }: SuggestionInlineCar
                 <div className="space-y-2">
                     <div className="text-xs font-medium text-muted-foreground uppercase">Usulan Konten Baru</div>
                     <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
-                        <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data.content }} />
+                        <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
                     </div>
                 </div>
             </CardContent>
 
             <CardFooter className="p-3 bg-amber-100/50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800 flex justify-end gap-2">
                 <div className="flex gap-2 w-full">
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
-                        onClick={() => handleAction('delete')}
-                        title="Hapus Saran"
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
-                        onClick={() => {
-                            setEditData({ description: suggestion.description, content: suggestion.data.content });
-                            setIsEditOpen(true)
-                        }}
-                        title="Edit Saran"
-                    >
-                        <Pencil className="w-4 h-4" />
-                    </Button>
+                    {canEditOrDelete && (
+                        <>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                onClick={() => handleAction('delete')}
+                                title="Hapus Saran"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                            </Button>
+                            <Button
+                                size="sm"
+                                variant="ghost"
+                                className="text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
+                                onClick={() => {
+                                    setEditData({ description: suggestion.description, content: suggestion.data?.content || '' });
+                                    setIsEditOpen(true)
+                                }}
+                                title="Edit Saran"
+                            >
+                                <Pencil className="w-4 h-4" />
+                            </Button>
+                        </>
+                    )}
+
                     <div className="flex-1" />
-                    <Button
-                        size="sm"
-                        variant="destructive"
-                        className="h-8"
-                        onClick={() => handleAction('reject')}
-                    >
-                        <X className="w-4 h-4 mr-1" />
-                        Tolak
-                    </Button>
-                    <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 h-8"
-                        onClick={() => handleAction('approve')}
-                    >
-                        <Check className="w-4 h-4 mr-1" />
-                        Terima
-                    </Button>
+
+                    {canApproveReject && (
+                        <>
+                            <Button
+                                size="sm"
+                                variant="destructive"
+                                className="h-8"
+                                onClick={() => handleAction('reject')}
+                            >
+                                <X className="w-4 h-4 mr-1" />
+                                Tolak
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="bg-green-600 hover:bg-green-700 h-8"
+                                onClick={() => handleAction('approve')}
+                            >
+                                <Check className="w-4 h-4 mr-1" />
+                                Terima
+                            </Button>
+                        </>
+                    )}
                 </div>
             </CardFooter>
 

@@ -83,8 +83,8 @@ class QuestionSuggestionController extends Controller
      */
     public function update(Request $request, QuestionSuggestion $suggestion)
     {
-        // Authorization: Only the owner
-        if ($request->user()->id !== $suggestion->question->questionBank->user_id) {
+        // Authorization: Owner of QuestionBank OR Creator of Suggestion
+        if ($request->user()->id !== $suggestion->question->questionBank->user_id && $request->user()->id !== $suggestion->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
@@ -113,8 +113,8 @@ class QuestionSuggestionController extends Controller
      */
     public function destroy(QuestionSuggestion $suggestion)
     {
-        // Authorization: Only the owner
-        if (request()->user()->id !== $suggestion->question->questionBank->user_id) {
+        // Authorization: Owner of QuestionBank OR Creator of Suggestion
+        if (request()->user()->id !== $suggestion->question->questionBank->user_id && request()->user()->id !== $suggestion->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
