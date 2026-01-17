@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Head, Link, useForm, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, Edit, Globe, Lock, Plus, Lightbulb } from 'lucide-react';
+import { ArrowLeft, Edit, Globe, Lock, Plus, Lightbulb, MoreHorizontal, Calendar, User, BookOpen } from 'lucide-react';
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 import ExamController from '@/actions/App/Http/Controllers/Admin/ExamController';
 import QuestionCard from '@/components/app/questions/QuestionCard';
@@ -19,11 +19,12 @@ import { useState, useEffect, useMemo } from 'react';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 import 'katex/dist/katex.min.css';
 import QuestionSuggestionSidebar from '@/components/app/questions/QuestionSuggestionSidebar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import QuestionSuggestionList from '@/components/app/questions/QuestionSuggestionList';
+import QuestionNavigation from '@/components/app/questions/QuestionNavigation';
+import SuggestionInlineCard from '@/components/app/questions/SuggestionInlineCard';
+import { Separator } from '@/components/ui/separator';
 
 interface QuestionBank {
-    id: number; // Note: id here is actually number in interface but might come as string from model if ULID? Keeping as is for now as existing code works.
+    id: number;
     user_id: string;
     name: string;
     subject_id: number;
@@ -47,7 +48,7 @@ interface QuestionBank {
 interface ShowProps {
     questionBank: QuestionBank;
     questions: Question[];
-    suggestions?: any[]; // Added suggestions prop
+    suggestions?: any[];
     auth: {
         user: {
             id: string;
@@ -110,8 +111,8 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
         is_published: true, // Default true
         is_randomized: true,
         is_answer_randomized: false,
-        is_hint_visible: false, // Added
-        show_result_on_finish: true, // Added
+        is_hint_visible: false,
+        show_result_on_finish: true,
         max_attempts: null,
         timer_type: 'flexible',
         passing_score: 70, // Default 70
@@ -126,7 +127,6 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
             const data = await response.json();
             setFormData(data);
 
-            // Set academic year pertama yang active
             const activeAcademicYear = data.academicYears.find((ay: any) => ay.is_active);
             if (activeAcademicYear) {
                 createForm.setData('academic_year_id', activeAcademicYear.id.toString());
@@ -138,7 +138,6 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
         }
     };
 
-    // Quick duration buttons - set end_time based on start_time + duration
     const setQuickDuration = (days: number) => {
         const startTime = new Date(createForm.data.start_time);
         const endTime = new Date(startTime);
@@ -159,7 +158,6 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
             onSuccess: (page: any) => {
                 setIsCreateExamOpen(false);
                 createForm.reset();
-                // Redirect to monitor page of the newly created exam
                 const examId = page.props.exam?.id;
                 if (examId) {
                     router.visit(ExamController.monitor(examId).url);
@@ -178,182 +176,154 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
         setIsSuggestionSidebarOpen(true);
     };
 
-    // Filter suggestions
-    const pendingSuggestionsCount = suggestions.filter(s => s.state === 'pending').length;
+    const scrollToQuestion = (index: number) => {
+        const element = document.getElementById(`question-${index}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Map suggestions to questions for easier rendering
+    const getSuggestionForQuestion = (questionId: string) => {
+        return suggestions.find(s => s.question_id === questionId && s.state === 'pending');
+    };
 
     return (
         <AppShell variant="header">
             <Head title={questionBank.name} />
 
-            {/* Header Bar */}
-            <div className="sticky top-0 z-50 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href={QuestionBankController.index().url}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Link>
-                </Button>
+            {/* Content Container */}
+            <div className="min-h-screen bg-slate-50/50 dark:bg-slate-950/50 pb-20">
+                {/* Simplified Header */}
+                <div className="bg-background border-b sticky top-0 z-40 bg-white/80 dark:bg-slate-950/80 backdrop-blur-md">
+                    <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+                        <div className="flex items-center gap-4 overflow-hidden">
+                            <Button variant="ghost" size="icon" className="shrink-0" asChild>
+                                <Link href={QuestionBankController.index().url}>
+                                    <ArrowLeft className="h-5 w-5" />
+                                </Link>
+                            </Button>
 
-                <div className="flex-1">
-                    <h1 className="text-lg font-semibold">{questionBank.name}</h1>
+                            <div className="flex flex-col overflow-hidden">
+                                <h1 className="text-lg font-bold truncate">{questionBank.name}</h1>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+                                    <span className="flex items-center gap-1"><BookOpen className="w-3 h-3" /> {questionBank.subject.name}</span>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1"><User className="w-3 h-3" /> {questionBank.teacher.name}</span>
+                                    <span>•</span>
+                                    <span className="flex items-center gap-1">
+                                        {questionBank.is_public ? <Globe className="w-3 h-3" /> : <Lock className="w-3 h-3" />}
+                                        {questionBank.is_public ? 'Publik' : 'Privat'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                            <Button size="sm" onClick={handleOpenCreateExam} className="hidden sm:flex">
+                                <Plus className="mr-2 h-4 w-4" />
+                                Buat Exam
+                            </Button>
+                            {isOwner && (
+                                <Button variant="outline" size="sm" asChild>
+                                    <Link href={QuestionBankController.edit(questionBank.id).url}>
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Edit Soal
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
-                {isOwner && (
-                    <Button variant="outline" size="sm" asChild>
-                        <Link href={QuestionBankController.edit(questionBank.id).url}>
-                            <Edit className="mr-2 h-4 w-4" />
-                            Edit
-                        </Link>
-                    </Button>
-                )}
-            </div>
+                <div className="container mx-auto px-4 sm:px-6 py-8">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Main Questions List */}
+                        <div className="lg:col-span-10 space-y-12">
+                            {questions.length > 0 ? (
+                                questions.map((question, index) => {
+                                    const suggestion = getSuggestionForQuestion(question.id);
 
-            {/* Main Content */}
-            <div className="flex-1 overflow-auto p-6 bg-muted/10">
-                <div className="max-w-5xl mx-auto space-y-6">
-                    {/* Card 1: Informasi Question Bank */}
-                    <Card>
-                        <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
-                            {/* ... (Existing Header Logic) ... */}
-                            {/* Re-using existing content without change roughly */}
-                            <div className="space-y-1 flex-1">
-                                <CardTitle className="text-2xl font-bold">Informasi Bank Soal</CardTitle>
-                                <p className="text-sm text-muted-foreground">
-                                    Detail dan informasi terkait bank soal ini
-                                </p>
-                            </div>
-                            <Button onClick={handleOpenCreateExam}>
-                                <Plus className="mr-2 h-4 w-4" />
-                                Buat Exam dari Bank Soal
-                            </Button>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <div className="text-sm font-medium text-muted-foreground">Nama</div>
-                                    <div className="text-base font-semibold">{questionBank.name}</div>
-                                </div>
+                                    return (
+                                        <div
+                                            key={question.id}
+                                            id={`question-${index}`}
+                                            className="scroll-mt-24 relative group"
+                                        >
+                                            <div className="flex items-center gap-4 mb-4">
+                                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-lg shadow-sm border border-primary/20">
+                                                    {index + 1}
+                                                </div>
+                                                <Separator className="flex-1" />
+                                            </div>
 
-                                <div className="space-y-2">
-                                    <div className="text-sm font-medium text-muted-foreground">Mata Pelajaran</div>
-                                    <div className="text-base">
-                                        {questionBank.subject.name}
-                                        {questionBank.subject.grade && (
-                                            <span className="text-muted-foreground"> - {questionBank.subject.grade.name}</span>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="text-sm font-medium text-muted-foreground">Pembuat</div>
-                                    <div className="text-base">
-                                        <div className="font-medium">{questionBank.teacher.name}</div>
-                                        <div className="text-sm text-muted-foreground">{questionBank.teacher.email}</div>
-                                    </div>
-                                </div>
-
-                                <div className="space-y-2">
-                                    <div className="text-sm font-medium text-muted-foreground">Status</div>
-                                    <div>
-                                        {questionBank.is_public ? (
-                                            <Badge variant="outline" className="gap-1">
-                                                <Globe className="h-3 w-3" />
-                                                Publik
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant="secondary" className="gap-1">
-                                                <Lock className="h-3 w-3" />
-                                                Privat
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-
-                            {questionBank.description && (
-                                <div className="space-y-2">
-                                    <div className="text-sm font-medium text-muted-foreground">Deskripsi</div>
-                                    <div className="text-base text-muted-foreground bg-muted/50 rounded-md p-4">
-                                        {questionBank.description}
-                                    </div>
-                                </div>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    {/* TABS SECTION */}
-                    <Tabs defaultValue="questions" className="w-full">
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="questions">Daftar Pertanyaan ({questions.length})</TabsTrigger>
-                            {isOwner && (
-                                <TabsTrigger value="suggestions" className="relative">
-                                    Saran Masuk
-                                    <div className="ml-2 bg-muted-foreground/20 text-xs px-2 py-0.5 rounded-full min-w-[20px] text-center">
-                                        {pendingSuggestionsCount}
-                                    </div>
-                                    {pendingSuggestionsCount > 0 && <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
-                                </TabsTrigger>
-                            )}
-                        </TabsList>
-
-                        <TabsContent value="questions">
-                            <Card>
-                                <CardContent className="pt-6">
-                                    {questions.length > 0 ? (
-                                        <div className="space-y-4">
-                                            {questions.map((question, index) => (
-                                                <div key={question.id} className="relative group/card-wrapper">
-                                                    <div className="absolute -left-3 top-4 z-10">
-                                                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold text-sm shadow-md">
-                                                            {index + 1}
-                                                        </div>
+                                            {/* Layout: Suggestion (Left) - Question (Right) if suggestion exists */}
+                                            {suggestion && isOwner ? (
+                                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch">
+                                                    <div className="order-2 xl:order-1">
+                                                        <SuggestionInlineCard suggestion={suggestion} />
                                                     </div>
-
-                                                    <div className="ml-6 relative">
+                                                    <div className="order-1 xl:order-2">
                                                         <QuestionCard
                                                             question={question}
                                                             readOnly={true}
                                                         />
-
-                                                        {/* Suggest Button */}
-                                                        {!isOwner && questionBank.is_public && (
-                                                            <div className="absolute top-2 right-2 opacity-0 group-hover/card-wrapper:opacity-100 transition-opacity">
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="secondary"
-                                                                    className="shadow-sm border bg-background/95 hover:bg-background"
-                                                                    onClick={() => handleSuggestClick(question)}
-                                                                >
-                                                                    <Lightbulb className="w-4 h-4 mr-2 text-amber-500" />
-                                                                    Saran Perubahan
-                                                                </Button>
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 </div>
-                                            ))}
-                                        </div>
-                                    ) : (
-                                        <div className="text-center text-muted-foreground py-12">
-                                            <p>Belum ada pertanyaan di bank soal ini.</p>
-                                            {isOwner && (
-                                                <Button variant="link" className="mt-2" asChild>
-                                                    <Link href={QuestionBankController.edit(questionBank.id).url}>
-                                                        Tambah Pertanyaan
-                                                    </Link>
-                                                </Button>
+                                            ) : (
+                                                <div className="relative">
+                                                    <QuestionCard
+                                                        question={question}
+                                                        readOnly={true}
+                                                    />
+                                                    {/* Suggest Button for Non-Owners */}
+                                                    {!isOwner && questionBank.is_public && (
+                                                        <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            <Button
+                                                                size="sm"
+                                                                variant="secondary"
+                                                                className="shadow-sm border bg-background/95 hover:bg-background backdrop-blur"
+                                                                onClick={() => handleSuggestClick(question)}
+                                                            >
+                                                                <Lightbulb className="w-4 h-4 mr-2 text-amber-500" />
+                                                                Saran Perubahan
+                                                            </Button>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             )}
                                         </div>
+                                    );
+                                })
+                            ) : (
+                                <div className="text-center py-20 bg-muted/20 rounded-xl border-2 border-dashed">
+                                    <h3 className="text-lg font-medium text-muted-foreground">Belum ada pertanyaan</h3>
+                                    <p className="text-sm text-muted-foreground mt-1 mb-4">Mulai tambahkan pertanyaan ke bank soal ini.</p>
+                                    {isOwner && (
+                                        <Button asChild>
+                                            <Link href={QuestionBankController.edit(questionBank.id).url}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Tambah Pertanyaan
+                                            </Link>
+                                        </Button>
                                     )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
+                                </div>
+                            )}
+                        </div>
 
-                        {isOwner && (
-                            <TabsContent value="suggestions">
-                                <QuestionSuggestionList suggestions={suggestions} />
-                            </TabsContent>
-                        )}
-                    </Tabs>
+                        {/* Navigation Sidebar */}
+                        <div className="lg:col-span-2 hidden lg:block">
+                            <QuestionNavigation
+                                totalQuestions={questions.length}
+                                onQuestionClick={scrollToQuestion}
+                                onScrollToTop={scrollToTop}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -658,3 +628,4 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
         </AppShell>
     );
 }
+

@@ -77,4 +77,49 @@ class QuestionSuggestionController extends Controller
 
         return back()->with('success', 'Suggestion rejected.');
     }
+
+    /**
+     * Update the specified suggestion (e.g. fix typos before approving).
+     */
+    public function update(Request $request, QuestionSuggestion $suggestion)
+    {
+        // Authorization: Only the owner
+        if ($request->user()->id !== $suggestion->question->questionBank->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'description' => 'required|string',
+            'content' => 'sometimes|string', // Frontend sends 'content' separately in my specific implementation
+        ]);
+
+        $data = $suggestion->data ?? [];
+
+        // Update content in data array if provided
+        if ($request->has('content')) {
+            $data['content'] = $request->input('content');
+        }
+
+        $suggestion->update([
+            'description' => $request->description,
+            'data' => $data,
+        ]);
+
+        return back()->with('success', 'Suggestion updated successfully.');
+    }
+
+    /**
+     * Remove the specified suggestion.
+     */
+    public function destroy(QuestionSuggestion $suggestion)
+    {
+        // Authorization: Only the owner
+        if (request()->user()->id !== $suggestion->question->questionBank->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $suggestion->delete();
+
+        return back()->with('success', 'Suggestion deleted successfully.');
+    }
 }

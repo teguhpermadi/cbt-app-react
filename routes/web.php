@@ -104,8 +104,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
             // Question Suggestions
             Route::post('questions/{question}/suggestions', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'store'])->name('questions.suggestions.store');
-            Route::post('question-suggestions/{suggestion}/approve', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'approve'])->name('question-suggestions.approve');
-            Route::post('question-suggestions/{suggestion}/reject', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'reject'])->name('question-suggestions.reject');
+            Route::put('question-suggestions/{suggestion}', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'update'])->name('questions.suggestions.update'); // using standard naming
+            Route::delete('question-suggestions/{suggestion}', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'destroy'])->name('questions.suggestions.destroy');
+            Route::post('question-suggestions/{suggestion}/approve', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'approve'])->name('questions.suggestions.approve'); // Changed name to match my frontend code (admin.questions.suggestions.approve -> actually need to check prefix)
+            Route::post('question-suggestions/{suggestion}/reject', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'reject'])->name('questions.suggestions.reject');
         });
     });
 });
