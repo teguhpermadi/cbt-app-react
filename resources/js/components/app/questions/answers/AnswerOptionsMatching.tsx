@@ -51,14 +51,14 @@ function LeftOptionNode({ id, data }: NodeProps) {
             }}
         >
             {/* Full size handle overlay */}
-            {!data.isReadOnly && (
-                <Handle
-                    type="source"
-                    position={Position.Right}
-                    className="absolute inset-0 w-full h-full opacity-0 z-10 rounded-lg cursor-pointer"
-                    id="source"
-                />
-            )}
+            {/* Full size handle overlay */}
+            <Handle
+                type="source"
+                position={Position.Right}
+                className="absolute inset-0 w-full h-full opacity-0 z-10 rounded-lg cursor-pointer"
+                id="source"
+                isConnectable={!data.isReadOnly}
+            />
 
             {/* Visual content */}
             <div className="flex-1 min-w-0 pointer-events-none">
@@ -111,14 +111,14 @@ function RightOptionNode({ id, data }: NodeProps) {
             }}
         >
             {/* Full size handle overlay */}
-            {!data.isReadOnly && (
-                <Handle
-                    type="target"
-                    position={Position.Left}
-                    className="absolute inset-0 w-full h-full opacity-0 z-10 rounded-lg cursor-pointer"
-                    id="target"
-                />
-            )}
+            {/* Full size handle overlay */}
+            <Handle
+                type="target"
+                position={Position.Left}
+                className="absolute inset-0 w-full h-full opacity-0 z-10 rounded-lg cursor-pointer"
+                id="target"
+                isConnectable={!data.isReadOnly}
+            />
 
             {/* Visual Handle Dot */}
             <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 w-4 h-4 bg-muted-foreground border-2 border-background rounded-full z-0 pointer-events-none" />
@@ -440,8 +440,8 @@ function MatchingFlow({ options, showKeyAnswer = false, onAnswerChange, isReadOn
                 onPaneClick={() => setSelectedNodeId(null)}
                 nodeTypes={nodeTypes}
                 nodesDraggable={false}
-                panOnDrag={true} // Enabled panning
-                panOnScroll={true}
+                panOnDrag={false} // Disabled panning
+                panOnScroll={false}
                 zoomOnScroll={false}
                 fitView
                 fitViewOptions={{ padding: 0.2 }}

@@ -323,10 +323,10 @@ function MatchingFlow({ options, value, onChange, disabled, showMedia = true, on
                 nodeTypes={nodeTypes}
                 edgeTypes={edgeTypes}
                 nodesDraggable={false}
-                panOnDrag={true}
-                zoomOnScroll={true}
-                zoomOnPinch={true}
-                zoomOnDoubleClick={true}
+                panOnDrag={false}
+                zoomOnScroll={false}
+                zoomOnPinch={false}
+                zoomOnDoubleClick={false}
                 proOptions={{ hideAttribution: true }}
                 fitView
             >

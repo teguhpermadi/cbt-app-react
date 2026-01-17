@@ -266,10 +266,10 @@ export default function PreviewStudentAnswerMatching({
                 fitView
                 fitViewOptions={{ padding: 0.2 }}
                 proOptions={{ hideAttribution: true }}
-                panOnDrag={true}
-                zoomOnScroll={true}
-                zoomOnPinch={true}
-                zoomOnDoubleClick={true}
+                panOnDrag={false}
+                zoomOnScroll={false}
+                zoomOnPinch={false}
+                zoomOnDoubleClick={false}
                 // Prevent user interaction modifying structure
                 nodesDraggable={false}
                 nodesConnectable={false}

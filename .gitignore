@@ -1,12 +1,12 @@
 /.phpunit.cache
 /bootstrap/ssr
 /node_modules
-# /public/build
+/public/build
 /public/hot
 /public/storage
 # jika deploy ini yang di hapus
 /resources/js/actions
-/resources/js/routes  
+/resources/js/routes
 /resources/js/wayfinder
 
 

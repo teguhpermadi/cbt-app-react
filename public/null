@@ -1,24 +1,13 @@
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+QuestionSuggestion::get()
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')->load('questions.options')
+QuestionSuggestion::get()
 
-ExamSession::find('01keevyw0fj3swbre30zzcxyr4')->load('details')
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')
 
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')->load('questions.options')
 
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
-
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
-
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
+QuestionBank::find('01kf5r4jgzx167s6cshxe937qt')->load('questions.options')
 
 
-ExamSession::find('01keevyw0fj3swbre30zzcxyr4')->load('details')
-ExamSession::find('01keew9vn924qgxypy1fqxcvxa')->load('details')
-
-
-
-
-
-
-ExamSession::find('01kehns6h3j3xsxayekekmn7e7')->load('details')
-
+Question::find('01kf72ny8krybkjcnqf455a9rh')->load('options')

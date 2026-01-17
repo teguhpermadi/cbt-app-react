@@ -496,8 +496,8 @@ function MatchingEditorFlow({ options, onChange }: OptionEditorProps) {
                 onConnect={onConnect}
                 nodeTypes={nodeTypes}
                 nodesDraggable={false} // Disable dragging
-                panOnDrag={true}
-                panOnScroll={true} // Mouse wheel pans
+                panOnDrag={false}
+                panOnScroll={false} // Mouse wheel pans
                 zoomOnScroll={false} // Mouse zoom off
                 proOptions={{ hideAttribution: true }}
                 fitView
