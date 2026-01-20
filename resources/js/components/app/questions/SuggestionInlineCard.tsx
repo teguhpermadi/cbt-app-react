@@ -16,7 +16,9 @@ interface Suggestion {
     description: string;
     state: string;
     created_at: string;
+    user_id: number | string;
     user: {
+        id?: number | string;
         name: string;
         email: string;
     };
@@ -33,23 +35,12 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
     const [isEditOpen, setIsEditOpen] = useState(false);
 
     // Check if the current user is the creator of the suggestion
-    // Ensure we handle potential type mismatches (string vs number)
-    const isCreator = currentUserId && suggestion.user && (currentUserId.toString() === suggestion.user.id?.toString() || currentUserId.toString() === (suggestion as any).user_id?.toString());
+    const isCreator = currentUserId != null && (
+        (suggestion.user_id && suggestion.user_id.toString() === currentUserId.toString()) ||
+        (suggestion.user?.id && suggestion.user.id.toString() === currentUserId.toString())
+    );
 
-    // Fallback if suggestion.user.id is not available directly, check if we passed it or if it's in a different field
-    // The interface says user: { name, email }, but typical Laravel API usage usually includes ID or user_id in root.
-    // Let's assume passed 'suggestion.user' implies relation loaded. If not, we might need to check 'user_id'. 
-    // In `show.tsx`, `suggestions` are passed. Usually they have `user_id`.
-
-    // Let's refine isCreator check:
-    // We'll rely on `currentUserId` matching `suggestion.user_id` if available, or we might need to rely on what information is physically present.
-    // Looking at `show.tsx`, `suggestion` comes from `suggestions` prop.
-    // Let's use `suggestion.user_id` if available (it is in the QuestionBank interface earlier but checking `Suggestion` interface here).
-    // The `Suggestion` interface in this file does NOT have `user_id`, only `user` object. 
-    // However, the backend normally sends `user_id` or `id` in `user`.
-    // I will cast to `any` for `suggestion` to safely access `user_id` if needed, or update interface.
-
-    const canEditOrDelete = isCreator || isOwner;
+    const canEditOrDelete = isCreator;
     const canApproveReject = isOwner;
 
     // Simple edit form for description and content (basic usage)
