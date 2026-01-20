@@ -101,14 +101,12 @@ class QuestionBankController extends Controller
         });
 
         // Load Suggestions ONLY if current user is owner
-        $suggestions = [];
-        if (Auth::id() === $questionBank->user_id) {
-            // We use HasManyThrough relationship
-            $suggestions = $questionBank->suggestions()
-                ->with(['user', 'question'])
-                ->latest()
-                ->get();
-        }
+        // Load Suggestions for everyone
+        // We use HasManyThrough relationship
+        $suggestions = $questionBank->suggestions()
+            ->with(['user', 'question'])
+            ->latest()
+            ->get();
 
         return Inertia::render('admin/question-banks/show', [
             'questionBank' => $questionBank,

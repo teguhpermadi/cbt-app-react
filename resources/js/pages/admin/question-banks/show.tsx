@@ -189,10 +189,7 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
 
     // Map suggestions to questions for easier rendering
     const getSuggestionForQuestion = (questionId: string) => {
-        if (isOwner) {
-            return suggestions.find(s => s.question_id === questionId && s.state === 'pending');
-        }
-        return suggestions.find(s => s.question_id === questionId && s.state === 'pending' && s.user_id == auth.user.id);
+        return suggestions.find(s => s.question_id === questionId && s.state === 'pending');
     };
 
     return (
@@ -265,7 +262,7 @@ export default function Show({ questionBank, questions, suggestions = [], auth }
                                             </div>
 
                                             {/* Layout: Suggestion (Left) - Question (Right) if suggestion exists */}
-                                            {suggestion && (isOwner || auth.user.id == suggestion.user_id) ? (
+                                            {suggestion ? (
                                                 <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
                                                     <div className="xl:col-span-8 2xl:col-span-9">
                                                         <QuestionCard
