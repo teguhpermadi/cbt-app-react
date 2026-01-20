@@ -17,7 +17,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { dashboard as studentDashboard } from '@/routes/student';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList, MessageSquare } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 import { usePermission } from '@/hooks/usePermission';
@@ -62,6 +62,11 @@ export function AppSidebar() {
             icon: BookOpen,
         },
         {
+            title: 'Saran Soal',
+            href: '/admin/question-suggestions',
+            icon: MessageSquare,
+        },
+        {
             title: 'Exam Management',
             href: examsIndex(),
             icon: ClipboardList,
@@ -79,6 +84,11 @@ export function AppSidebar() {
             title: 'Bank Soal',
             href: '/admin/question-banks',
             icon: BookOpen,
+        },
+        {
+            title: 'Saran Soal',
+            href: '/admin/question-suggestions',
+            icon: MessageSquare,
         },
         {
             title: 'Exam Management',

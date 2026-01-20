@@ -9,9 +9,46 @@ use App\States\QuestionSuggestion\Approved;
 use App\States\QuestionSuggestion\Rejected;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Inertia\Inertia;
 
 class QuestionSuggestionController extends Controller
 {
+    /**
+     * Display a listing of suggestions.
+     */
+    public function index()
+    {
+        $user = auth()->user();
+
+        // 1. Received Suggestions (Saran Masuk)
+        $receivedQuery = QuestionSuggestion::query()
+            ->with(['question', 'question.questionBank', 'user'])
+            ->latest();
+
+        if ($user->hasRole('admin')) {
+            // Admin sees all suggestions
+        } else {
+            // Teacher sees suggestions for their OWN questions
+            $receivedQuery->whereHas('question', function ($q) use ($user) {
+                $q->where('author_id', $user->id);
+            });
+        }
+
+        $receivedSuggestions = $receivedQuery->get();
+
+        // 2. Sent Suggestions (Saran Terkirim)
+        // Suggestions made BY the logged-in user to others
+        $sentSuggestions = QuestionSuggestion::query()
+            ->with(['question', 'question.questionBank', 'question.author']) // Load author only relative to question model? No relation "author" in Question model? Let's check Question model. It has "author" relation. OK.
+            ->where('user_id', $user->id)
+            ->latest()
+            ->get();
+
+        return Inertia::render('admin/question-suggestions/index', [
+            'receivedSuggestions' => $receivedSuggestions,
+            'sentSuggestions' => $sentSuggestions,
+        ]);
+    }
     /**
      * Store a newly created suggestion in storage.
      */

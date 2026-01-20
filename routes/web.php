@@ -103,6 +103,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::resource('questions', \App\Http\Controllers\Admin\QuestionController::class);
 
             // Question Suggestions
+            Route::get('question-suggestions', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'index'])->name('question-suggestions.index');
             Route::post('questions/{question}/suggestions', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'store'])->name('questions.suggestions.store');
             Route::put('question-suggestions/{suggestion}', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'update'])->name('questions.suggestions.update'); // using standard naming
             Route::delete('question-suggestions/{suggestion}', [\App\Http\Controllers\Admin\QuestionSuggestionController::class, 'destroy'])->name('questions.suggestions.destroy');
