@@ -7,9 +7,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Check, X, Pencil, Trash2, User, Clock, AlertCircle } from "lucide-react";
+import { Check, X, Pencil, Trash2, User, Clock, AlertCircle, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import RichTextEditor from "@/components/ui/rich-text/RichTextEditor";
 import QuestionSuggestionController from '@/actions/App/Http/Controllers/Admin/QuestionSuggestionController';
+import { cn } from "@/lib/utils";
 
 interface Suggestion {
     id: string;
@@ -32,7 +33,13 @@ interface SuggestionInlineCardProps {
 }
 
 export default function SuggestionInlineCard({ suggestion, isOwner = false, currentUserId }: SuggestionInlineCardProps) {
+    const isPending = suggestion.state === 'pending';
+    const isApproved = suggestion.state === 'approved';
+    const isRejected = suggestion.state === 'rejected';
+
     const [isEditOpen, setIsEditOpen] = useState(false);
+    // Default open if pending, closed if resolved (approved/rejected) to save space
+    const [isExpanded, setIsExpanded] = useState(isPending);
 
     // Check if the current user is the creator of the suggestion
     const isCreator = currentUserId != null && (
@@ -40,11 +47,10 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
         (suggestion.user?.id && suggestion.user.id.toString() === currentUserId.toString())
     );
 
-    const canEditOrDelete = isCreator;
-    const canApproveReject = isOwner;
+    const canEditOrDelete = isCreator && isPending;
+    const canApproveReject = isOwner && isPending;
 
     // Simple edit form for description and content (basic usage)
-    // If you need full question editing capabilities, this would need to replicate the full QuestionForm
     const { data: editData, setData: setEditData, put, processing, reset } = useForm({
         description: suggestion.description,
         content: suggestion.data?.content || '',
@@ -83,104 +89,169 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
         });
     };
 
+    // Style configuration based on state
+    const stateStyles = {
+        pending: {
+            card: "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/10",
+            avatarBorder: "border-amber-200",
+            avatarFallback: "bg-amber-100 text-amber-700",
+            headerText: "text-amber-900 dark:text-amber-100",
+            subtext: "text-amber-700 dark:text-amber-300",
+            badge: "bg-amber-100 text-amber-800 border-amber-200",
+            contentBg: "border-amber-100 dark:border-amber-900/50",
+            titleIcon: "text-amber-600",
+            footer: "bg-amber-100/50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800"
+        },
+        approved: {
+            card: "border-green-200 dark:border-green-800 bg-green-50/50 dark:bg-green-950/10",
+            avatarBorder: "border-green-200",
+            avatarFallback: "bg-green-100 text-green-700",
+            headerText: "text-green-900 dark:text-green-100",
+            subtext: "text-green-700 dark:text-green-300",
+            badge: "bg-green-100 text-green-800 border-green-200",
+            contentBg: "border-green-100 dark:border-green-900/50",
+            titleIcon: "text-green-600",
+            footer: "bg-green-100/50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+        },
+        rejected: {
+            card: "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-950/10",
+            avatarBorder: "border-red-200",
+            avatarFallback: "bg-red-100 text-red-700",
+            headerText: "text-red-900 dark:text-red-100",
+            subtext: "text-red-700 dark:text-red-300",
+            badge: "bg-red-100 text-red-800 border-red-200",
+            contentBg: "border-red-100 dark:border-red-900/50",
+            titleIcon: "text-red-600",
+            footer: "bg-red-100/50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+        }
+    };
+
+    const currentStyle = stateStyles[suggestion.state as keyof typeof stateStyles] || stateStyles.pending;
+
     return (
-        <Card className="border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/10 h-full flex flex-col">
-            <CardHeader className="p-4 pb-2">
+        <Card className={cn("flex flex-col transition-all duration-200", currentStyle.card, isExpanded ? "h-full" : "h-auto")}>
+            <CardHeader
+                className="p-4 pb-2 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors rounded-t-lg"
+                onClick={() => setIsExpanded(!isExpanded)}
+            >
                 <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                        <Avatar className="h-8 w-8 border border-amber-200">
-                            <AvatarFallback className="bg-amber-100 text-amber-700 text-xs">
+                        {isExpanded ? <ChevronUp className="w-4 h-4 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 text-muted-foreground" />}
+                        <Avatar className={cn("h-8 w-8 border", currentStyle.avatarBorder)}>
+                            <AvatarFallback className={cn("text-xs", currentStyle.avatarFallback)}>
                                 {suggestion.user.name.charAt(0)}
                             </AvatarFallback>
                         </Avatar>
                         <div>
-                            <div className="text-sm font-semibold text-amber-900 dark:text-amber-100">
+                            <div className={cn("text-sm font-semibold", currentStyle.headerText)}>
                                 {suggestion.user.name}
                             </div>
-                            <div className="text-xs text-amber-700 dark:text-amber-300 flex items-center gap-1">
+                            <div className={cn("text-xs flex items-center gap-1", currentStyle.subtext)}>
                                 <Clock className="w-3 h-3" />
                                 {new Date(suggestion.created_at).toLocaleDateString()}
                             </div>
                         </div>
                     </div>
-                    <Badge variant="outline" className="bg-amber-100 text-amber-800 border-amber-200">
-                        Saran
-                    </Badge>
+
+                    {isPending && (
+                        <Badge variant="outline" className={currentStyle.badge}>
+                            Saran
+                        </Badge>
+                    )}
+                    {isApproved && (
+                        <Badge variant="outline" className={cn("gap-1 pr-3", currentStyle.badge)}>
+                            <CheckCircle2 className="w-3 h-3" />
+                            Diterima
+                        </Badge>
+                    )}
+                    {isRejected && (
+                        <Badge variant="outline" className={cn("gap-1 pr-3", currentStyle.badge)}>
+                            <XCircle className="w-3 h-3" />
+                            Ditolak
+                        </Badge>
+                    )}
                 </div>
             </CardHeader>
 
-            <CardContent className="p-4 flex-1 space-y-4">
-                <div className="bg-white dark:bg-slate-950 rounded-lg p-3 border border-amber-100 dark:border-amber-900/50 text-sm shadow-sm">
-                    <div className="flex items-start gap-2 mb-1 text-amber-600 font-medium text-xs uppercase tracking-wider">
-                        <AlertCircle className="w-3 h-3 mt-0.5" />
-                        Alasan
-                    </div>
-                    <p className="text-muted-foreground">{suggestion.description}</p>
-                </div>
+            {isExpanded && (
+                <>
+                    <CardContent className="p-4 flex-1 space-y-4 animate-in slide-in-from-top-2 duration-200">
+                        <div className={cn("bg-white dark:bg-slate-950 rounded-lg p-3 border text-sm shadow-sm", currentStyle.contentBg)}>
+                            <div className={cn("flex items-start gap-2 mb-1 font-medium text-xs uppercase tracking-wider", currentStyle.titleIcon)}>
+                                <AlertCircle className="w-3 h-3 mt-0.5" />
+                                Alasan
+                            </div>
+                            <p className="text-muted-foreground">{suggestion.description}</p>
+                        </div>
 
-                <div className="space-y-2">
-                    <div className="text-xs font-medium text-muted-foreground uppercase">Usulan Konten Baru</div>
-                    <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
-                        <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
-                    </div>
-                </div>
-            </CardContent>
+                        <div className="space-y-2">
+                            <div className="text-xs font-medium text-muted-foreground uppercase">Usulan Konten Baru</div>
+                            <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+                                <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
+                            </div>
+                        </div>
+                    </CardContent>
 
-            <CardFooter className="p-3 bg-amber-100/50 dark:bg-amber-900/20 border-t border-amber-200 dark:border-amber-800 flex justify-end gap-2">
-                <div className="flex gap-2 w-full">
-                    {canEditOrDelete && (
-                        <>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
-                                onClick={() => handleAction('delete')}
-                                title="Hapus Saran"
-                            >
-                                <Trash2 className="w-4 h-4" />
-                            </Button>
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                className="text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
-                                onClick={() => {
-                                    setEditData({ description: suggestion.description, content: suggestion.data?.content || '' });
-                                    setIsEditOpen(true)
-                                }}
-                                title="Edit Saran"
-                            >
-                                <Pencil className="w-4 h-4" />
-                            </Button>
-                        </>
+                    {(canEditOrDelete || canApproveReject) && (
+                        <CardFooter className={cn("p-3 flex justify-end gap-2 border-t mt-auto", currentStyle.footer)}>
+                            <div className="flex gap-2 w-full">
+                                {canEditOrDelete && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="text-muted-foreground hover:text-red-500 hover:bg-red-50"
+                                            onClick={(e) => { e.stopPropagation(); handleAction('delete'); }}
+                                            title="Hapus Saran"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            variant="ghost"
+                                            className="text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setEditData({ description: suggestion.description, content: suggestion.data?.content || '' });
+                                                setIsEditOpen(true)
+                                            }}
+                                            title="Edit Saran"
+                                        >
+                                            <Pencil className="w-4 h-4" />
+                                        </Button>
+                                    </>
+                                )}
+
+                                <div className="flex-1" />
+
+                                {canApproveReject && (
+                                    <>
+                                        <Button
+                                            size="sm"
+                                            variant="destructive"
+                                            className="h-8"
+                                            onClick={(e) => { e.stopPropagation(); handleAction('reject'); }}
+                                        >
+                                            <X className="w-4 h-4 mr-1" />
+                                            Tolak
+                                        </Button>
+                                        <Button
+                                            size="sm"
+                                            className="bg-green-600 hover:bg-green-700 h-8"
+                                            onClick={(e) => { e.stopPropagation(); handleAction('approve'); }}
+                                        >
+                                            <Check className="w-4 h-4 mr-1" />
+                                            Terima
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
+                        </CardFooter>
                     )}
+                </>
+            )}
 
-                    <div className="flex-1" />
-
-                    {canApproveReject && (
-                        <>
-                            <Button
-                                size="sm"
-                                variant="destructive"
-                                className="h-8"
-                                onClick={() => handleAction('reject')}
-                            >
-                                <X className="w-4 h-4 mr-1" />
-                                Tolak
-                            </Button>
-                            <Button
-                                size="sm"
-                                className="bg-green-600 hover:bg-green-700 h-8"
-                                onClick={() => handleAction('approve')}
-                            >
-                                <Check className="w-4 h-4 mr-1" />
-                                Terima
-                            </Button>
-                        </>
-                    )}
-                </div>
-            </CardFooter>
-
-            {/* Edit Dialog */}
+            {/* Edit Dialog - Render outside of toggle area to avoid closing card when clicking dialog trigger if bubbling occurs, though modal is separate portal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
                 <DialogContent className="sm:max-w-xl">
                     <form onSubmit={handleSaveEdit}>
