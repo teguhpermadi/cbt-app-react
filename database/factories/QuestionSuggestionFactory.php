@@ -20,12 +20,14 @@ class QuestionSuggestionFactory extends Factory
      */
     public function definition(): array
     {
+        $questions = Question::get()->random();
+        $teacher = User::where('user_type', 'teacher')->get()->random();
         return [
-            'question_id' => Question::factory(),
-            'user_id' => User::factory(),
+            'question_id' => $questions->id,
+            'user_id' => $teacher->id,
             'data' => [
                 'content' => $this->faker->paragraph,
-                'score_value' => $this->faker->numberBetween(1, 10),
+                'score_value' => $this->faker->numberBetween(1, 5),
             ],
             'description' => $this->faker->sentence,
             'state' => Pending::class,

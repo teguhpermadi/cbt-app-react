@@ -43,6 +43,9 @@ class DatabaseSeeder extends Seeder
                 // Transaksional
                 ExamSessionSeeder::class,
                 ExamResultDetailSeeder::class,
+
+                // Suggestion
+                QuestionSuggestionSeeder::class,
             ]);
 
             $this->command->info('⏳ Menghitung Skor dan Merekap Hasil Akhir...');
