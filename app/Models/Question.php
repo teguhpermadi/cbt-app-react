@@ -28,6 +28,7 @@ class Question extends Model implements HasMedia
     protected $fillable = [
         'question_bank_id',
         'reading_material_id',
+        'author_id',
         'question_type',
         'difficulty_level',
         'timer',
@@ -52,6 +53,11 @@ class Question extends Model implements HasMedia
     public function questionBank(): BelongsTo
     {
         return $this->belongsTo(QuestionBank::class);
+    }
+
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function readingMaterial(): BelongsTo

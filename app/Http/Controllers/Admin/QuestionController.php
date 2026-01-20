@@ -74,6 +74,7 @@ class QuestionController extends Controller
 
             $question = Question::create([
                 'question_bank_id' => $validated['question_bank_id'],
+                'author_id' => auth()->id(),
                 'content' => $validated['content'],
                 'hint' => $validated['hint'] ?? null,
                 'question_type' => $validated['question_type'],
