@@ -229,7 +229,7 @@ class QuestionBankController extends Controller
 
             // Parse document using service
             $importService = new QuestionImportService();
-            $result = $importService->parseWordDocument($fullPath, $questionBank->id);
+            $result = $importService->parseWordDocument($fullPath, $questionBank->id, Auth::id());
 
             // Delete temp file after processing
             if (file_exists($fullPath)) {
@@ -286,13 +286,16 @@ class QuestionBankController extends Controller
             'difficulty' => 'required|string|in:mudah,sedang,sulit',
         ]);
 
+        $userId = Auth::id();
+
         // Dispatch Job
         \App\Jobs\GenerateQuestionsWithAI::dispatch(
             $questionBank->id,
             $validated['question_type'],
             $validated['topic'],
             $validated['count'],
-            $validated['difficulty']
+            $validated['difficulty'],
+            $userId
         );
 
         return back()->with('success', 'AI sedang membuat soal. Soal akan muncul dalam beberapa menit.');

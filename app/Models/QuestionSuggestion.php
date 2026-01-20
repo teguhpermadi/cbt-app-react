@@ -16,7 +16,7 @@ class QuestionSuggestion extends Model
 
     protected $fillable = [
         'question_id',
-        'user_id',
+        'user_id', // The user who made the suggestion
         'data',
         'description',
         'state',

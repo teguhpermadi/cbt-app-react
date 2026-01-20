@@ -197,7 +197,7 @@ export default function QuestionSuggestionsIndex({ auth, receivedSuggestions, se
                                                         <TableCell className="font-medium">
                                                             <div className="line-clamp-2" dangerouslySetInnerHTML={{ __html: suggestion.question.content }} />
                                                             <div className="text-xs text-muted-foreground mt-1">
-                                                                Bank: {suggestion.question.question_bank?.title}
+                                                                Bank: {suggestion.question.question_bank?.name}
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>

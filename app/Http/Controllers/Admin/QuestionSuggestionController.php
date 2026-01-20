@@ -22,15 +22,20 @@ class QuestionSuggestionController extends Controller
 
         // 1. Received Suggestions (Saran Masuk)
         $receivedQuery = QuestionSuggestion::query()
-            ->with(['question', 'question.questionBank', 'user'])
+            ->with(['question', 'question.questionBank', 'question.author', 'user'])
             ->latest();
 
         if ($user->hasRole('admin')) {
             // Admin sees all suggestions
         } else {
-            // Teacher sees suggestions for their OWN questions
+            // Teacher sees suggestions for:
+            // 1. Questions they authored
+            // 2. Questions in QuestionBanks they own (so they can moderate)
             $receivedQuery->whereHas('question', function ($q) use ($user) {
-                $q->where('author_id', $user->id);
+                $q->where('author_id', $user->id)
+                    ->orWhereHas('questionBank', function ($qb) use ($user) {
+                        $qb->where('user_id', $user->id);
+                    });
             });
         }
 
@@ -39,7 +44,7 @@ class QuestionSuggestionController extends Controller
         // 2. Sent Suggestions (Saran Terkirim)
         // Suggestions made BY the logged-in user to others
         $sentSuggestions = QuestionSuggestion::query()
-            ->with(['question', 'question.questionBank', 'question.author']) // Load author only relative to question model? No relation "author" in Question model? Let's check Question model. It has "author" relation. OK.
+            ->with(['question', 'question.questionBank', 'question.author'])
             ->where('user_id', $user->id)
             ->latest()
             ->get();

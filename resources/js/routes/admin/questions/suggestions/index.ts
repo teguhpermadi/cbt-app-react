@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::store
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:55
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:60
  * @route '/admin/questions/{question}/suggestions'
  */
 export const store = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::store
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:55
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:60
  * @route '/admin/questions/{question}/suggestions'
  */
 store.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -49,7 +49,7 @@ store.url = (args: { question: string | { id: string } } | [question: string | {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::store
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:55
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:60
  * @route '/admin/questions/{question}/suggestions'
  */
 store.post = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -59,7 +59,7 @@ store.post = (args: { question: string | { id: string } } | [question: string | 
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::store
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:55
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:60
  * @route '/admin/questions/{question}/suggestions'
  */
     const storeForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -69,7 +69,7 @@ store.post = (args: { question: string | { id: string } } | [question: string | 
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::store
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:55
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:60
  * @route '/admin/questions/{question}/suggestions'
  */
         storeForm.post = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -80,7 +80,7 @@ store.post = (args: { question: string | { id: string } } | [question: string | 
     store.form = storeForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::update
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:121
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:126
  * @route '/admin/question-suggestions/{suggestion}'
  */
 export const update = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -95,7 +95,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::update
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:121
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:126
  * @route '/admin/question-suggestions/{suggestion}'
  */
 update.url = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -128,7 +128,7 @@ update.url = (args: { suggestion: string | { id: string } } | [suggestion: strin
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::update
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:121
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:126
  * @route '/admin/question-suggestions/{suggestion}'
  */
 update.put = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -138,7 +138,7 @@ update.put = (args: { suggestion: string | { id: string } } | [suggestion: strin
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::update
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:121
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:126
  * @route '/admin/question-suggestions/{suggestion}'
  */
     const updateForm = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -153,7 +153,7 @@ update.put = (args: { suggestion: string | { id: string } } | [suggestion: strin
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::update
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:121
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:126
  * @route '/admin/question-suggestions/{suggestion}'
  */
         updateForm.put = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -169,7 +169,7 @@ update.put = (args: { suggestion: string | { id: string } } | [suggestion: strin
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:151
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
  * @route '/admin/question-suggestions/{suggestion}'
  */
 export const destroy = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -184,7 +184,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:151
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
  * @route '/admin/question-suggestions/{suggestion}'
  */
 destroy.url = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -217,7 +217,7 @@ destroy.url = (args: { suggestion: string | { id: string } } | [suggestion: stri
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:151
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
  * @route '/admin/question-suggestions/{suggestion}'
  */
 destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -227,7 +227,7 @@ destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: s
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:151
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
  * @route '/admin/question-suggestions/{suggestion}'
  */
     const destroyForm = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -242,7 +242,7 @@ destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: s
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:151
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
  * @route '/admin/question-suggestions/{suggestion}'
  */
         destroyForm.delete = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -258,7 +258,7 @@ destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: s
     destroy.form = destroyForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::approve
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:80
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:85
  * @route '/admin/question-suggestions/{suggestion}/approve'
  */
 export const approve = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -273,7 +273,7 @@ approve.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::approve
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:80
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:85
  * @route '/admin/question-suggestions/{suggestion}/approve'
  */
 approve.url = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -306,7 +306,7 @@ approve.url = (args: { suggestion: string | { id: string } } | [suggestion: stri
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::approve
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:80
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:85
  * @route '/admin/question-suggestions/{suggestion}/approve'
  */
 approve.post = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -316,7 +316,7 @@ approve.post = (args: { suggestion: string | { id: string } } | [suggestion: str
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::approve
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:80
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:85
  * @route '/admin/question-suggestions/{suggestion}/approve'
  */
     const approveForm = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -326,7 +326,7 @@ approve.post = (args: { suggestion: string | { id: string } } | [suggestion: str
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::approve
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:80
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:85
  * @route '/admin/question-suggestions/{suggestion}/approve'
  */
         approveForm.post = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -337,7 +337,7 @@ approve.post = (args: { suggestion: string | { id: string } } | [suggestion: str
     approve.form = approveForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::reject
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:104
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:109
  * @route '/admin/question-suggestions/{suggestion}/reject'
  */
 export const reject = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -352,7 +352,7 @@ reject.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::reject
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:104
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:109
  * @route '/admin/question-suggestions/{suggestion}/reject'
  */
 reject.url = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -385,7 +385,7 @@ reject.url = (args: { suggestion: string | { id: string } } | [suggestion: strin
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::reject
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:104
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:109
  * @route '/admin/question-suggestions/{suggestion}/reject'
  */
 reject.post = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -395,7 +395,7 @@ reject.post = (args: { suggestion: string | { id: string } } | [suggestion: stri
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::reject
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:104
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:109
  * @route '/admin/question-suggestions/{suggestion}/reject'
  */
     const rejectForm = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -405,7 +405,7 @@ reject.post = (args: { suggestion: string | { id: string } } | [suggestion: stri
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::reject
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:104
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:109
  * @route '/admin/question-suggestions/{suggestion}/reject'
  */
         rejectForm.post = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

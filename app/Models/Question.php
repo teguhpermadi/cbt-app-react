@@ -28,7 +28,7 @@ class Question extends Model implements HasMedia
     protected $fillable = [
         'question_bank_id',
         'reading_material_id',
-        'author_id',
+        'author_id', // The user who created the question
         'question_type',
         'difficulty_level',
         'timer',

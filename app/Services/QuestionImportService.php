@@ -32,9 +32,10 @@ class QuestionImportService
      *
      * @param string $filePath Full path to uploaded .docx file
      * @param string $questionBankId ULID of question bank
+     * @param string $authorId ULID of key user
      * @return array ['success' => bool, 'questions' => array, 'errors' => array]
      */
-    public function parseWordDocument(string $filePath, string $questionBankId): array
+    public function parseWordDocument(string $filePath, string $questionBankId, string $authorId): array
     {
         try {
             $this->questionBank = QuestionBank::findOrFail($questionBankId);
@@ -58,7 +59,7 @@ class QuestionImportService
                 }
 
                 try {
-                    $question = $this->parseRow($row);
+                    $question = $this->parseRow($row, $authorId);
                     if ($question) {
                         $this->createdQuestions[] = $question;
                     }
@@ -284,7 +285,7 @@ class QuestionImportService
      * @param array $cells Array of 5 cell texts
      * @return Question|null
      */
-    protected function parseRow(array $cells): ?Question
+    protected function parseRow(array $cells, string $authorId): ?Question
     {
         if (count($cells) < 4) { // At least Type, Question, Key
             return null;
@@ -319,6 +320,7 @@ class QuestionImportService
                 'type' => $questionType,
                 'content' => $questionCell['text'],
                 'points' => is_numeric($pointsCell['text']) ? intval($pointsCell['text']) : 10,
+                'author_id' => $authorId,
             ]);
 
             // Attach images to question
@@ -443,6 +445,7 @@ class QuestionImportService
             'is_approved' => true, // Auto info approved for uploaded questions
             'options' => [], // Init empty JSON
             'key_answer' => [], // Init empty JSON
+            'author_id' => $data['author_id'],
         ]);
     }
     /**
