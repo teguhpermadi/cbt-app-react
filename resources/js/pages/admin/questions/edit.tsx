@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,6 +11,7 @@ import { DifficultySelector } from '@/components/app/questions/DifficultySelecto
 import { QuestionTypeSelector } from '@/components/app/questions/QuestionTypeSelector';
 import { TimerSelector } from '@/components/app/questions/TimerSelector';
 import { ScoreSelector } from '@/components/app/questions/ScoreSelector';
+import SuggestionInlineCard from '@/components/app/questions/SuggestionInlineCard';
 
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 import QuestionController from '@/actions/App/Http/Controllers/Admin/QuestionController';
@@ -37,6 +38,7 @@ interface Question {
     options: Option[];
     media_url?: string | null;
     hint?: string | null;
+    suggestions?: any[];
 }
 
 interface EnumOption {
@@ -82,6 +84,8 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
     const [previewQuestionMedia, setPreviewQuestionMedia] = useState<string | null>(question.media_url || null);
 
     const optionCache = useRef<Record<string, Option[]>>({});
+    const { auth } = usePage<any>().props;
+    const currentUserId = auth.user?.id;
 
     useEffect(() => {
         optionCache.current[question.question_type] = question.options;
@@ -200,6 +204,28 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
             </div>
 
             <div className="flex-1 overflow-auto p-6 space-y-6 max-w-5xl mx-auto w-full">
+
+                {question.suggestions && question.suggestions.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5" />
+                                Saran Perbaikan ({question.suggestions.length})
+                            </h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {question.suggestions.map((suggestion) => (
+                                <div key={suggestion.id} className="h-full">
+                                    <SuggestionInlineCard
+                                        suggestion={suggestion}
+                                        currentUserId={currentUserId}
+                                        isOwner={true} // As we are in edit page, assuming the user can manage this question
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {validationError && (
                     <Alert variant="destructive">
