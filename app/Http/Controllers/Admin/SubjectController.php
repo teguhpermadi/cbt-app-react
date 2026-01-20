@@ -13,17 +13,19 @@ class SubjectController extends Controller
 {
     public function index()
     {
-        $subjects = Subject::with(['grade', 'academicYear'])
+        $subjects = Subject::with(['grade', 'academicYear', 'user'])
             ->latest()
             ->paginate(10);
 
         $grades = Grade::all();
         $academicYears = AcademicYear::active()->get();
+        $users = \App\Models\User::role(['admin', 'teacher'])->get(['id', 'name']);
 
         return Inertia::render('admin/subjects/index', [
             'subjects' => $subjects,
             'grades' => $grades,
             'academicYears' => $academicYears,
+            'users' => $users,
         ]);
     }
 
@@ -35,9 +37,8 @@ class SubjectController extends Controller
             'description' => 'nullable|string',
             'grade_id' => 'required|exists:grades,id',
             'academic_year_id' => 'required|exists:academic_years,id',
+            'user_id' => 'required|exists:users,id',
         ]);
-
-        $validated['user_id'] = auth()->id();
 
         Subject::create($validated);
 
@@ -52,6 +53,7 @@ class SubjectController extends Controller
             'description' => 'nullable|string',
             'grade_id' => 'required|exists:grades,id',
             'academic_year_id' => 'required|exists:academic_years,id',
+            'user_id' => 'required|exists:users,id',
         ]);
 
         $subject->update($validated);
