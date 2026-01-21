@@ -87,12 +87,17 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo \
     libfreetype6 \
     supervisor \
+    nodejs \
+    npm \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy PHP extensions from builder
 COPY --from=php-builder /usr/local/lib/php/extensions /usr/local/lib/php/extensions
 COPY --from=php-builder /usr/local/etc/php/conf.d /usr/local/etc/php/conf.d
+
+# Copy composer from builder
+COPY --from=php-builder /usr/bin/composer /usr/bin/composer
 
 # Copy vendor from builder
 COPY --from=php-builder /app/vendor ./vendor
