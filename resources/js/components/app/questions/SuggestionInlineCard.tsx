@@ -10,7 +10,7 @@ import QuestionSuggestionController from '@/actions/App/Http/Controllers/Admin/Q
 import { cn } from "@/lib/utils";
 import SuggestionForm from './SuggestionForm';
 import { Option } from './option-editors/types'; // Make sure this import matches your structure
-import OptionsEditor from './option-editors/OptionsEditor';
+
 
 interface Suggestion {
     id: string;
@@ -198,27 +198,16 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
                             <p className="text-muted-foreground">{suggestion.description}</p>
                         </div>
 
-                        <div className="space-y-4 border rounded-md p-3 bg-white/50 dark:bg-black/5">
-                            <div className="">
-                                <div className="text-xs font-medium text-muted-foreground uppercase mb-2">Usulan Konten Baru</div>
-                                <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
-                                    <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
-                                </div>
-                            </div>
-
-                            {suggestion.data?.options && suggestion.data.options.length > 0 && (
+                        {suggestion.data?.content && (
+                            <div className="space-y-4 border rounded-md p-3 bg-white/50 dark:bg-black/5">
                                 <div>
-                                    <div className="text-xs font-medium text-muted-foreground uppercase mb-2">Usulan Opsi Jawaban</div>
-                                    <div className="pointer-events-none opacity-80">
-                                        <OptionsEditor
-                                            type={questionType}
-                                            options={suggestion.data.options}
-                                            onChange={() => { }} // Read only in view mode
-                                        />
+                                    <div className="text-xs font-medium text-muted-foreground uppercase mb-2">Usulan Konten Baru</div>
+                                    <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+                                        <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data.content }} />
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </CardContent>
 
                     {(canEditOrDelete || canApproveReject) && (
