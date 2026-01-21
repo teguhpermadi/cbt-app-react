@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('exam_questions', function (Blueprint $table) {
-            $table->longText('hint')->nullable();
+        Schema::table('questions', function (Blueprint $table) {
+            $table->foreignUlid('author_id')->nullable()->constrained('users')->nullOnDelete();
         });
     }
 
@@ -21,10 +21,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (Schema::hasColumn('exam_questions', 'hint')) {
-            Schema::table('exam_questions', function (Blueprint $table) {
-                $table->dropColumn('hint');
-            });
-        }
+        Schema::table('questions', function (Blueprint $table) {
+            $table->dropForeign(['author_id']);
+            $table->dropColumn('author_id');
+        });
     }
 };

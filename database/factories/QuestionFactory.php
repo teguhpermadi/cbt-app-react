@@ -21,6 +21,7 @@ class QuestionFactory extends Factory
 
         return [
             'question_bank_id' => $questionBank->id,
+            'author_id' => \App\Models\User::factory(),
             'reading_material_id' => null,
             'question_type' => $type,
             'difficulty_level' => $this->faker->randomElement(DifficultyLevelEnum::cases()),

@@ -15,6 +15,7 @@ interface QuestionBank {
     id: number;
     name: string;
     is_public: boolean;
+    user_id: number;
     subject?: {
         name: string;
         grade?: {
@@ -41,6 +42,8 @@ interface IndexProps {
 }
 
 export default function Index({ questionBanks, filters }: IndexProps) {
+    const { auth } = usePage().props as any;
+
     const handleDelete = (id: number) => {
         if (confirm('Are you sure you want to delete this question bank?')) {
             // Using QuestionBankController.destroy(id)
@@ -103,22 +106,27 @@ export default function Index({ questionBanks, filters }: IndexProps) {
                                                     >
                                                         <Eye className="size-4" />
                                                     </Button>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
-                                                        onClick={() => router.visit(QuestionBankController.edit(bank.id).url)}
-                                                    >
-                                                        <Edit className="size-4" />
-                                                    </Button>
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all font-bold"
-                                                        onClick={() => handleDelete(bank.id)}
-                                                    >
-                                                        <Trash2 className="size-4" />
-                                                    </Button>
+
+                                                    {auth.user.id === bank.user_id && (
+                                                        <>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all font-bold"
+                                                                onClick={() => router.visit(QuestionBankController.edit(bank.id).url)}
+                                                            >
+                                                                <Edit className="size-4" />
+                                                            </Button>
+                                                            <Button
+                                                                size="icon"
+                                                                variant="ghost"
+                                                                className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all font-bold"
+                                                                onClick={() => handleDelete(bank.id)}
+                                                            >
+                                                                <Trash2 className="size-4" />
+                                                            </Button>
+                                                        </>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>

@@ -37,7 +37,8 @@ class GenerateQuestionsWithAI implements ShouldQueue
         protected string $questionType, // Passed as string from command, cast to Enum logic inside
         protected string $topic,
         protected int $count = 5,
-        protected string $difficulty = 'sedang'
+        protected string $difficulty = 'sedang',
+        protected string $userId
     ) {}
 
     /**
@@ -60,6 +61,8 @@ class GenerateQuestionsWithAI implements ShouldQueue
 
         $prompt = $this->buildPrompt($typeEnum);
 
+        $userId = $this->userId;
+
         try {
             $response = Prism::text()
                 ->using(Provider::Gemini, 'gemini-flash-latest')
@@ -78,7 +81,7 @@ class GenerateQuestionsWithAI implements ShouldQueue
             }
 
             // Using transaction to ensure atomicity
-            DB::transaction(function () use ($questionBank, $questionsData, $typeEnum) {
+            DB::transaction(function () use ($questionBank, $questionsData, $typeEnum, $userId) {
                 foreach ($questionsData as $qData) {
                     $question = Question::create([
                         'question_bank_id' => $questionBank->id,
@@ -89,6 +92,7 @@ class GenerateQuestionsWithAI implements ShouldQueue
                         'timer' => \App\Enums\TimerEnum::OneMinute, // Default 1 minute per question
                         'is_active' => true,
                         // 'is_approved' => true,
+                        'author_id' => $userId,
                     ]);
 
                     $this->createOptions($question, $typeEnum, $qData);

@@ -63,11 +63,41 @@ class QuestionBank extends Model
     }
 
     /**
+     * Scope untuk memfilter Bank Soal berdasarkan role user.
+     * Admin: Melihat semua.
+     * Teacher: Melihat milik sendiri atau yang public.
+     */
+    public function scopeAccessibleBy($query, User $user)
+    {
+        if ($user->hasRole('admin')) {
+            return $query;
+        }
+
+        if ($user->hasRole('teacher')) {
+            return $query->where(function ($q) use ($user) {
+                $q->where('user_id', $user->id)
+                    ->orWhere('is_public', true);
+            });
+        }
+
+        // Default: tidak menampilkan apa-apa (atau sesuaikan dengan kebutuhan role lain)
+        return $query->where('id', null);
+    }
+
+    /**
      * Relasi One-to-Many: Satu Bank Soal memiliki banyak Question.
      */
     public function questions(): HasMany
     {
         return $this->hasMany(Question::class)->orderBy('order', 'asc');
+    }
+
+    /**
+     * Relasi HasManyThrough: Bank Soal memiliki banyak Saran melalui Question.
+     */
+    public function suggestions(): \Illuminate\Database\Eloquent\Relations\HasManyThrough
+    {
+        return $this->hasManyThrough(QuestionSuggestion::class, Question::class);
     }
 
     /**

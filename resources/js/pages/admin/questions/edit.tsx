@@ -1,42 +1,35 @@
-import React, { useState, useEffect, useRef } from 'react'; // Added useRef
-import { Head, Link, useForm } from '@inertiajs/react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Head, Link, useForm, usePage } from '@inertiajs/react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import RichTextEditor from '@/components/ui/rich-text/RichTextEditor';
-import { ArrowLeft, Save, Plus, Trash2, AlertCircle, Image as ImageIcon, X } from 'lucide-react'; // Added Image icon
+import { ArrowLeft, Save, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
 import { DifficultySelector } from '@/components/app/questions/DifficultySelector';
 import { QuestionTypeSelector } from '@/components/app/questions/QuestionTypeSelector';
 import { TimerSelector } from '@/components/app/questions/TimerSelector';
 import { ScoreSelector } from '@/components/app/questions/ScoreSelector';
+import SuggestionInlineCard from '@/components/app/questions/SuggestionInlineCard';
 
-// Icons for Question Types
-import {
-    AlignLeft,
-    CheckSquare,
-    ListOrdered,
-    Type,
-    GitMerge,
-    Calculator
-} from 'lucide-react';
 import QuestionBankController from '@/actions/App/Http/Controllers/Admin/QuestionBankController';
 import QuestionController from '@/actions/App/Http/Controllers/Admin/QuestionController';
-
-declare function route(name: string, params?: any): string;
 
 import OptionsEditor from '@/components/app/questions/option-editors/OptionsEditor';
 import { Option } from '@/components/app/questions/option-editors/types';
 import { generateDefaultOptions } from '@/components/app/questions/option-editors/utils';
 
+interface QuestionBank {
+    id: string;
+    user_id: string;
+    is_public: boolean;
+}
+
 interface Question {
     id: string;
     question_bank_id: string;
+    question_bank: QuestionBank;
     content: string;
     question_type: string;
     difficulty_level: string;
@@ -44,7 +37,8 @@ interface Question {
     score_value: number;
     options: Option[];
     media_url?: string | null;
-    hint?: string | null; // Added
+    hint?: string | null;
+    suggestions?: any[];
 }
 
 interface EnumOption {
@@ -83,26 +77,24 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
         options: question.options.map(opt => ({ ...opt, media_file: null, delete_media: false })),
         question_media: null,
         delete_question_media: false,
-        hint: question.hint || '', // Added
+        hint: question.hint || '',
     };
 
     const { data, setData, post, processing, errors } = useForm(initialData);
     const [previewQuestionMedia, setPreviewQuestionMedia] = useState<string | null>(question.media_url || null);
 
     const optionCache = useRef<Record<string, Option[]>>({});
+    const { auth } = usePage<any>().props;
+    const currentUserId = auth.user?.id;
 
-    // Initialize cache with initial options
     useEffect(() => {
         optionCache.current[question.question_type] = question.options;
     }, []);
 
     const handleTypeChange = (value: string) => {
-        // Save current options to cache before switching
         optionCache.current[data.question_type] = data.options;
-
         let newOptions: Option[];
 
-        // Check if we have cached options for the new type
         if (optionCache.current[value]) {
             newOptions = optionCache.current[value];
         } else {
@@ -136,16 +128,7 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
             return;
         }
 
-        // 3. Validate Options Content (Checking if at least one looks valid if needed, or all)
-        // For now, let's just make sure they aren't all empty if that's a requirement,
-        // but often options might be images only. Let's rely on basic check.
-        // If strict validation is needed for each option content:
-        const hasValidOption = data.options.some(opt => opt.content && opt.content.trim() !== '');
-        // CHECK: Is it mandatory for ALL options to have text? Or just Media?
-        // User said "opsi jawaban yang wajib ada".
-        // Let's assume we check if options array is not empty (done above).
-
-        // 4. Validate Correct Answer
+        // 3. Validate Correct Answer
         const hasCorrectAnswer = data.options.some(opt => opt.is_correct);
         if (!hasCorrectAnswer) {
             setValidationError('Harus ada setidaknya satu kunci jawaban yang dipilih.');
@@ -153,7 +136,7 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
             return;
         }
 
-        // Use POST with _method: PUT to support file uploads
+        // Normal Edit Mode
         post(QuestionController.update(question.id).url, {
             forceFormData: true,
             onError: () => {
@@ -182,7 +165,6 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
         <div className="min-h-screen bg-muted/40 flex flex-col">
             <Head title={`Edit Soal # ${question.id}`} />
 
-            {/* TOPBAR */}
             <div className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
                 <Link
                     href={QuestionBankController.edit(question.question_bank_id).url}
@@ -221,8 +203,29 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                 </Button>
             </div>
 
-            {/* CONTENT */}
             <div className="flex-1 overflow-auto p-6 space-y-6 max-w-5xl mx-auto w-full">
+
+                {question.suggestions && question.suggestions.length > 0 && (
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-semibold text-amber-700 flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5" />
+                                Saran Perbaikan ({question.suggestions.length})
+                            </h3>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {question.suggestions.map((suggestion) => (
+                                <div key={suggestion.id} className="h-full">
+                                    <SuggestionInlineCard
+                                        suggestion={suggestion}
+                                        currentUserId={currentUserId}
+                                        isOwner={true} // As we are in edit page, assuming the user can manage this question
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {validationError && (
                     <Alert variant="destructive">
@@ -234,7 +237,6 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                     </Alert>
                 )}
 
-                {/* QUESTION CARD */}
                 <Card className="border-primary/10 shadow-md">
                     <CardHeader>
                         <CardTitle className="text-lg">Konten Soal</CardTitle>
@@ -248,7 +250,6 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                         />
                         {errors.content && <p className="text-red-500 text-sm">{errors.content}</p>}
 
-                        {/* Media Upload for Question */}
                         <div className="space-y-2">
                             <Label>Media / Gambar (Opsional)</Label>
                             <div className="flex items-start gap-4">
@@ -286,7 +287,6 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                     </CardContent>
                 </Card>
 
-                {/* HINT CARD */}
                 <Card className="border-primary/10 shadow-md">
                     <CardHeader>
                         <CardTitle className="text-lg">Hint (Bantuan)</CardTitle>
@@ -301,18 +301,14 @@ export default function EditQuestion({ question, difficulties, timers, scores }:
                     </CardContent>
                 </Card>
 
-                {/* OPTIONS EDITOR */}
                 <OptionsEditor
                     type={data.question_type}
                     options={data.options}
                     onChange={(newOptions) => setData('options', newOptions)}
-                    errors={errors} // Pass errors to show option specific errors if needed
+                    errors={errors}
                 />
 
             </div>
         </div>
     );
 }
-
-
-

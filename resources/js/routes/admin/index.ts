@@ -8,6 +8,7 @@ import exams from './exams'
 import questionBanks from './question-banks'
 import questions from './questions'
 import tags from './tags'
+import questionSuggestions from './question-suggestions'
 /**
 * @see \App\Http\Controllers\DashboardController::dashboard
  * @see app/Http/Controllers/DashboardController.php:13
@@ -97,6 +98,7 @@ exams: Object.assign(exams, exams),
 questionBanks: Object.assign(questionBanks, questionBanks),
 questions: Object.assign(questions, questions),
 tags: Object.assign(tags, tags),
+questionSuggestions: Object.assign(questionSuggestions, questionSuggestions),
 }
 
 export default admin

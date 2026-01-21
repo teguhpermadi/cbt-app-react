@@ -17,7 +17,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { dashboard as studentDashboard } from '@/routes/student';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList, MessageSquare } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 import { usePermission } from '@/hooks/usePermission';
@@ -62,11 +62,45 @@ export function AppSidebar() {
             icon: BookOpen,
         },
         {
+            title: 'Saran Soal',
+            href: '/admin/question-suggestions',
+            icon: MessageSquare,
+        },
+        {
             title: 'Exam Management',
             href: examsIndex(),
             icon: ClipboardList,
             // active: true, // Example of marking active
         }
+    ];
+
+    const teacherNavItems: NavItem[] = [
+        {
+            title: 'Dashboard',
+            href: adminDashboard(),
+            icon: LayoutGrid,
+        },
+        {
+            title: 'Bank Soal',
+            href: '/admin/question-banks',
+            icon: BookOpen,
+        },
+        {
+            title: 'Saran Soal',
+            href: '/admin/question-suggestions',
+            icon: MessageSquare,
+        },
+        {
+            title: 'Exam Management',
+            href: examsIndex(),
+            icon: ClipboardList,
+            // active: true, // Example of marking active
+        },
+        {
+            title: 'Grade Management',
+            href: gradesIndex(),
+            icon: GraduationCap,
+        },
     ];
 
     const studentNavItems: NavItem[] = [
@@ -95,8 +129,11 @@ export function AppSidebar() {
     if (hasRole('student')) {
         mainNavItems = studentNavItems;
         dashboardLink = studentDashboard();
-    } else if (hasRole('admin') || hasRole('teacher')) {
+    } else if (hasRole('admin')) {
         mainNavItems = adminNavItems;
+        dashboardLink = adminDashboard();
+    } else if (hasRole('teacher')) {
+        mainNavItems = teacherNavItems;
         dashboardLink = adminDashboard();
     }
 

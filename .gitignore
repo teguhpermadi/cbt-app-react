@@ -6,7 +6,11 @@
 /public/storage
 # jika deploy ini yang di hapus
 /resources/js/actions
+<<<<<<< HEAD
 /resources/js/routes
+=======
+
+>>>>>>> question-reviewer
 /resources/js/wayfinder
 
 

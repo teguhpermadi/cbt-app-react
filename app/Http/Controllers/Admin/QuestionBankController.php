@@ -22,6 +22,7 @@ class QuestionBankController extends Controller
     {
         $questionBanks = QuestionBank::query()
             ->with(['subject.grade', 'teacher'])
+            ->accessibleBy(Auth::user())
             ->when($request->search, function ($query, $search) {
                 $query->where('name', 'like', "%{$search}%");
             })
@@ -99,9 +100,18 @@ class QuestionBankController extends Controller
             return $question;
         });
 
+        // Load Suggestions ONLY if current user is owner
+        // Load Suggestions for everyone
+        // We use HasManyThrough relationship
+        $suggestions = $questionBank->suggestions()
+            ->with(['user', 'question'])
+            ->latest()
+            ->get();
+
         return Inertia::render('admin/question-banks/show', [
             'questionBank' => $questionBank,
             'questions' => $questionBank->questions,
+            'suggestions' => $suggestions, // Pass suggestions to view
         ]);
     }
 
@@ -219,7 +229,7 @@ class QuestionBankController extends Controller
 
             // Parse document using service
             $importService = new QuestionImportService();
-            $result = $importService->parseWordDocument($fullPath, $questionBank->id);
+            $result = $importService->parseWordDocument($fullPath, $questionBank->id, Auth::id());
 
             // Delete temp file after processing
             if (file_exists($fullPath)) {
@@ -276,13 +286,16 @@ class QuestionBankController extends Controller
             'difficulty' => 'required|string|in:mudah,sedang,sulit',
         ]);
 
+        $userId = Auth::id();
+
         // Dispatch Job
         \App\Jobs\GenerateQuestionsWithAI::dispatch(
             $questionBank->id,
             $validated['question_type'],
             $validated['topic'],
             $validated['count'],
-            $validated['difficulty']
+            $validated['difficulty'],
+            $userId
         );
 
         return back()->with('success', 'AI sedang membuat soal. Soal akan muncul dalam beberapa menit.');

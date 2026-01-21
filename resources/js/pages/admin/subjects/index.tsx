@@ -43,6 +43,10 @@ interface Subject {
         id: string;
         year: string;
     };
+    user?: {
+        id: string;
+        name: string;
+    };
 }
 
 interface CreateSubjectForm {
@@ -51,6 +55,7 @@ interface CreateSubjectForm {
     description: string;
     grade_id: string;
     academic_year_id: string;
+    user_id: string;
 }
 
 interface EditSubjectForm {
@@ -59,6 +64,7 @@ interface EditSubjectForm {
     description: string;
     grade_id: string;
     academic_year_id: string;
+    user_id: string;
 }
 
 interface IndexProps {
@@ -68,6 +74,7 @@ interface IndexProps {
     };
     grades: any[];
     academicYears: any[];
+    users: any[];
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -75,7 +82,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Subject Management', href: index().url },
 ];
 
-export default function Index({ subjects, grades, academicYears }: IndexProps) {
+export default function Index({ subjects, grades, academicYears, users }: IndexProps) {
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [editingSubject, setEditingSubject] = useState<any>(null);
@@ -86,6 +93,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
         description: '',
         grade_id: '',
         academic_year_id: academicYears.find((ay: any) => ay.active)?.id || academicYears[0]?.id || '',
+        user_id: '',
     });
 
     const editForm = useForm<EditSubjectForm>({
@@ -94,6 +102,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
         description: '',
         grade_id: '',
         academic_year_id: '',
+        user_id: '',
     });
 
     const deleteForm = useForm();
@@ -116,6 +125,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
             description: subject.description || '',
             grade_id: subject.grade?.id || '',
             academic_year_id: subject.academic_year?.id || '',
+            user_id: subject.user?.id || '',
         });
         setIsEditOpen(true);
     };
@@ -209,6 +219,20 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                                             <InputError message={createForm.errors.academic_year_id} />
                                         </div>
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Teacher</Label>
+                                        <Select onValueChange={(val) => createForm.setData('user_id', val)}>
+                                            <SelectTrigger className="rounded-xl h-11 border-slate-200">
+                                                <SelectValue placeholder="Select Teacher" />
+                                            </SelectTrigger>
+                                            <SelectContent className="rounded-xl border-none shadow-xl">
+                                                {users.map(u => (
+                                                    <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        <InputError message={createForm.errors.user_id} />
+                                    </div>
                                 </div>
                                 <DialogFooter>
                                     <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
@@ -228,6 +252,7 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                                     <th className="px-6 py-4">Subject Info</th>
                                     <th className="px-6 py-4">Grade</th>
                                     <th className="px-6 py-4">Academic Year</th>
+                                    <th className="px-6 py-4">Teacher</th>
                                     <th className="px-6 py-4 text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -260,6 +285,11 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                                                 <td className="px-6 py-4">
                                                     <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
                                                         {subject.academic_year?.year || 'N/A'}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                                        {subject.user?.name || 'N/A'}
                                                     </span>
                                                 </td>
                                                 <td className="px-6 py-4 text-right">
@@ -354,6 +384,20 @@ export default function Index({ subjects, grades, academicYears }: IndexProps) {
                                     </Select>
                                     <InputError message={editForm.errors.academic_year_id} />
                                 </div>
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Teacher</Label>
+                                <Select onValueChange={(val) => editForm.setData('user_id', val)} defaultValue={editForm.data.user_id}>
+                                    <SelectTrigger className="rounded-xl h-11 border-slate-200">
+                                        <SelectValue placeholder="Select Teacher" />
+                                    </SelectTrigger>
+                                    <SelectContent className="rounded-xl border-none shadow-xl">
+                                        {users.map(u => (
+                                            <SelectItem key={u.id} value={u.id}>{u.name}</SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <InputError message={editForm.errors.user_id} />
                             </div>
                         </div>
                         <DialogFooter>

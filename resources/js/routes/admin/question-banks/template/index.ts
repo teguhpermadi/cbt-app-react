@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
 export const download = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ download.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
 download.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ download.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
 download.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ download.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
 download.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ download.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
     const downloadForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ download.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
         downloadForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ download.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::download
- * @see app/Http/Controllers/Admin/QuestionBankController.php:259
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:269
  * @route '/admin/question-banks/template/download'
  */
         downloadForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
