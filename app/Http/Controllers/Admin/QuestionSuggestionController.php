@@ -7,6 +7,8 @@ use App\Models\Question;
 use App\Models\QuestionSuggestion;
 use App\States\QuestionSuggestion\Approved;
 use App\States\QuestionSuggestion\Rejected;
+use App\Models\Option;
+use App\Enums\QuestionTypeEnum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -95,6 +97,52 @@ class QuestionSuggestionController extends Controller
                 if ($suggestion->state->canTransitionTo(Approved::class)) {
                     $suggestion->state->transitionTo(Approved::class);
                 }
+
+                // Apply Changes to Question
+                $question = $suggestion->question;
+                $data = $suggestion->data;
+
+                // Update Content
+                if (!empty($data['content'])) {
+                    $question->update(['content' => $data['content']]);
+                }
+
+                // Update Options
+                if (!empty($data['options']) && is_array($data['options'])) {
+                    $suggestedOptions = collect($data['options']);
+
+                    // Get existing option IDs belonging to this question
+                    $existingOptionIds = $question->options()->pluck('id')->toArray();
+
+                    // IDs present in the suggestion
+                    $incomingOptionIds = $suggestedOptions->pluck('id')->filter()->toArray();
+
+                    // Delete options that are in DB but not in suggestion
+                    $idsToDelete = array_diff($existingOptionIds, $incomingOptionIds);
+                    if (!empty($idsToDelete)) {
+                        Option::destroy($idsToDelete);
+                    }
+
+                    // Upsert options
+                    foreach ($suggestedOptions as $index => $optData) {
+                        $optionAttributes = [
+                            'question_id' => $question->id,
+                            'option_key'  => $optData['option_key'] ?? $this->generateDefaultKey($question->question_type, $index),
+                            'content'     => $optData['content'] ?? '',
+                            'is_correct'  => filter_var($optData['is_correct'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                            'order'       => $optData['order'] ?? $index,
+                            'metadata'    => $optData['metadata'] ?? null,
+                        ];
+
+                        if (isset($optData['id']) && in_array($optData['id'], $existingOptionIds)) {
+                            // Update existing
+                            Option::where('id', $optData['id'])->update($optionAttributes);
+                        } else {
+                            // Create new
+                            Option::create($optionAttributes);
+                        }
+                    }
+                }
             });
 
             return back()->with('success', 'Suggestion approved and applied.');
@@ -174,5 +222,19 @@ class QuestionSuggestionController extends Controller
         $suggestion->delete();
 
         return back()->with('success', 'Suggestion deleted successfully.');
+    }
+
+    private function generateDefaultKey($type, $index)
+    {
+        // Fallback key generation if frontend doesn't send it provided
+        // Mostly relevant for new options
+        if ($type instanceof QuestionTypeEnum) {
+            $type = $type->value;
+        }
+
+        if ($type === QuestionTypeEnum::MultipleChoice->value || $type === QuestionTypeEnum::MultipleSelection->value) {
+            return chr(65 + $index); // A, B, C...
+        }
+        return (string)($index + 1);
     }
 }

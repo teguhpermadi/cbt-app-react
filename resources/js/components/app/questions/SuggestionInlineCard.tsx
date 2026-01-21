@@ -81,14 +81,19 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
                 : QuestionSuggestionController.reject(suggestion.id).url;
 
             router.post(url, {}, {
-                preserveScroll: true
+                preserveScroll: true,
+                onSuccess: () => {
+                    if (action === 'approve') {
+                        window.location.reload();
+                    }
+                }
             });
         }
     };
 
-    const handleSaveEdit = (formData: { content: string; options: Option[] }) => {
+    const handleSaveEdit = (formData: { description: string; content: string; options: Option[] }) => {
         router.put(QuestionSuggestionController.update(suggestion.id).url, {
-            description: suggestion.description,
+            description: formData.description,
             content: formData.content,
             data: {
                 content: formData.content,
@@ -279,6 +284,7 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
 
                     <SuggestionForm
                         initialData={{
+                            description: suggestion.description,
                             content: suggestion.data?.content || '',
                             options: suggestion.data?.options || []
                         }}
