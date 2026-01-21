@@ -2,6 +2,13 @@
     root * /app/public
     encode gzip
 
+    # Proxy Reverb WebSockets (ws/wss)
+    @websockets {
+        header Connection *Upgrade*
+        header Upgrade    websocket
+    }
+    reverse_proxy @websockets reverb:8080
+
     # Laravel routing
     try_files {path} /index.php
     php_server
