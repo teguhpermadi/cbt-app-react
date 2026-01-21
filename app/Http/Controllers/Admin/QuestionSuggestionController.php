@@ -131,21 +131,32 @@ class QuestionSuggestionController extends Controller
         }
 
         $request->validate([
-            'description' => 'required|string',
-            'content' => 'sometimes|string', // Frontend sends 'content' separately in my specific implementation
+            'description' => 'sometimes|string',
+            'content' => 'sometimes|string', // Backward comp
+            'data' => 'sometimes|array', // New way to send full data
         ]);
 
         $data = $suggestion->data ?? [];
 
-        // Update content in data array if provided
+        // If 'data' is passed (new frontend), merge it or replace relevant parts
+        if ($request->has('data')) {
+            $data = array_merge($data, $request->input('data'));
+        }
+
+        // Backward compatibility if content is sent separately
         if ($request->has('content')) {
             $data['content'] = $request->input('content');
         }
 
-        $suggestion->update([
-            'description' => $request->description,
+        $updatePayload = [
             'data' => $data,
-        ]);
+        ];
+
+        if ($request->has('description')) {
+            $updatePayload['description'] = $request->description;
+        }
+
+        $suggestion->update($updatePayload);
 
         return back()->with('success', 'Suggestion updated successfully.');
     }

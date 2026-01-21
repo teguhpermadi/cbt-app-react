@@ -1,16 +1,16 @@
 import { useState } from 'react';
-import { router, useForm } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Check, X, Pencil, Trash2, User, Clock, AlertCircle, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
-import RichTextEditor from "@/components/ui/rich-text/RichTextEditor";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Check, X, Pencil, Trash2, Clock, AlertCircle, CheckCircle2, XCircle, ChevronDown, ChevronUp } from "lucide-react";
 import QuestionSuggestionController from '@/actions/App/Http/Controllers/Admin/QuestionSuggestionController';
 import { cn } from "@/lib/utils";
+import SuggestionForm from './SuggestionForm';
+import { Option } from './option-editors/types'; // Make sure this import matches your structure
+import OptionsEditor from './option-editors/OptionsEditor';
 
 interface Suggestion {
     id: string;
@@ -23,7 +23,15 @@ interface Suggestion {
         name: string;
         email: string;
     };
-    data: any; // suggested changes
+    data: {
+        content?: string;
+        options?: Option[];
+        [key: string]: any;
+    };
+    question?: {
+        id: string;
+        question_type: string;
+    };
 }
 
 interface SuggestionInlineCardProps {
@@ -50,11 +58,8 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
     const canEditOrDelete = isCreator && isPending;
     const canApproveReject = isOwner && isPending;
 
-    // Simple edit form for description and content (basic usage)
-    const { data: editData, setData: setEditData, put, processing, reset } = useForm({
-        description: suggestion.description,
-        content: suggestion.data?.content || '',
-    });
+    // Use Inertia form for tracking processing state
+    const [processing, setProcessing] = useState(false);
 
     const handleAction = (action: 'approve' | 'reject' | 'delete') => {
         const labels = {
@@ -81,9 +86,17 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
         }
     };
 
-    const handleSaveEdit = (e: React.FormEvent) => {
-        e.preventDefault();
-        put(QuestionSuggestionController.update(suggestion.id).url, {
+    const handleSaveEdit = (formData: { content: string; options: Option[] }) => {
+        router.put(QuestionSuggestionController.update(suggestion.id).url, {
+            description: suggestion.description,
+            content: formData.content,
+            data: {
+                content: formData.content,
+                options: formData.options
+            }
+        }, {
+            onStart: () => setProcessing(true),
+            onFinish: () => setProcessing(false),
             onSuccess: () => setIsEditOpen(false),
             preserveScroll: true
         });
@@ -127,6 +140,7 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
     };
 
     const currentStyle = stateStyles[suggestion.state as keyof typeof stateStyles] || stateStyles.pending;
+    const questionType = suggestion.question?.question_type || 'multiple_choice'; // Fallback
 
     return (
         <Card className={cn("flex flex-col transition-all duration-200", currentStyle.card, isExpanded ? "h-full" : "h-auto")}>
@@ -184,11 +198,26 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
                             <p className="text-muted-foreground">{suggestion.description}</p>
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="text-xs font-medium text-muted-foreground uppercase">Usulan Konten Baru</div>
-                            <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
-                                <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
+                        <div className="space-y-4 border rounded-md p-3 bg-white/50 dark:bg-black/5">
+                            <div className="">
+                                <div className="text-xs font-medium text-muted-foreground uppercase mb-2">Usulan Konten Baru</div>
+                                <div className="bg-white dark:bg-slate-950 rounded-md border p-3 max-h-[200px] overflow-y-auto custom-scrollbar">
+                                    <div className="prose prose-sm max-w-none dark:prose-invert" dangerouslySetInnerHTML={{ __html: suggestion.data?.content || '<span class="text-muted-foreground text-xs italic">Tidak ada konten usulan</span>' }} />
+                                </div>
                             </div>
+
+                            {suggestion.data?.options && suggestion.data.options.length > 0 && (
+                                <div>
+                                    <div className="text-xs font-medium text-muted-foreground uppercase mb-2">Usulan Opsi Jawaban</div>
+                                    <div className="pointer-events-none opacity-80">
+                                        <OptionsEditor
+                                            type={questionType}
+                                            options={suggestion.data.options}
+                                            onChange={() => { }} // Read only in view mode
+                                        />
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </CardContent>
 
@@ -212,7 +241,6 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
                                             className="text-muted-foreground hover:text-blue-500 hover:bg-blue-50"
                                             onClick={(e) => {
                                                 e.stopPropagation();
-                                                setEditData({ description: suggestion.description, content: suggestion.data?.content || '' });
                                                 setIsEditOpen(true)
                                             }}
                                             title="Edit Saran"
@@ -251,42 +279,25 @@ export default function SuggestionInlineCard({ suggestion, isOwner = false, curr
                 </>
             )}
 
-            {/* Edit Dialog - Render outside of toggle area to avoid closing card when clicking dialog trigger if bubbling occurs, though modal is separate portal */}
             <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogContent className="sm:max-w-xl">
-                    <form onSubmit={handleSaveEdit}>
-                        <DialogHeader>
-                            <DialogTitle>Edit Saran Perubahan</DialogTitle>
-                            <DialogDescription>
-                                Ubah detail saran sebelum menyetujui atau menolak.
-                            </DialogDescription>
-                        </DialogHeader>
+                <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+                    <DialogHeader>
+                        <DialogTitle>Edit Saran Perubahan</DialogTitle>
+                        <DialogDescription>
+                            Ubah detail saran sebelum menyetujui atau menolak.
+                        </DialogDescription>
+                    </DialogHeader>
 
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="edit-description">Alasan</Label>
-                                <Textarea
-                                    id="edit-description"
-                                    value={editData.description}
-                                    onChange={(e) => setEditData('description', e.target.value)}
-                                    rows={3}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Usulan Konten</Label>
-                                <RichTextEditor
-                                    value={editData.content}
-                                    onChange={(model) => setEditData('content', model)}
-                                />
-                            </div>
-                        </div>
-
-                        <DialogFooter>
-                            <Button type="button" variant="outline" onClick={() => setIsEditOpen(false)}>Batal</Button>
-                            <Button type="submit" disabled={processing}>Simpan Perubahan</Button>
-                        </DialogFooter>
-                    </form>
+                    <SuggestionForm
+                        initialData={{
+                            content: suggestion.data?.content || '',
+                            options: suggestion.data?.options || []
+                        }}
+                        questionType={questionType}
+                        onSubmit={handleSaveEdit}
+                        onCancel={() => setIsEditOpen(false)}
+                        isProcessing={processing}
+                    />
                 </DialogContent>
             </Dialog>
         </Card>

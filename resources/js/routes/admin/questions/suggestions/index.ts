@@ -169,7 +169,7 @@ update.put = (args: { suggestion: string | { id: string } } | [suggestion: strin
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:167
  * @route '/admin/question-suggestions/{suggestion}'
  */
 export const destroy = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -184,7 +184,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:167
  * @route '/admin/question-suggestions/{suggestion}'
  */
 destroy.url = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -217,7 +217,7 @@ destroy.url = (args: { suggestion: string | { id: string } } | [suggestion: stri
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:167
  * @route '/admin/question-suggestions/{suggestion}'
  */
 destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -227,7 +227,7 @@ destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: s
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:167
  * @route '/admin/question-suggestions/{suggestion}'
  */
     const destroyForm = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -242,7 +242,7 @@ destroy.delete = (args: { suggestion: string | { id: string } } | [suggestion: s
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionSuggestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:156
+ * @see app/Http/Controllers/Admin/QuestionSuggestionController.php:167
  * @route '/admin/question-suggestions/{suggestion}'
  */
         destroyForm.delete = (args: { suggestion: string | { id: string } } | [suggestion: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
