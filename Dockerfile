@@ -134,4 +134,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
     CMD php artisan about || exit 1
 
 # Start FrankenPHP with Octane (Worker Mode)
-CMD ["php", "artisan", "octane:start", "--server=frankenphp", "--host=0.0.0.0", "--port=80", "--admin-port=2019", "--workers=auto", "--max-requests=1000"]
+# Start FrankenPHP with custom Caddyfile
+CMD ["frankenphp", "run", "--config", "/app/Caddyfile"]
