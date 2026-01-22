@@ -1,15 +1,19 @@
-{$APP_URL:localhost} {
+{
+    email admin@miarridlo.sch.id
+}
+
+cbtapp.miarridlo.sch.id {
     root * /app/public
     encode gzip
-
-    # Proxy Reverb WebSockets (ws/wss)
+    
+    # Proxy WebSocket Reverb
     @websockets {
         header Connection *Upgrade*
         header Upgrade    websocket
     }
     reverse_proxy @websockets reverb:8080
 
-    # Laravel routing
+    # PHP Application
     try_files {path} /index.php
     php_server
 }
