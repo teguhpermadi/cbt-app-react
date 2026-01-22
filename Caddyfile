@@ -1,5 +1,6 @@
 {
     email admin@miarridlo.sch.id
+    order php_server before file_server
 }
 
 cbtapp.miarridlo.sch.id {
@@ -14,6 +15,5 @@ cbtapp.miarridlo.sch.id {
     reverse_proxy @websockets reverb:8080
 
     # PHP Application
-    try_files {path} /index.php
     php_server
 }
