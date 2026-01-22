@@ -1,6 +1,6 @@
 services:
   # ============================================
-  # FrankenPHP Application Server
+  # PHP-FPM Application Server
   # ============================================
   app:
     build:
@@ -8,16 +8,12 @@ services:
       dockerfile: Dockerfile
     container_name: cbt-app
     restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
     environment:
       - APP_NAME=${APP_NAME:-Laravel}
       - APP_ENV=${APP_ENV:-production}
       - APP_KEY=${APP_KEY}
       - APP_DEBUG=${APP_DEBUG:-false}
       - APP_URL=${APP_URL:-https://cbtapp.miarridlo.sch.id}
-      - SERVER_NAME=${APP_URL}
       
       # Database
       - DB_CONNECTION=pgsql
@@ -58,11 +54,31 @@ services:
     networks:
       - cbt-network
     healthcheck:
-      test: ["CMD", "php", "artisan", "about"]
+      test: ["CMD", "php-fpm", "-t"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
+
+  # ============================================
+  # Nginx Web Server
+  # ============================================
+  web:
+    image: nginx:alpine
+    container_name: cbt-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./public:/app/public
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d
+      - ./storage/logs/nginx:/var/log/nginx
+    depends_on:
+      - app
+    networks:
+      - cbt-network
 
   # ============================================
   # PostgreSQL Database
@@ -253,8 +269,4 @@ volumes:
   postgres_data:
     driver: local
   redis_data:
-    driver: local
-  caddy_data:
-    driver: local
-  caddy_config:
     driver: local

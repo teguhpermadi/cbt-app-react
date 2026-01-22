@@ -73,9 +73,9 @@ RUN composer install \
     --optimize-autoloader
 
 # ============================================
-# Stage 3: Final FrankenPHP Runtime
+# Stage 3: Final PHP-FPM Runtime
 # ============================================
-FROM dunglas/frankenphp:latest-php8.3
+FROM php:8.3-fpm
 
 WORKDIR /app
 
@@ -108,9 +108,6 @@ COPY . .
 # Copy built frontend assets from node-builder
 COPY --from=node-builder /app/public/build ./public/build
 
-# Generate package manifest to ensure Octane is discovered
-RUN php artisan package:discover --ansi
-
 # Create necessary directories and set permissions
 RUN mkdir -p storage/framework/{sessions,views,cache} \
     storage/logs \
@@ -124,15 +121,13 @@ COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 # Set environment
 ENV APP_ENV=production
 ENV APP_DEBUG=false
-ENV SERVER_NAME=:80
 
-# Expose ports
-EXPOSE 80 443
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
-    CMD php artisan about || exit 1
+    CMD php-fpm -t || exit 1
 
-# Start FrankenPHP with Octane (Worker Mode)
-# Start FrankenPHP with custom Caddyfile
-CMD ["frankenphp", "run", "--config", "/app/Caddyfile"]
+# Start PHP-FPM
+CMD ["php-fpm"]
