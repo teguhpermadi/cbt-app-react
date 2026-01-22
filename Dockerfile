@@ -75,7 +75,7 @@ RUN composer install \
 # ============================================
 # Stage 3: Final PHP-FPM Runtime
 # ============================================
-FROM php:8.3-fpm
+FROM php:8.3-fpm-bookworm
 
 WORKDIR /app
 
