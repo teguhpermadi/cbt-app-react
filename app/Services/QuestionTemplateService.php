@@ -109,7 +109,9 @@ class QuestionTemplateService
         $cell = $table->addCell(3500);
         $cell->addText('Besaran turunan dari ');
         $cell->addText('$\frac{kg \cdot m}{s^2}$ adalah Newton.');
-        $table->addCell(2500)->addText('-');
+        $optionsCell = $table->addCell(2500);
+        $optionsCell->addText('TRUE');
+        $optionsCell->addText('FALSE');
         $table->addCell(1500)->addText('TRUE');
         $table->addCell(800)->addText('5');
         $table->addCell(2000)->addText('Fisika, Besaran, Satuan');
