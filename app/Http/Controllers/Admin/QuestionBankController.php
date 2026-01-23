@@ -248,7 +248,7 @@ class QuestionBankController extends Controller
             } else {
                 return back()->withErrors([
                     'upload' => 'Gagal mengupload soal: ' . implode(', ', $result['errors'])
-                ]);
+                ])->with('error', 'Gagal mengupload soal. Periksa pesan error di form.');
             }
         } catch (\Exception $e) {
             // Log full error for debugging
@@ -259,7 +259,7 @@ class QuestionBankController extends Controller
 
             return back()->withErrors([
                 'upload' => 'Terjadi kesalahan: ' . $e->getMessage()
-            ]);
+            ])->with('error', 'Terjadi kesalahan saat memproses file.');
         }
     }
 
