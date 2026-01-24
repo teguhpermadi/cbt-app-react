@@ -20,7 +20,6 @@ export function AppShell({ children, variant = 'header' }: AppShellProps) {
                 {children}
             </div>
         );
-        );
     }
 
     return (

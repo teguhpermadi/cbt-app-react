@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
 export const downloadTemplate = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ downloadTemplate.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
 downloadTemplate.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ downloadTemplate.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
 downloadTemplate.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ downloadTemplate.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => 
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
 downloadTemplate.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ downloadTemplate.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
     const downloadTemplateForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ downloadTemplate.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
         downloadTemplateForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ downloadTemplate.head = (options?: RouteQueryOptions): RouteDefinition<'head'> =
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::downloadTemplate
- * @see app/Http/Controllers/Admin/QuestionBankController.php:269
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:278
  * @route '/admin/question-banks/template/download'
  */
         downloadTemplateForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -754,7 +754,7 @@ uploadQuestions.post = (args: { questionBank: string | { id: string } } | [quest
     uploadQuestions.form = uploadQuestionsForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateWithAI
- * @see app/Http/Controllers/Admin/QuestionBankController.php:280
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:289
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 export const generateWithAI = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -769,7 +769,7 @@ generateWithAI.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateWithAI
- * @see app/Http/Controllers/Admin/QuestionBankController.php:280
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:289
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 generateWithAI.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -802,7 +802,7 @@ generateWithAI.url = (args: { questionBank: string | { id: string } } | [questio
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateWithAI
- * @see app/Http/Controllers/Admin/QuestionBankController.php:280
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:289
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
 generateWithAI.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -812,7 +812,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateWithAI
- * @see app/Http/Controllers/Admin/QuestionBankController.php:280
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:289
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
     const generateWithAIForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -822,7 +822,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateWithAI
- * @see app/Http/Controllers/Admin/QuestionBankController.php:280
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:289
  * @route '/admin/question-banks/{questionBank}/generate-ai'
  */
         generateWithAIForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -833,7 +833,7 @@ generateWithAI.post = (args: { questionBank: string | { id: string } } | [questi
     generateWithAI.form = generateWithAIForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:307
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:316
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 export const generateTags = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -848,7 +848,7 @@ generateTags.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:307
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:316
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 generateTags.url = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -881,7 +881,7 @@ generateTags.url = (args: { questionBank: string | { id: string } } | [questionB
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:307
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:316
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
 generateTags.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -891,7 +891,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:307
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:316
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
     const generateTagsForm = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -901,7 +901,7 @@ generateTags.post = (args: { questionBank: string | { id: string } } | [question
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionBankController::generateTags
- * @see app/Http/Controllers/Admin/QuestionBankController.php:307
+ * @see app/Http/Controllers/Admin/QuestionBankController.php:316
  * @route '/admin/question-banks/{questionBank}/generate-tags'
  */
         generateTagsForm.post = (args: { questionBank: string | { id: string } } | [questionBank: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

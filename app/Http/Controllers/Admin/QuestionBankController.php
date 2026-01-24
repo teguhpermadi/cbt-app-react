@@ -203,6 +203,15 @@ class QuestionBankController extends Controller
             $fileName = time() . '_' . $file->getClientOriginalName();
 
             // Store temporarily with proper path
+            Log::info('Debug Upload', [
+                'isValid' => $file->isValid(),
+                'path' => $file->path(),
+                'realPath' => $file->getRealPath(),
+                'exists' => file_exists($file->path()),
+                'size' => $file->getSize(),
+                'error' => $file->getError(),
+            ]);
+
             $tempPath = $file->storeAs('temp', $fileName, 'local');
             $fullPath = Storage::disk('local')->path($tempPath);
 
