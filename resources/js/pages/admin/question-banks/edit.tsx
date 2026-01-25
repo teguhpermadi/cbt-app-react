@@ -471,103 +471,119 @@ export default function Edit({ questionBank, questions = [], subjects, readingMa
         <AppShell variant="header">
             <Head title={`Edit ${questionBank.name}`} />
 
-            {/* Custom Top Bar */}
-            <div className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background px-6 shadow-sm">
-                <Button variant="ghost" size="icon" asChild>
-                    <Link href={QuestionBankController.index().url}>
-                        <ArrowLeft className="h-5 w-5" />
-                    </Link>
-                </Button>
+            <Tabs defaultValue={defaultTab} className="flex flex-col h-full">
 
-                <div className="flex-1">
-                    <Input
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        className="h-10 text-lg font-semibold border-transparent focus-visible:ring-0 px-0 hover:border-input focus-visible:border-input focus-visible:px-3 transition-all max-w-md"
-                        placeholder="Nama Bank Soal"
-                    />
-                    {errors.name && <div className="text-sm text-red-500 mt-1">{errors.name}</div>}
-                </div>
-
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button variant="outline" size="icon">
-                            <Settings className="h-4 w-4" />
+                {/* Custom Top Bar */}
+                <div className="sticky top-0 z-30 bg-background border-b shadow-sm">
+                    <div className="flex h-16 items-center gap-4 px-6">
+                        <Button variant="ghost" size="icon" asChild>
+                            <Link href={QuestionBankController.index().url}>
+                                <ArrowLeft className="h-5 w-5" />
+                            </Link>
                         </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Pengaturan Bank Soal</DialogTitle>
-                            <DialogDescription>
-                                Ubah detail konfigurasi untuk bank soal ini.
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="grid gap-2">
-                                <Label htmlFor="subject">Mata Pelajaran</Label>
-                                <Select
-                                    value={data.subject_id.toString()}
-                                    onValueChange={(value) => setData('subject_id', parseInt(value))}
-                                >
-                                    <SelectTrigger id="subject">
-                                        <SelectValue placeholder="Pilih Mata Pelajaran" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {subjects.map((subject) => (
-                                            <SelectItem key={subject.id} value={subject.id.toString()}>
-                                                {subject.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.subject_id && <div className="text-sm text-red-500">{errors.subject_id}</div>}
-                            </div>
-                            <div className="grid gap-2">
-                                <Label htmlFor="description">Deskripsi</Label>
-                                <Textarea
-                                    id="description"
-                                    value={data.description}
-                                    onChange={(e) => setData('description', e.target.value)}
-                                    placeholder="Deskripsi singkat bank soal..."
-                                />
-                                {errors.description && <div className="text-sm text-red-500">{errors.description}</div>}
-                            </div>
-                            <div className="flex items-center justify-between rounded-lg border p-4">
-                                <div className="space-y-0.5">
-                                    <Label className="text-base">Publik</Label>
-                                    <div className="text-sm text-muted-foreground">
-                                        Izinkan bank soal ini diakses oleh guru lain.
+
+                        <div className="flex-1">
+                            <Input
+                                value={data.name}
+                                onChange={(e) => setData('name', e.target.value)}
+                                className="h-10 text-lg font-semibold border-transparent focus-visible:ring-0 px-0 hover:border-input focus-visible:border-input focus-visible:px-3 transition-all max-w-md"
+                                placeholder="Nama Bank Soal"
+                            />
+                            {errors.name && <div className="text-sm text-red-500 mt-1">{errors.name}</div>}
+                        </div>
+
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <Button variant="outline" size="icon">
+                                    <Settings className="h-4 w-4" />
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Pengaturan Bank Soal</DialogTitle>
+                                    <DialogDescription>
+                                        Ubah detail konfigurasi untuk bank soal ini.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="grid gap-4 py-4">
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="subject">Mata Pelajaran</Label>
+                                        <Select
+                                            value={data.subject_id.toString()}
+                                            onValueChange={(value) => setData('subject_id', parseInt(value))}
+                                        >
+                                            <SelectTrigger id="subject">
+                                                <SelectValue placeholder="Pilih Mata Pelajaran" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {subjects.map((subject) => (
+                                                    <SelectItem key={subject.id} value={subject.id.toString()}>
+                                                        {subject.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.subject_id && <div className="text-sm text-red-500">{errors.subject_id}</div>}
+                                    </div>
+                                    <div className="grid gap-2">
+                                        <Label htmlFor="description">Deskripsi</Label>
+                                        <Textarea
+                                            id="description"
+                                            value={data.description}
+                                            onChange={(e) => setData('description', e.target.value)}
+                                            placeholder="Deskripsi singkat bank soal..."
+                                        />
+                                        {errors.description && <div className="text-sm text-red-500">{errors.description}</div>}
+                                    </div>
+                                    <div className="flex items-center justify-between rounded-lg border p-4">
+                                        <div className="space-y-0.5">
+                                            <Label className="text-base">Publik</Label>
+                                            <div className="text-sm text-muted-foreground">
+                                                Izinkan bank soal ini diakses oleh guru lain.
+                                            </div>
+                                        </div>
+                                        <Switch
+                                            checked={data.is_public}
+                                            onCheckedChange={(checked) => setData('is_public', checked)}
+                                        />
                                     </div>
                                 </div>
-                                <Switch
-                                    checked={data.is_public}
-                                    onCheckedChange={(checked) => setData('is_public', checked)}
-                                />
-                            </div>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                            </DialogContent>
+                        </Dialog>
 
-                <Button onClick={handleOpenCreateExam}>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Buat Exam
-                </Button>
+                        <Button onClick={handleOpenCreateExam}>
+                            <Plus className="mr-2 h-4 w-4" />
+                            Buat Exam
+                        </Button>
 
-                <Button onClick={submit} disabled={processing || !isDirty}>
-                    <Save className="mr-2 h-4 w-4" />
-                    Simpan
-                </Button>
-            </div>
+                        <Button onClick={submit} disabled={processing || !isDirty}>
+                            <Save className="mr-2 h-4 w-4" />
+                            Simpan
+                        </Button>
+                    </div>
 
-            {/* Main Content */}
-            <div className="flex-1 overflow-auto p-6 bg-muted/10">
-                <div className="container max-w-7xl mx-auto space-y-6">
-
-                    <Tabs defaultValue={defaultTab} className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="questions">Daftar Pertanyaan</TabsTrigger>
-                            <TabsTrigger value="reading_materials">Bahan Bacaan</TabsTrigger>
+                    <div className="px-6">
+                        <TabsList className="w-full justify-start rounded-none border-b-0 bg-transparent p-0 h-auto">
+                            <TabsTrigger
+                                value="questions"
+                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+                            >
+                                Daftar Pertanyaan
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="reading_materials"
+                                className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none px-4 py-2"
+                            >
+                                Bahan Bacaan
+                            </TabsTrigger>
                         </TabsList>
+                    </div>
+                </div>
+
+                {/* Main Content */}
+                <div className="flex-1 overflow-auto p-6 bg-muted/10">
+
+                    <div className="container max-w-7xl mx-auto space-y-6 pt-6">
 
                         {/* QUESTIONS TAB */}
                         <TabsContent value="questions">
@@ -907,9 +923,10 @@ export default function Edit({ questionBank, questions = [], subjects, readingMa
                                 )}
                             </div>
                         </TabsContent>
-                    </Tabs>
+
+                    </div>
                 </div>
-            </div>
+            </Tabs>
 
             {/* CREATE READING MATERIAL DIALOG */}
             <Dialog open={isCreateReaderOpen} onOpenChange={setIsCreateReaderOpen}>
