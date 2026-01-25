@@ -283,7 +283,7 @@ take.head = (args: { exam: string | { id: string } } | [exam: string | { id: str
     take.form = takeForm
 /**
 * @see \App\Http\Controllers\Student\ExamController::saveAnswer
- * @see app/Http/Controllers/Student/ExamController.php:311
+ * @see app/Http/Controllers/Student/ExamController.php:318
  * @route '/student/exams/{exam}/save-answer'
  */
 export const saveAnswer = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -298,7 +298,7 @@ saveAnswer.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::saveAnswer
- * @see app/Http/Controllers/Student/ExamController.php:311
+ * @see app/Http/Controllers/Student/ExamController.php:318
  * @route '/student/exams/{exam}/save-answer'
  */
 saveAnswer.url = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -331,7 +331,7 @@ saveAnswer.url = (args: { exam: string | { id: string } } | [exam: string | { id
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::saveAnswer
- * @see app/Http/Controllers/Student/ExamController.php:311
+ * @see app/Http/Controllers/Student/ExamController.php:318
  * @route '/student/exams/{exam}/save-answer'
  */
 saveAnswer.post = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -341,7 +341,7 @@ saveAnswer.post = (args: { exam: string | { id: string } } | [exam: string | { i
 
     /**
 * @see \App\Http\Controllers\Student\ExamController::saveAnswer
- * @see app/Http/Controllers/Student/ExamController.php:311
+ * @see app/Http/Controllers/Student/ExamController.php:318
  * @route '/student/exams/{exam}/save-answer'
  */
     const saveAnswerForm = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -351,7 +351,7 @@ saveAnswer.post = (args: { exam: string | { id: string } } | [exam: string | { i
 
             /**
 * @see \App\Http\Controllers\Student\ExamController::saveAnswer
- * @see app/Http/Controllers/Student/ExamController.php:311
+ * @see app/Http/Controllers/Student/ExamController.php:318
  * @route '/student/exams/{exam}/save-answer'
  */
         saveAnswerForm.post = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -441,7 +441,7 @@ start.post = (args: { exam: string | { id: string } } | [exam: string | { id: st
     start.form = startForm
 /**
 * @see \App\Http\Controllers\Student\ExamController::finish
- * @see app/Http/Controllers/Student/ExamController.php:404
+ * @see app/Http/Controllers/Student/ExamController.php:411
  * @route '/student/exams/{exam}/finish'
  */
 export const finish = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -456,7 +456,7 @@ finish.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::finish
- * @see app/Http/Controllers/Student/ExamController.php:404
+ * @see app/Http/Controllers/Student/ExamController.php:411
  * @route '/student/exams/{exam}/finish'
  */
 finish.url = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -489,7 +489,7 @@ finish.url = (args: { exam: string | { id: string } } | [exam: string | { id: st
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::finish
- * @see app/Http/Controllers/Student/ExamController.php:404
+ * @see app/Http/Controllers/Student/ExamController.php:411
  * @route '/student/exams/{exam}/finish'
  */
 finish.post = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -499,7 +499,7 @@ finish.post = (args: { exam: string | { id: string } } | [exam: string | { id: s
 
     /**
 * @see \App\Http\Controllers\Student\ExamController::finish
- * @see app/Http/Controllers/Student/ExamController.php:404
+ * @see app/Http/Controllers/Student/ExamController.php:411
  * @route '/student/exams/{exam}/finish'
  */
     const finishForm = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -509,7 +509,7 @@ finish.post = (args: { exam: string | { id: string } } | [exam: string | { id: s
 
             /**
 * @see \App\Http\Controllers\Student\ExamController::finish
- * @see app/Http/Controllers/Student/ExamController.php:404
+ * @see app/Http/Controllers/Student/ExamController.php:411
  * @route '/student/exams/{exam}/finish'
  */
         finishForm.post = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -520,7 +520,7 @@ finish.post = (args: { exam: string | { id: string } } | [exam: string | { id: s
     finish.form = finishForm
 /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
 export const finished = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -535,7 +535,7 @@ finished.definition = {
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
 finished.url = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -568,7 +568,7 @@ finished.url = (args: { exam: string | { id: string } } | [exam: string | { id: 
 
 /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
 finished.get = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -577,7 +577,7 @@ finished.get = (args: { exam: string | { id: string } } | [exam: string | { id: 
 })
 /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
 finished.head = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -587,7 +587,7 @@ finished.head = (args: { exam: string | { id: string } } | [exam: string | { id:
 
     /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
     const finishedForm = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -597,7 +597,7 @@ finished.head = (args: { exam: string | { id: string } } | [exam: string | { id:
 
             /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
         finishedForm.get = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -606,7 +606,7 @@ finished.head = (args: { exam: string | { id: string } } | [exam: string | { id:
         })
             /**
 * @see \App\Http\Controllers\Student\ExamController::finished
- * @see app/Http/Controllers/Student/ExamController.php:444
+ * @see app/Http/Controllers/Student/ExamController.php:451
  * @route '/student/exams/{exam}/finished'
  */
         finishedForm.head = (args: { exam: string | { id: string } } | [exam: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

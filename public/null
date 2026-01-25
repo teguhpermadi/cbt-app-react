@@ -1,1 +1,15 @@
-ReadingMaterial::get()
+User::get()
+User::get();
+User::find('01kfsha5qgway618q2rehvyzfn');
+User::find('01kfsha5qgway618q2rehvyzfn')->assignRole('student');
+User::find('01kfsha5qgway618q2rehvyzfn')->assignRole('student');
+$user = User::find('01kfsha5qgway618q2rehvyzfn');
+$user->assignRole('student');
+$user = User::find('01kfsha5qgway618q2rehvyzfn');
+$user->assignRole('student');
+$user = User::find('01kfsha5qgway618q2rehvyzfn');
+$user->assignRole('student');
+$user = User::find('01kfsha5qgway618q2rehvyzfn');
+$user->assignRole('student');
+$user = User::find('01kfsha5qgway618q2rehvyzfn');
+$user->assignRole('student');

@@ -263,11 +263,12 @@ class ExamController extends Controller
         // Fetch questions ordered by 'question_number' persisted in ExamResultDetail
         // We join with exam_questions to get the content snapshot
         $questions = \App\Models\ExamResultDetail::where('exam_session_id', $session->id)
-            ->with('examQuestion') // Eager load exam question relationship
+            ->with(['examQuestion.originalQuestion.readingMaterial']) // Eager load exam question and reading material
             ->orderBy('question_number')
             ->get()
             ->map(function ($detail) use ($exam, $session) {
                 $examQuestion = $detail->examQuestion;
+                $readingMaterial = $examQuestion->originalQuestion?->readingMaterial;
 
                 // \Illuminate\Support\Facades\Log::info('ExamQuestion Media Debug:', [
                 //     'question_id' => $examQuestion->id,
@@ -289,6 +290,12 @@ class ExamController extends Controller
                         : (($detail->student_answer === 'null') ? null : $detail->student_answer),
                     'is_flagged' => (bool) $detail->is_flagged,
                     'media_url' => $examQuestion->media_path ? asset('storage/' . $examQuestion->media_path) : null,
+                    'reading_material' => $readingMaterial ? [
+                        'title' => $readingMaterial->title,
+                        'content' => $readingMaterial->content,
+                        'media_url' => $readingMaterial->media_url, // Accessor
+                        'media_type' => $readingMaterial->media_type, // Accessor
+                    ] : null,
                 ];
             });
 

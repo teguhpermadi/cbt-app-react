@@ -18,7 +18,9 @@ import {
     Lightbulb,
     Minus,
     Plus,
-    Type // Added
+    Type, // Added
+    BookOpen, // Added
+    FileText // Added for generic file icon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -40,6 +42,12 @@ interface Question {
     is_flagged: boolean;
     media_url?: string;
     hint?: string; // Added
+    reading_material?: {
+        title: string;
+        content: string;
+        media_url?: string;
+        media_type?: string;
+    };
 }
 
 interface Props {
@@ -474,6 +482,67 @@ export default function ExamTake({ exam, session, questions }: Props) {
 
                         <ScrollArea className="flex-1 bg-white dark:bg-slate-900">
                             <CardContent className="p-4 md:p-10 space-y-6 md:space-y-10">
+                                {/* Reading Material Section */}
+                                {questions[currentIndex].reading_material && (
+                                    <div className="bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden mb-8 shadow-sm">
+                                        <div className="bg-slate-100/50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 px-6 py-3 flex items-center gap-2">
+                                            <BookOpen className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                                            <span className="font-bold text-sm text-slate-700 dark:text-slate-300 uppercase tracking-wide">
+                                                Materi Bacaan
+                                            </span>
+                                        </div>
+                                        <div className="p-6">
+                                            <h3 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100 leading-tight">
+                                                {questions[currentIndex].reading_material.title}
+                                            </h3>
+
+                                            {questions[currentIndex].reading_material.media_url && (
+                                                <div className="mb-6 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
+                                                    {(() => {
+                                                        const { media_url, media_type } = questions[currentIndex].reading_material!;
+                                                        if (media_type?.startsWith('image/')) {
+                                                            return (
+                                                                <img
+                                                                    src={media_url}
+                                                                    alt="Reading Material"
+                                                                    className="w-full h-auto max-h-[500px] object-contain mx-auto"
+                                                                    onClick={() => handleImageClick(media_url!)}
+                                                                    style={{ cursor: 'pointer' }}
+                                                                />
+                                                            );
+                                                        } else if (media_type?.startsWith('audio/')) {
+                                                            return <audio controls src={media_url} className="w-full mt-2" />;
+                                                        } else if (media_type?.startsWith('video/')) {
+                                                            return <video controls src={media_url} className="w-full max-h-[500px]" />;
+                                                        } else if (media_type === 'application/pdf') {
+                                                            return <iframe src={media_url} className="w-full h-[600px] border-0" title="PDF Viewer"></iframe>;
+                                                        }
+                                                        return (
+                                                            <div className="p-4 flex items-center gap-3">
+                                                                <FileText className="w-8 h-8 text-slate-400" />
+                                                                <div className="flex-1">
+                                                                    <p className="text-sm font-medium">File Lampiran</p>
+                                                                    <a href={media_url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline">
+                                                                        Download / Buka File
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })()}
+                                                </div>
+                                            )}
+
+                                            <div
+                                                className={cn(
+                                                    "prose prose-sm md:prose-base dark:prose-invert max-w-none text-slate-700 dark:text-slate-300 leading-relaxed",
+                                                    currentFontSizeClass
+                                                )}
+                                                dangerouslySetInnerHTML={{ __html: questions[currentIndex].reading_material.content }}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
                                 {/* Question Content */}
                                 <div className={cn("leading-relaxed text-slate-800 dark:text-slate-200", currentFontSizeClass)} key={`question-content-${currentIndex}`}>
                                     {questions[currentIndex].media_url && (
