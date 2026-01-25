@@ -50,6 +50,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
             Route::group(['middleware' => ['role:admin']], function () {
                 Route::resource('users', UserController::class);
+                Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+                Route::resource('permissions', \App\Http\Controllers\Admin\PermissionController::class);
                 Route::resource('subjects', App\Http\Controllers\Admin\SubjectController::class);
                 Route::resource('academic-years', AcademicYearController::class);
                 Route::get('students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');

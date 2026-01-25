@@ -1,4 +1,6 @@
 import UserController from './UserController'
+import RoleController from './RoleController'
+import PermissionController from './PermissionController'
 import SubjectController from './SubjectController'
 import AcademicYearController from './AcademicYearController'
 import StudentController from './StudentController'
@@ -14,6 +16,8 @@ import QuestionController from './QuestionController'
 import QuestionSuggestionController from './QuestionSuggestionController'
 const Admin = {
     UserController: Object.assign(UserController, UserController),
+RoleController: Object.assign(RoleController, RoleController),
+PermissionController: Object.assign(PermissionController, PermissionController),
 SubjectController: Object.assign(SubjectController, SubjectController),
 AcademicYearController: Object.assign(AcademicYearController, AcademicYearController),
 StudentController: Object.assign(StudentController, StudentController),

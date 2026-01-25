@@ -170,6 +170,36 @@ export default function Index({ users, roles }: IndexProps) {
                                         </Select>
                                         <InputError message={createForm.errors.user_type} />
                                     </div>
+                                    <div className="space-y-2">
+                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Roles</Label>
+                                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-3 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                                            {roles.map((role) => (
+                                                <div key={role.id} className="flex items-center space-x-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        id={`create-role-${role.id}`}
+                                                        className="rounded border-slate-300 text-primary shadow-sm focus:ring-primary"
+                                                        checked={createForm.data.roles.includes(role.name)}
+                                                        onChange={(e) => {
+                                                            const checked = e.target.checked;
+                                                            const currentRoles = createForm.data.roles;
+                                                            if (checked) {
+                                                                createForm.setData('roles', [...currentRoles, role.name]);
+                                                            } else {
+                                                                createForm.setData('roles', currentRoles.filter(r => r !== role.name));
+                                                            }
+                                                        }}
+                                                    />
+                                                    <label
+                                                        htmlFor={`create-role-${role.id}`}
+                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                                                    >
+                                                        {role.name}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
                                 </div>
                                 <DialogFooter>
                                     <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
@@ -287,6 +317,36 @@ export default function Index({ users, roles }: IndexProps) {
                                     </SelectContent>
                                 </Select>
                                 <InputError message={editForm.errors.user_type} />
+                            </div>
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Roles</Label>
+                                <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-3 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                                    {roles.map((role) => (
+                                        <div key={role.id} className="flex items-center space-x-2">
+                                            <input
+                                                type="checkbox"
+                                                id={`edit-role-${role.id}`}
+                                                className="rounded border-slate-300 text-primary shadow-sm focus:ring-primary"
+                                                checked={editForm.data.roles.includes(role.name)}
+                                                onChange={(e) => {
+                                                    const checked = e.target.checked;
+                                                    const currentRoles = editForm.data.roles;
+                                                    if (checked) {
+                                                        editForm.setData('roles', [...currentRoles, role.name]);
+                                                    } else {
+                                                        editForm.setData('roles', currentRoles.filter(r => r !== role.name));
+                                                    }
+                                                }}
+                                            />
+                                            <label
+                                                htmlFor={`edit-role-${role.id}`}
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                                            >
+                                                {role.name}
+                                            </label>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <DialogFooter>

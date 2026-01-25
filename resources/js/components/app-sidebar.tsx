@@ -37,6 +37,16 @@ export function AppSidebar() {
             icon: Users,
         },
         {
+            title: 'Roles',
+            href: '/admin/roles',
+            icon: FileText,
+        },
+        {
+            title: 'Permissions',
+            href: '/admin/permissions',
+            icon: Folder,
+        },
+        {
             title: 'Student Management',
             href: '/admin/students',
             icon: GraduationCap,
