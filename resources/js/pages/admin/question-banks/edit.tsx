@@ -59,6 +59,7 @@ import QuestionCard from '@/components/app/questions/QuestionCard';
 import { Question } from '@/components/app/questions/types';
 import { UploadQuestionsModal } from '@/components/admin/question-banks/upload-questions-modal';
 import { TimerTypeSelector } from '@/components/app/timer-type-selector';
+import QuestionNavigation from '@/components/app/questions/QuestionNavigation';
 
 
 
@@ -257,6 +258,21 @@ export default function Edit({ questionBank, questions = [], subjects, readingMa
                 setIsGeneratingTags(false);
             },
         });
+    };
+
+    const scrollToQuestion = (index: number) => {
+        const element = document.getElementById(`question-index-${index}`);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Provide visual feedback
+            const cardElement = element.querySelector('.question-card-inner') || element;
+            cardElement.classList.add('ring-2', 'ring-primary', 'ring-offset-2');
+            setTimeout(() => cardElement.classList.remove('ring-2', 'ring-primary', 'ring-offset-2'), 2000);
+        }
+    };
+
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     // Create Exam State
@@ -545,7 +561,7 @@ export default function Edit({ questionBank, questions = [], subjects, readingMa
 
             {/* Main Content */}
             <div className="flex-1 overflow-auto p-6 bg-muted/10">
-                <div className="max-w-4xl mx-auto space-y-6">
+                <div className="container max-w-7xl mx-auto space-y-6">
 
                     <Tabs defaultValue={defaultTab} className="w-full">
                         <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -554,220 +570,234 @@ export default function Edit({ questionBank, questions = [], subjects, readingMa
                         </TabsList>
 
                         {/* QUESTIONS TAB */}
-                        <TabsContent value="questions" className="space-y-6">
-                            {/* AI Question Generator Card */}
-                            <Card className="border-primary/20">
-                                <CardContent className="pt-6">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <Sparkles className="h-5 w-5 text-primary" />
-                                        <h3 className="text-lg font-semibold">Generator Soal AI</h3>
-                                    </div>
-                                    <form onSubmit={submitAIGeneration} className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div className="space-y-2 md:col-span-2">
-                                                <Label htmlFor="topic">Topik Soal</Label>
-                                                <Input
-                                                    id="topic"
-                                                    value={aiForm.data.topic}
-                                                    onChange={(e) => aiForm.setData('topic', e.target.value)}
-                                                    placeholder="Contoh: Sistem Pernapasan Manusia"
-                                                    required
-                                                />
-                                                {aiForm.errors.topic && (
-                                                    <div className="text-sm text-red-500">{aiForm.errors.topic}</div>
-                                                )}
+                        <TabsContent value="questions">
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                <div className="lg:col-span-10 space-y-6">
+                                    {/* AI Question Generator Card */}
+                                    <Card className="border-primary/20">
+                                        <CardContent className="pt-6">
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <Sparkles className="h-5 w-5 text-primary" />
+                                                <h3 className="text-lg font-semibold">Generator Soal AI</h3>
                                             </div>
+                                            <form onSubmit={submitAIGeneration} className="space-y-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                    <div className="space-y-2 md:col-span-2">
+                                                        <Label htmlFor="topic">Topik Soal</Label>
+                                                        <Input
+                                                            id="topic"
+                                                            value={aiForm.data.topic}
+                                                            onChange={(e) => aiForm.setData('topic', e.target.value)}
+                                                            placeholder="Contoh: Sistem Pernapasan Manusia"
+                                                            required
+                                                        />
+                                                        {aiForm.errors.topic && (
+                                                            <div className="text-sm text-red-500">{aiForm.errors.topic}</div>
+                                                        )}
+                                                    </div>
 
-                                            <div className="space-y-2">
-                                                <Label htmlFor="question_type">Tipe Soal</Label>
-                                                <Select
-                                                    value={aiForm.data.question_type}
-                                                    onValueChange={(value) => aiForm.setData('question_type', value)}
-                                                >
-                                                    <SelectTrigger id="question_type">
-                                                        <SelectValue placeholder="Pilih Tipe Soal" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="multiple_choice">Pilihan Ganda (Tunggal)</SelectItem>
-                                                        <SelectItem value="true_false">Benar/Salah</SelectItem>
-                                                        <SelectItem value="essay">Esai/Uraian</SelectItem>
-                                                        <SelectItem value="matching">Menjodohkan</SelectItem>
-                                                        <SelectItem value="ordering">Mengurutkan</SelectItem>
-                                                        <SelectItem value="multiple_selection">Pilihan Ganda Kompleks</SelectItem>
-                                                        <SelectItem value="numerical_input">Input Angka</SelectItem>
-                                                        <SelectItem value="arrange_words">Susun Kata</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                {aiForm.errors.question_type && (
-                                                    <div className="text-sm text-red-500">{aiForm.errors.question_type}</div>
-                                                )}
-                                            </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="question_type">Tipe Soal</Label>
+                                                        <Select
+                                                            value={aiForm.data.question_type}
+                                                            onValueChange={(value) => aiForm.setData('question_type', value)}
+                                                        >
+                                                            <SelectTrigger id="question_type">
+                                                                <SelectValue placeholder="Pilih Tipe Soal" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="multiple_choice">Pilihan Ganda (Tunggal)</SelectItem>
+                                                                <SelectItem value="true_false">Benar/Salah</SelectItem>
+                                                                <SelectItem value="essay">Esai/Uraian</SelectItem>
+                                                                <SelectItem value="matching">Menjodohkan</SelectItem>
+                                                                <SelectItem value="ordering">Mengurutkan</SelectItem>
+                                                                <SelectItem value="multiple_selection">Pilihan Ganda Kompleks</SelectItem>
+                                                                <SelectItem value="numerical_input">Input Angka</SelectItem>
+                                                                <SelectItem value="arrange_words">Susun Kata</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {aiForm.errors.question_type && (
+                                                            <div className="text-sm text-red-500">{aiForm.errors.question_type}</div>
+                                                        )}
+                                                    </div>
 
-                                            <div className="space-y-2">
-                                                <Label htmlFor="count">Jumlah Soal</Label>
-                                                <Input
-                                                    id="count"
-                                                    type="number"
-                                                    min="1"
-                                                    max="5"
-                                                    value={aiForm.data.count}
-                                                    onChange={(e) => aiForm.setData('count', parseInt(e.target.value))}
-                                                    required
-                                                />
-                                                {aiForm.errors.count && (
-                                                    <div className="text-sm text-red-500">{aiForm.errors.count}</div>
-                                                )}
-                                            </div>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="count">Jumlah Soal</Label>
+                                                        <Input
+                                                            id="count"
+                                                            type="number"
+                                                            min="1"
+                                                            max="5"
+                                                            value={aiForm.data.count}
+                                                            onChange={(e) => aiForm.setData('count', parseInt(e.target.value))}
+                                                            required
+                                                        />
+                                                        {aiForm.errors.count && (
+                                                            <div className="text-sm text-red-500">{aiForm.errors.count}</div>
+                                                        )}
+                                                    </div>
 
-                                            <div className="space-y-2">
-                                                <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
-                                                <Select
-                                                    value={aiForm.data.difficulty}
-                                                    onValueChange={(value) => aiForm.setData('difficulty', value)}
-                                                >
-                                                    <SelectTrigger id="difficulty">
-                                                        <SelectValue placeholder="Pilih Kesulitan" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="mudah">Mudah</SelectItem>
-                                                        <SelectItem value="sedang">Sedang</SelectItem>
-                                                        <SelectItem value="sulit">Sulit</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                {aiForm.errors.difficulty && (
-                                                    <div className="text-sm text-red-500">{aiForm.errors.difficulty}</div>
-                                                )}
-                                            </div>
-                                        </div>
-
-                                        <Button type="submit" disabled={aiForm.processing || isGenerating} className="w-full sm:w-auto">
-                                            {isGenerating ? (
-                                                <>
-                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                    Sedang Membuat Soal...
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <Sparkles className="mr-2 h-4 w-4" />
-                                                    {aiForm.processing ? 'Mengirim...' : 'Generate Soal dengan AI'}
-                                                </>
-                                            )}
-                                        </Button>
-
-                                        <p className="text-xs text-muted-foreground">
-                                            💡 AI akan membuat soal berdasarikan topik dan parameter yang Anda berikan. Proses ini mungkin memakan waktu beberapa menit.
-                                        </p>
-                                    </form>
-                                </CardContent>
-                            </Card>
-
-                            {/* AI Generation Progress Indicator */}
-                            {isGenerating && (
-                                <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
-                                    <CardContent className="pt-6">
-                                        <div className="flex items-center gap-3">
-                                            <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-                                            <div className="flex-1">
-                                                <h4 className="font-semibold text-blue-900 dark:text-blue-100">
-                                                    AI sedang membuat soal...
-                                                </h4>
-                                                <p className="text-sm text-blue-700 dark:text-blue-300">
-                                                    Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            )}
-
-                            {/* AI Tag Generator Card */}
-                            {questions.length > 0 && (
-                                <Card className="border-purple-500/20">
-                                    <CardContent className="pt-6">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-2">
-                                                <Sparkles className="h-5 w-5 text-purple-500" />
-                                                <div>
-                                                    <h3 className="text-lg font-semibold">Generator Tag AI</h3>
-                                                    <p className="text-sm text-muted-foreground">
-                                                        Buat tag otomatis untuk semua pertanyaan ({questions.length} soal)
-                                                    </p>
+                                                    <div className="space-y-2">
+                                                        <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
+                                                        <Select
+                                                            value={aiForm.data.difficulty}
+                                                            onValueChange={(value) => aiForm.setData('difficulty', value)}
+                                                        >
+                                                            <SelectTrigger id="difficulty">
+                                                                <SelectValue placeholder="Pilih Kesulitan" />
+                                                            </SelectTrigger>
+                                                            <SelectContent>
+                                                                <SelectItem value="mudah">Mudah</SelectItem>
+                                                                <SelectItem value="sedang">Sedang</SelectItem>
+                                                                <SelectItem value="sulit">Sulit</SelectItem>
+                                                            </SelectContent>
+                                                        </Select>
+                                                        {aiForm.errors.difficulty && (
+                                                            <div className="text-sm text-red-500">{aiForm.errors.difficulty}</div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <Button
-                                                onClick={handleGenerateTags}
-                                                disabled={isGeneratingTags}
-                                                variant="outline"
-                                                className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
-                                            >
-                                                {isGeneratingTags ? (
-                                                    <>
-                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                        Sedang Membuat Tag...
-                                                    </>
-                                                ) : (
-                                                    <>
-                                                        <Sparkles className="mr-2 h-4 w-4" />
-                                                        Generate Tag dengan AI
-                                                    </>
-                                                )}
+
+                                                <Button type="submit" disabled={aiForm.processing || isGenerating} className="w-full sm:w-auto">
+                                                    {isGenerating ? (
+                                                        <>
+                                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                            Sedang Membuat Soal...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles className="mr-2 h-4 w-4" />
+                                                            {aiForm.processing ? 'Mengirim...' : 'Generate Soal dengan AI'}
+                                                        </>
+                                                    )}
+                                                </Button>
+
+                                                <p className="text-xs text-muted-foreground">
+                                                    💡 AI akan membuat soal berdasarikan topik dan parameter yang Anda berikan. Proses ini mungkin memakan waktu beberapa menit.
+                                                </p>
+                                            </form>
+                                        </CardContent>
+                                    </Card>
+
+                                    {/* AI Generation Progress Indicator */}
+                                    {isGenerating && (
+                                        <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+                                            <CardContent className="pt-6">
+                                                <div className="flex items-center gap-3">
+                                                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                                                    <div className="flex-1">
+                                                        <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                                                            AI sedang membuat soal...
+                                                        </h4>
+                                                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                            Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
+                                    {/* AI Tag Generator Card */}
+                                    {questions.length > 0 && (
+                                        <Card className="border-purple-500/20">
+                                            <CardContent className="pt-6">
+                                                <div className="flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <Sparkles className="h-5 w-5 text-purple-500" />
+                                                        <div>
+                                                            <h3 className="text-lg font-semibold">Generator Tag AI</h3>
+                                                            <p className="text-sm text-muted-foreground">
+                                                                Buat tag otomatis untuk semua pertanyaan ({questions.length} soal)
+                                                            </p>
+                                                        </div>
+                                                    </div>
+                                                    <Button
+                                                        onClick={handleGenerateTags}
+                                                        disabled={isGeneratingTags}
+                                                        variant="outline"
+                                                        className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
+                                                    >
+                                                        {isGeneratingTags ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                Sedang Membuat Tag...
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Sparkles className="mr-2 h-4 w-4" />
+                                                                Generate Tag dengan AI
+                                                            </>
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+
+                                    {/* Header for Questions Section */}
+                                    <div className="flex items-center justify-between">
+                                        <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
+                                        <div className="flex items-center gap-2">
+                                            <UploadQuestionsModal questionBankId={questionBank.id} />
+                                            <Button size="sm" variant="outline" asChild>
+                                                <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                                    Tambah Pertanyaan
+                                                </Link>
                                             </Button>
                                         </div>
-                                    </CardContent>
-                                </Card>
-                            )}
+                                    </div>
 
-                            {/* Header for Questions Section */}
-                            <div className="flex items-center justify-between">
-                                <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
-                                <div className="flex items-center gap-2">
-                                    <UploadQuestionsModal questionBankId={questionBank.id} />
-                                    <Button size="sm" variant="outline" asChild>
-                                        <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
-                                            Tambah Pertanyaan
-                                        </Link>
-                                    </Button>
+                                    {questions.length > 0 ? (
+                                        <DndContext
+                                            sensors={sensors}
+                                            collisionDetection={closestCenter}
+                                            onDragEnd={handleDragEnd}
+                                        >
+                                            <SortableContext
+                                                items={sortedQuestions.map(q => q.id)}
+                                                strategy={verticalListSortingStrategy}
+                                            >
+                                                <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
+                                                    {sortedQuestions.map((question, index) => (
+                                                        <div key={question.id} id={`question-index-${index}`} className="scroll-mt-24">
+                                                            <SortableQuestionCard
+                                                                id={`question-${question.id}`}
+                                                                question={question}
+                                                                onUpdate={handleQuestionUpdate}
+                                                                onDelete={handleQuestionDelete}
+                                                                onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
+                                                            />
+                                                            <InsertQuestionIndicator order={index + 2} />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </SortableContext>
+                                        </DndContext>
+                                    ) : (
+                                        <Card className="min-h-[300px] flex items-center justify-center border-dashed">
+                                            <CardContent className="text-center text-muted-foreground">
+                                                <p>Belum ada pertanyaan di bank soal ini.</p>
+                                                <Button variant="link" className="mt-2" asChild>
+                                                    <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                                        Buat Pertanyaan Baru
+                                                    </Link>
+                                                </Button>
+                                            </CardContent>
+                                        </Card>
+                                    )}
+                                </div>
+                                <div className="hidden lg:block lg:col-span-2 relative">
+                                    {/* Placeholder to keep grid column width */}
+                                    <div className="absolute inset-0" />
+                                    <QuestionNavigation
+                                        className="fixed top-44 right-8 w-50 z-40"
+                                        totalQuestions={questions.length}
+                                        onQuestionClick={scrollToQuestion}
+                                        onScrollToTop={scrollToTop}
+                                    />
                                 </div>
                             </div>
-
-                            {questions.length > 0 ? (
-                                <DndContext
-                                    sensors={sensors}
-                                    collisionDetection={closestCenter}
-                                    onDragEnd={handleDragEnd}
-                                >
-                                    <SortableContext
-                                        items={sortedQuestions.map(q => q.id)}
-                                        strategy={verticalListSortingStrategy}
-                                    >
-                                        <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
-                                            {sortedQuestions.map((question, index) => (
-                                                <div key={question.id}>
-                                                    <SortableQuestionCard
-                                                        id={`question-${question.id}`}
-                                                        question={question}
-                                                        onUpdate={handleQuestionUpdate}
-                                                        onDelete={handleQuestionDelete}
-                                                        onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
-                                                    />
-                                                    <InsertQuestionIndicator order={index + 2} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </SortableContext>
-                                </DndContext>
-                            ) : (
-                                <Card className="min-h-[300px] flex items-center justify-center border-dashed">
-                                    <CardContent className="text-center text-muted-foreground">
-                                        <p>Belum ada pertanyaan di bank soal ini.</p>
-                                        <Button variant="link" className="mt-2" asChild>
-                                            <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
-                                                Buat Pertanyaan Baru
-                                            </Link>
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            )}
                         </TabsContent>
 
                         {/* READING MATERIALS TAB */}

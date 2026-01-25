@@ -7,22 +7,24 @@ interface QuestionNavigationProps {
     currentQuestionId?: string; // Optional: to highlight current matching question if tracking scroll
     onQuestionClick: (index: number) => void;
     onScrollToTop: () => void;
+    className?: string;
 }
 
 export default function QuestionNavigation({
     totalQuestions,
     onQuestionClick,
-    onScrollToTop
+    onScrollToTop,
+    className
 }: QuestionNavigationProps) {
     return (
         <>
-            <div className="sticky top-24 space-y-4">
+            <div className={cn("sticky top-24 space-y-4", className)}>
                 <div className="bg-card border rounded-lg shadow-sm p-4">
                     <div className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wider text-center">
                         Navigasi Soal
                     </div>
 
-                    <div className="flex flex-wrap gap-2 justify-center max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
+                    <div className="grid grid-cols-4 gap-2 justify-items-center max-h-[60vh] overflow-y-auto custom-scrollbar p-1">
                         {Array.from({ length: totalQuestions }).map((_, index) => (
                             <Button
                                 key={index}
