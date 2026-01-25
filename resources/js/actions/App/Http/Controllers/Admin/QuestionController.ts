@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::reorder
- * @see app/Http/Controllers/Admin/QuestionController.php:280
+ * @see app/Http/Controllers/Admin/QuestionController.php:298
  * @route '/admin/questions/reorder'
  */
 export const reorder = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ reorder.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::reorder
- * @see app/Http/Controllers/Admin/QuestionController.php:280
+ * @see app/Http/Controllers/Admin/QuestionController.php:298
  * @route '/admin/questions/reorder'
  */
 reorder.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ reorder.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::reorder
- * @see app/Http/Controllers/Admin/QuestionController.php:280
+ * @see app/Http/Controllers/Admin/QuestionController.php:298
  * @route '/admin/questions/reorder'
  */
 reorder.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ reorder.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::reorder
- * @see app/Http/Controllers/Admin/QuestionController.php:280
+ * @see app/Http/Controllers/Admin/QuestionController.php:298
  * @route '/admin/questions/reorder'
  */
     const reorderForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ reorder.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::reorder
- * @see app/Http/Controllers/Admin/QuestionController.php:280
+ * @see app/Http/Controllers/Admin/QuestionController.php:298
  * @route '/admin/questions/reorder'
  */
         reorderForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -56,7 +56,7 @@ reorder.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
     reorder.form = reorderForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
 export const searchTags = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -71,7 +71,7 @@ searchTags.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
 searchTags.url = (options?: RouteQueryOptions) => {
@@ -80,7 +80,7 @@ searchTags.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
 searchTags.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -89,7 +89,7 @@ searchTags.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
 searchTags.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -99,7 +99,7 @@ searchTags.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
     const searchTagsForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -109,7 +109,7 @@ searchTags.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
         searchTagsForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -118,7 +118,7 @@ searchTags.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::searchTags
- * @see app/Http/Controllers/Admin/QuestionController.php:307
+ * @see app/Http/Controllers/Admin/QuestionController.php:325
  * @route '/admin/tags/search'
  */
         searchTagsForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -290,7 +290,7 @@ create.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     create.form = createForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::store
- * @see app/Http/Controllers/Admin/QuestionController.php:40
+ * @see app/Http/Controllers/Admin/QuestionController.php:47
  * @route '/admin/questions'
  */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -305,7 +305,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::store
- * @see app/Http/Controllers/Admin/QuestionController.php:40
+ * @see app/Http/Controllers/Admin/QuestionController.php:47
  * @route '/admin/questions'
  */
 store.url = (options?: RouteQueryOptions) => {
@@ -314,7 +314,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::store
- * @see app/Http/Controllers/Admin/QuestionController.php:40
+ * @see app/Http/Controllers/Admin/QuestionController.php:47
  * @route '/admin/questions'
  */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -324,7 +324,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::store
- * @see app/Http/Controllers/Admin/QuestionController.php:40
+ * @see app/Http/Controllers/Admin/QuestionController.php:47
  * @route '/admin/questions'
  */
     const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -334,7 +334,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::store
- * @see app/Http/Controllers/Admin/QuestionController.php:40
+ * @see app/Http/Controllers/Admin/QuestionController.php:47
  * @route '/admin/questions'
  */
         storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -442,7 +442,7 @@ show.head = (args: { question: string | number } | [question: string | number ] 
     show.form = showForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
 export const edit = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -457,7 +457,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
 edit.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -490,7 +490,7 @@ edit.url = (args: { question: string | { id: string } } | [question: string | { 
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
 edit.get = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -499,7 +499,7 @@ edit.get = (args: { question: string | { id: string } } | [question: string | { 
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
 edit.head = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -509,7 +509,7 @@ edit.head = (args: { question: string | { id: string } } | [question: string | {
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
     const editForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -519,7 +519,7 @@ edit.head = (args: { question: string | { id: string } } | [question: string | {
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
         editForm.get = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -528,7 +528,7 @@ edit.head = (args: { question: string | { id: string } } | [question: string | {
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::edit
- * @see app/Http/Controllers/Admin/QuestionController.php:133
+ * @see app/Http/Controllers/Admin/QuestionController.php:147
  * @route '/admin/questions/{question}/edit'
  */
         editForm.head = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -544,7 +544,7 @@ edit.head = (args: { question: string | { id: string } } | [question: string | {
     edit.form = editForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
 export const update = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -559,7 +559,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
 update.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -592,7 +592,7 @@ update.url = (args: { question: string | { id: string } } | [question: string | 
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
 update.put = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -601,7 +601,7 @@ update.put = (args: { question: string | { id: string } } | [question: string | 
 })
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
 update.patch = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -611,7 +611,7 @@ update.patch = (args: { question: string | { id: string } } | [question: string 
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
     const updateForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -626,7 +626,7 @@ update.patch = (args: { question: string | { id: string } } | [question: string 
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
         updateForm.put = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -640,7 +640,7 @@ update.patch = (args: { question: string | { id: string } } | [question: string 
         })
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::update
- * @see app/Http/Controllers/Admin/QuestionController.php:157
+ * @see app/Http/Controllers/Admin/QuestionController.php:171
  * @route '/admin/questions/{question}'
  */
         updateForm.patch = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -656,7 +656,7 @@ update.patch = (args: { question: string | { id: string } } | [question: string 
     update.form = updateForm
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionController.php:297
+ * @see app/Http/Controllers/Admin/QuestionController.php:315
  * @route '/admin/questions/{question}'
  */
 export const destroy = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -671,7 +671,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionController.php:297
+ * @see app/Http/Controllers/Admin/QuestionController.php:315
  * @route '/admin/questions/{question}'
  */
 destroy.url = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions) => {
@@ -704,7 +704,7 @@ destroy.url = (args: { question: string | { id: string } } | [question: string |
 
 /**
 * @see \App\Http\Controllers\Admin\QuestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionController.php:297
+ * @see app/Http/Controllers/Admin/QuestionController.php:315
  * @route '/admin/questions/{question}'
  */
 destroy.delete = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -714,7 +714,7 @@ destroy.delete = (args: { question: string | { id: string } } | [question: strin
 
     /**
 * @see \App\Http\Controllers\Admin\QuestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionController.php:297
+ * @see app/Http/Controllers/Admin/QuestionController.php:315
  * @route '/admin/questions/{question}'
  */
     const destroyForm = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -729,7 +729,7 @@ destroy.delete = (args: { question: string | { id: string } } | [question: strin
 
             /**
 * @see \App\Http\Controllers\Admin\QuestionController::destroy
- * @see app/Http/Controllers/Admin/QuestionController.php:297
+ * @see app/Http/Controllers/Admin/QuestionController.php:315
  * @route '/admin/questions/{question}'
  */
         destroyForm.delete = (args: { question: string | { id: string } } | [question: string | { id: string } ] | string | { id: string }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

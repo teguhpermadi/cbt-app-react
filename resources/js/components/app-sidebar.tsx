@@ -17,7 +17,7 @@ import { dashboard as adminDashboard } from '@/routes/admin';
 import { dashboard as studentDashboard } from '@/routes/student';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList, MessageSquare } from 'lucide-react';
+import { BookOpen, Folder, LayoutGrid, Users, GraduationCap, Calendar, ClipboardList, MessageSquare, FileText } from 'lucide-react';
 import AppLogoIcon from './app-logo-icon';
 import AppLogo from './app-logo';
 import { usePermission } from '@/hooks/usePermission';
@@ -56,6 +56,7 @@ export function AppSidebar() {
             href: gradesIndex(),
             icon: GraduationCap,
         },
+
         {
             title: 'Bank Soal',
             href: '/admin/question-banks',
@@ -80,6 +81,7 @@ export function AppSidebar() {
             href: adminDashboard(),
             icon: LayoutGrid,
         },
+
         {
             title: 'Bank Soal',
             href: '/admin/question-banks',

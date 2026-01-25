@@ -22,10 +22,17 @@ class QuestionController extends Controller
     {
         $request->validate([
             'question_bank_id' => 'required|exists:question_banks,id',
+            'reading_material_id' => 'nullable|exists:reading_materials,id',
         ]);
+
+        $readingMaterial = null;
+        if ($request->reading_material_id) {
+            $readingMaterial = \App\Models\ReadingMaterial::find($request->reading_material_id);
+        }
 
         return Inertia::render('admin/questions/create', [
             'question_bank_id' => $request->question_bank_id,
+            'reading_material' => $readingMaterial, // Pass full object or null
             'types' => QuestionTypeEnum::cases(),
             'difficulties' => DifficultyLevelEnum::cases(),
             'timers' => TimerEnum::cases(),
@@ -42,6 +49,7 @@ class QuestionController extends Controller
         // 1. Validate Basic Question Data
         $validated = $request->validate([
             'question_bank_id' => 'required|exists:question_banks,id',
+            'reading_material_id' => 'nullable|exists:reading_materials,id',
             'content' => 'required|string',
             'hint' => 'nullable|string',
             'question_type' => ['required', 'string', \Illuminate\Validation\Rule::in(array_column(QuestionTypeEnum::cases(), 'value'))],
@@ -74,6 +82,7 @@ class QuestionController extends Controller
 
             $question = Question::create([
                 'question_bank_id' => $validated['question_bank_id'],
+                'reading_material_id' => $validated['reading_material_id'] ?? null,
                 'author_id' => auth()->id(),
                 'content' => $validated['content'],
                 'hint' => $validated['hint'] ?? null,
@@ -121,6 +130,11 @@ class QuestionController extends Controller
             return $question;
         });
 
+        if ($question->reading_material_id) {
+            return to_route('admin.reading-materials.edit', $question->reading_material_id)
+                ->with('success', 'Soal berhasil dibuat.');
+        }
+
         return to_route('admin.question-banks.edit', [
             'question_bank' => $question->question_bank_id,
             'scrollTo' => "question-{$question->id}"
@@ -158,6 +172,7 @@ class QuestionController extends Controller
     {
         // 1. Validate Question Data - Support partial updates
         $validated = $request->validate([
+            'reading_material_id' => 'sometimes|nullable|exists:reading_materials,id',
             'content' => 'sometimes|required|string',
             'hint' => 'nullable|string',
             'question_type' => ['sometimes', 'required', 'string', \Illuminate\Validation\Rule::in(array_column(QuestionTypeEnum::cases(), 'value'))],
@@ -183,6 +198,9 @@ class QuestionController extends Controller
 
             if (isset($validated['content'])) {
                 $updateData['content'] = $validated['content'];
+            }
+            if (array_key_exists('reading_material_id', $validated)) {
+                $updateData['reading_material_id'] = $validated['reading_material_id'];
             }
             if ($request->has('hint')) {
                 $updateData['hint'] = $validated['hint'] ?? null;

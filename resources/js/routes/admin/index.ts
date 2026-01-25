@@ -6,6 +6,7 @@ import students from './students'
 import grades from './grades'
 import exams from './exams'
 import questionBanks from './question-banks'
+import readingMaterials from './reading-materials'
 import questions from './questions'
 import tags from './tags'
 import questionSuggestions from './question-suggestions'
@@ -96,6 +97,7 @@ students: Object.assign(students, students),
 grades: Object.assign(grades, grades),
 exams: Object.assign(exams, exams),
 questionBanks: Object.assign(questionBanks, questionBanks),
+readingMaterials: Object.assign(readingMaterials, readingMaterials),
 questions: Object.assign(questions, questions),
 tags: Object.assign(tags, tags),
 questionSuggestions: Object.assign(questionSuggestions, questionSuggestions),

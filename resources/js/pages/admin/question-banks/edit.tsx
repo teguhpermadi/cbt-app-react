@@ -25,7 +25,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { MultiSelect } from '@/components/ui/multi-select';
 import InputError from '@/components/input-error';
 import { Head, Link, useForm, router } from '@inertiajs/react';
-import { ArrowLeft, Save, Plus, Settings, Sparkles, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Plus, Settings, Sparkles, Loader2, FileText, Globe, Lock, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'; // Added icons
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; // Added Tabs
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'; // Added Dropdown
 import { FormEventHandler } from 'react';
 import { useDebounce } from 'use-debounce';
 
@@ -62,6 +64,7 @@ import { TimerTypeSelector } from '@/components/app/timer-type-selector';
 
 
 import 'katex/dist/katex.min.css';
+import ReadingMaterialController from '@/actions/App/Http/Controllers/Admin/ReadingMaterialController';
 
 interface QuestionBank {
     id: number;
@@ -112,11 +115,14 @@ interface CreateExamFormData {
 
 interface EditProps {
     questionBank: QuestionBank;
-    questions?: Question[];
-    subjects: Subject[];
+    readingMaterials?: any[]; // Added
 }
 
-export default function Edit({ questionBank, questions = [], subjects }: EditProps) {
+export default function Edit({ questionBank, questions = [], subjects, readingMaterials = [] }: EditProps) {
+    // Get query param for active tab
+    const queryParams = new URLSearchParams(window.location.search);
+    const defaultTab = queryParams.get('tab') || 'questions';
+
     const { data, setData, put, processing, errors, isDirty } = useForm({
         name: questionBank.name,
         subject_id: questionBank.subject_id,
@@ -141,6 +147,24 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
         count: 5,
         difficulty: 'sedang',
     });
+
+    // READING MATERIAL STATE
+    const [isCreateReaderOpen, setIsCreateReaderOpen] = useState(false);
+    const readerForm = useForm({
+        question_bank_id: questionBank.id,
+        title: '',
+        type: 'text', // 'text' or 'file' (UI only, backend handles content/file check)
+    });
+
+    const submitCreateReader = (e: React.FormEvent) => {
+        e.preventDefault();
+        readerForm.post(ReadingMaterialController.store().url, {
+            onSuccess: () => {
+                setIsCreateReaderOpen(false);
+                readerForm.reset();
+            }
+        });
+    };
 
     // Tag Generation State
     const [isGeneratingTags, setIsGeneratingTags] = useState(false);
@@ -522,221 +546,379 @@ export default function Edit({ questionBank, questions = [], subjects }: EditPro
             {/* Main Content */}
             <div className="flex-1 overflow-auto p-6 bg-muted/10">
                 <div className="max-w-4xl mx-auto space-y-6">
-                    {/* AI Question Generator Card */}
-                    <Card className="border-primary/20">
-                        <CardContent className="pt-6">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Sparkles className="h-5 w-5 text-primary" />
-                                <h3 className="text-lg font-semibold">Generator Soal AI</h3>
-                            </div>
-                            <form onSubmit={submitAIGeneration} className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2 md:col-span-2">
-                                        <Label htmlFor="topic">Topik Soal</Label>
-                                        <Input
-                                            id="topic"
-                                            value={aiForm.data.topic}
-                                            onChange={(e) => aiForm.setData('topic', e.target.value)}
-                                            placeholder="Contoh: Sistem Pernapasan Manusia"
-                                            required
-                                        />
-                                        {aiForm.errors.topic && (
-                                            <div className="text-sm text-red-500">{aiForm.errors.topic}</div>
-                                        )}
+
+                    <Tabs defaultValue={defaultTab} className="w-full">
+                        <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <TabsTrigger value="questions">Daftar Pertanyaan</TabsTrigger>
+                            <TabsTrigger value="reading_materials">Bahan Bacaan</TabsTrigger>
+                        </TabsList>
+
+                        {/* QUESTIONS TAB */}
+                        <TabsContent value="questions" className="space-y-6">
+                            {/* AI Question Generator Card */}
+                            <Card className="border-primary/20">
+                                <CardContent className="pt-6">
+                                    <div className="flex items-center gap-2 mb-4">
+                                        <Sparkles className="h-5 w-5 text-primary" />
+                                        <h3 className="text-lg font-semibold">Generator Soal AI</h3>
                                     </div>
+                                    <form onSubmit={submitAIGeneration} className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div className="space-y-2 md:col-span-2">
+                                                <Label htmlFor="topic">Topik Soal</Label>
+                                                <Input
+                                                    id="topic"
+                                                    value={aiForm.data.topic}
+                                                    onChange={(e) => aiForm.setData('topic', e.target.value)}
+                                                    placeholder="Contoh: Sistem Pernapasan Manusia"
+                                                    required
+                                                />
+                                                {aiForm.errors.topic && (
+                                                    <div className="text-sm text-red-500">{aiForm.errors.topic}</div>
+                                                )}
+                                            </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="question_type">Tipe Soal</Label>
-                                        <Select
-                                            value={aiForm.data.question_type}
-                                            onValueChange={(value) => aiForm.setData('question_type', value)}
-                                        >
-                                            <SelectTrigger id="question_type">
-                                                <SelectValue placeholder="Pilih Tipe Soal" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="multiple_choice">Pilihan Ganda (Tunggal)</SelectItem>
-                                                <SelectItem value="true_false">Benar/Salah</SelectItem>
-                                                <SelectItem value="essay">Esai/Uraian</SelectItem>
-                                                <SelectItem value="matching">Menjodohkan</SelectItem>
-                                                <SelectItem value="ordering">Mengurutkan</SelectItem>
-                                                <SelectItem value="multiple_selection">Pilihan Ganda Kompleks</SelectItem>
-                                                <SelectItem value="numerical_input">Input Angka</SelectItem>
-                                                <SelectItem value="arrange_words">Susun Kata</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {aiForm.errors.question_type && (
-                                            <div className="text-sm text-red-500">{aiForm.errors.question_type}</div>
-                                        )}
-                                    </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="question_type">Tipe Soal</Label>
+                                                <Select
+                                                    value={aiForm.data.question_type}
+                                                    onValueChange={(value) => aiForm.setData('question_type', value)}
+                                                >
+                                                    <SelectTrigger id="question_type">
+                                                        <SelectValue placeholder="Pilih Tipe Soal" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="multiple_choice">Pilihan Ganda (Tunggal)</SelectItem>
+                                                        <SelectItem value="true_false">Benar/Salah</SelectItem>
+                                                        <SelectItem value="essay">Esai/Uraian</SelectItem>
+                                                        <SelectItem value="matching">Menjodohkan</SelectItem>
+                                                        <SelectItem value="ordering">Mengurutkan</SelectItem>
+                                                        <SelectItem value="multiple_selection">Pilihan Ganda Kompleks</SelectItem>
+                                                        <SelectItem value="numerical_input">Input Angka</SelectItem>
+                                                        <SelectItem value="arrange_words">Susun Kata</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                {aiForm.errors.question_type && (
+                                                    <div className="text-sm text-red-500">{aiForm.errors.question_type}</div>
+                                                )}
+                                            </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="count">Jumlah Soal</Label>
-                                        <Input
-                                            id="count"
-                                            type="number"
-                                            min="1"
-                                            max="5"
-                                            value={aiForm.data.count}
-                                            onChange={(e) => aiForm.setData('count', parseInt(e.target.value))}
-                                            required
-                                        />
-                                        {aiForm.errors.count && (
-                                            <div className="text-sm text-red-500">{aiForm.errors.count}</div>
-                                        )}
-                                    </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="count">Jumlah Soal</Label>
+                                                <Input
+                                                    id="count"
+                                                    type="number"
+                                                    min="1"
+                                                    max="5"
+                                                    value={aiForm.data.count}
+                                                    onChange={(e) => aiForm.setData('count', parseInt(e.target.value))}
+                                                    required
+                                                />
+                                                {aiForm.errors.count && (
+                                                    <div className="text-sm text-red-500">{aiForm.errors.count}</div>
+                                                )}
+                                            </div>
 
-                                    <div className="space-y-2">
-                                        <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
-                                        <Select
-                                            value={aiForm.data.difficulty}
-                                            onValueChange={(value) => aiForm.setData('difficulty', value)}
-                                        >
-                                            <SelectTrigger id="difficulty">
-                                                <SelectValue placeholder="Pilih Kesulitan" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="mudah">Mudah</SelectItem>
-                                                <SelectItem value="sedang">Sedang</SelectItem>
-                                                <SelectItem value="sulit">Sulit</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        {aiForm.errors.difficulty && (
-                                            <div className="text-sm text-red-500">{aiForm.errors.difficulty}</div>
-                                        )}
-                                    </div>
-                                </div>
-
-                                <Button type="submit" disabled={aiForm.processing || isGenerating} className="w-full sm:w-auto">
-                                    {isGenerating ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            Sedang Membuat Soal...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <Sparkles className="mr-2 h-4 w-4" />
-                                            {aiForm.processing ? 'Mengirim...' : 'Generate Soal dengan AI'}
-                                        </>
-                                    )}
-                                </Button>
-
-                                <p className="text-xs text-muted-foreground">
-                                    💡 AI akan membuat soal berdasarikan topik dan parameter yang Anda berikan. Proses ini mungkin memakan waktu beberapa menit.
-                                </p>
-                            </form>
-                        </CardContent>
-                    </Card>
-
-                    {/* AI Generation Progress Indicator */}
-                    {isGenerating && (
-                        <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
-                            <CardContent className="pt-6">
-                                <div className="flex items-center gap-3">
-                                    <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-                                    <div className="flex-1">
-                                        <h4 className="font-semibold text-blue-900 dark:text-blue-100">
-                                            AI sedang membuat soal...
-                                        </h4>
-                                        <p className="text-sm text-blue-700 dark:text-blue-300">
-                                            Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
-                                        </p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    )}
-
-                    {/* AI Tag Generator Card */}
-                    {questions.length > 0 && (
-                        <Card className="border-purple-500/20">
-                            <CardContent className="pt-6">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <Sparkles className="h-5 w-5 text-purple-500" />
-                                        <div>
-                                            <h3 className="text-lg font-semibold">Generator Tag AI</h3>
-                                            <p className="text-sm text-muted-foreground">
-                                                Buat tag otomatis untuk semua pertanyaan ({questions.length} soal)
-                                            </p>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="difficulty">Tingkat Kesulitan</Label>
+                                                <Select
+                                                    value={aiForm.data.difficulty}
+                                                    onValueChange={(value) => aiForm.setData('difficulty', value)}
+                                                >
+                                                    <SelectTrigger id="difficulty">
+                                                        <SelectValue placeholder="Pilih Kesulitan" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="mudah">Mudah</SelectItem>
+                                                        <SelectItem value="sedang">Sedang</SelectItem>
+                                                        <SelectItem value="sulit">Sulit</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                {aiForm.errors.difficulty && (
+                                                    <div className="text-sm text-red-500">{aiForm.errors.difficulty}</div>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                    <Button
-                                        onClick={handleGenerateTags}
-                                        disabled={isGeneratingTags}
-                                        variant="outline"
-                                        className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
-                                    >
-                                        {isGeneratingTags ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                Sedang Membuat Tag...
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Sparkles className="mr-2 h-4 w-4" />
-                                                Generate Tag dengan AI
-                                            </>
-                                        )}
+
+                                        <Button type="submit" disabled={aiForm.processing || isGenerating} className="w-full sm:w-auto">
+                                            {isGenerating ? (
+                                                <>
+                                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                    Sedang Membuat Soal...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <Sparkles className="mr-2 h-4 w-4" />
+                                                    {aiForm.processing ? 'Mengirim...' : 'Generate Soal dengan AI'}
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <p className="text-xs text-muted-foreground">
+                                            💡 AI akan membuat soal berdasarikan topik dan parameter yang Anda berikan. Proses ini mungkin memakan waktu beberapa menit.
+                                        </p>
+                                    </form>
+                                </CardContent>
+                            </Card>
+
+                            {/* AI Generation Progress Indicator */}
+                            {isGenerating && (
+                                <Card className="border-blue-500 bg-blue-50 dark:bg-blue-950/20">
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-center gap-3">
+                                            <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                                            <div className="flex-1">
+                                                <h4 className="font-semibold text-blue-900 dark:text-blue-100">
+                                                    AI sedang membuat soal...
+                                                </h4>
+                                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                                    Mohon tunggu, soal akan muncul otomatis ketika selesai. Tidak perlu reload halaman.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* AI Tag Generator Card */}
+                            {questions.length > 0 && (
+                                <Card className="border-purple-500/20">
+                                    <CardContent className="pt-6">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Sparkles className="h-5 w-5 text-purple-500" />
+                                                <div>
+                                                    <h3 className="text-lg font-semibold">Generator Tag AI</h3>
+                                                    <p className="text-sm text-muted-foreground">
+                                                        Buat tag otomatis untuk semua pertanyaan ({questions.length} soal)
+                                                    </p>
+                                                </div>
+                                            </div>
+                                            <Button
+                                                onClick={handleGenerateTags}
+                                                disabled={isGeneratingTags}
+                                                variant="outline"
+                                                className="border-purple-500 text-purple-700 hover:bg-purple-50 dark:hover:bg-purple-950"
+                                            >
+                                                {isGeneratingTags ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Sedang Membuat Tag...
+                                                    </>
+                                                ) : (
+                                                    <>
+                                                        <Sparkles className="mr-2 h-4 w-4" />
+                                                        Generate Tag dengan AI
+                                                    </>
+                                                )}
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {/* Header for Questions Section */}
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
+                                <div className="flex items-center gap-2">
+                                    <UploadQuestionsModal questionBankId={questionBank.id} />
+                                    <Button size="sm" variant="outline" asChild>
+                                        <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                            Tambah Pertanyaan
+                                        </Link>
                                     </Button>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    )}
+                            </div>
 
-                    {/* Header for Questions Section */}
-                    <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold tracking-tight">Daftar Pertanyaan ({questions.length})</h2>
-                        <div className="flex items-center gap-2">
-                            <UploadQuestionsModal questionBankId={questionBank.id} />
-                            <Button size="sm" variant="outline" asChild>
-                                <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
-                                    Tambah Pertanyaan
-                                </Link>
-                            </Button>
-                        </div>
-                    </div>
-
-                    {questions.length > 0 ? (
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragEnd={handleDragEnd}
-                        >
-                            <SortableContext
-                                items={sortedQuestions.map(q => q.id)}
-                                strategy={verticalListSortingStrategy}
-                            >
-                                <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
-                                    {sortedQuestions.map((question, index) => (
-                                        <div key={question.id}>
-                                            <SortableQuestionCard
-                                                id={`question-${question.id}`}
-                                                question={question}
-                                                onUpdate={handleQuestionUpdate}
-                                                onDelete={handleQuestionDelete}
-                                                onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
-                                            />
-                                            <InsertQuestionIndicator order={index + 2} />
+                            {questions.length > 0 ? (
+                                <DndContext
+                                    sensors={sensors}
+                                    collisionDetection={closestCenter}
+                                    onDragEnd={handleDragEnd}
+                                >
+                                    <SortableContext
+                                        items={sortedQuestions.map(q => q.id)}
+                                        strategy={verticalListSortingStrategy}
+                                    >
+                                        <div className="space-y-4 pl-8"> {/* Add padding-left for drag handle space */}
+                                            {sortedQuestions.map((question, index) => (
+                                                <div key={question.id}>
+                                                    <SortableQuestionCard
+                                                        id={`question-${question.id}`}
+                                                        question={question}
+                                                        onUpdate={handleQuestionUpdate}
+                                                        onDelete={handleQuestionDelete}
+                                                        onEdit={(q) => router.visit(QuestionController.edit(q.id).url)}
+                                                    />
+                                                    <InsertQuestionIndicator order={index + 2} />
+                                                </div>
+                                            ))}
                                         </div>
-                                    ))}
+                                    </SortableContext>
+                                </DndContext>
+                            ) : (
+                                <Card className="min-h-[300px] flex items-center justify-center border-dashed">
+                                    <CardContent className="text-center text-muted-foreground">
+                                        <p>Belum ada pertanyaan di bank soal ini.</p>
+                                        <Button variant="link" className="mt-2" asChild>
+                                            <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
+                                                Buat Pertanyaan Baru
+                                            </Link>
+                                        </Button>
+                                    </CardContent>
+                                </Card>
+                            )}
+                        </TabsContent>
+
+                        {/* READING MATERIALS TAB */}
+                        <TabsContent value="reading_materials" className="space-y-6">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <h2 className="text-lg font-bold tracking-tight">Bahan Bacaan</h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Kelola wacana atau materi bacaan untuk soal-soal berbasis literasi.
+                                    </p>
                                 </div>
-                            </SortableContext>
-                        </DndContext>
-                    ) : (
-                        <Card className="min-h-[300px] flex items-center justify-center border-dashed">
-                            <CardContent className="text-center text-muted-foreground">
-                                <p>Belum ada pertanyaan di bank soal ini.</p>
-                                <Button variant="link" className="mt-2" asChild>
-                                    <Link href={`${QuestionController.create().url}?question_bank_id=${questionBank.id}`}>
-                                        Buat Pertanyaan Baru
-                                    </Link>
+                                <Button type="button" onClick={() => setIsCreateReaderOpen(true)}>
+                                    <Plus className="mr-2 h-4 w-4" />
+                                    Tambah Bahan Bacaan
                                 </Button>
-                            </CardContent>
-                        </Card>
-                    )}
+                            </div>
+
+                            <div className="grid gap-4">
+                                {readingMaterials && readingMaterials.length > 0 ? (
+                                    readingMaterials.map((material: any) => (
+                                        <Card key={material.id} className="overflow-hidden hover:shadow-md transition-shadow">
+                                            <CardContent className="p-0 flex">
+                                                <div className="w-2 bg-blue-500 shrink-0" />
+                                                <div className="flex-1 p-4">
+                                                    <div className="flex items-start justify-between">
+                                                        <div className="space-y-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <h3 className="font-semibold text-lg hover:underline cursor-pointer">
+                                                                    <Link href={ReadingMaterialController.edit(material.id).url}>
+                                                                        {material.title}
+                                                                    </Link>
+                                                                </h3>
+                                                                {material.content ?
+                                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 border">Teks</span> :
+                                                                    <span className="text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-100">PDF</span>
+                                                                }
+                                                            </div>
+                                                            <div className="text-sm text-muted-foreground line-clamp-2">
+                                                                {material.content ? material.content.substring(0, 150) + '...' : 'Dokumen PDF terlampir.'}
+                                                            </div>
+                                                            <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                                                                <span className="flex items-center gap-1">
+                                                                    <FileText className="h-3 w-3" />
+                                                                    {material.questions_count || material.questions?.length || 0} Soal Terkait
+                                                                </span>
+                                                                <span>
+                                                                    Dibuat: {new Date(material.created_at).toLocaleDateString('id-ID')}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <Button size="sm" variant="outline" asChild>
+                                                                <Link href={ReadingMaterialController.edit(material.id).url}>
+                                                                    Kelola
+                                                                </Link>
+                                                            </Button>
+                                                            <DropdownMenu>
+                                                                <DropdownMenuTrigger asChild>
+                                                                    <Button size="icon" variant="ghost">
+                                                                        <MoreHorizontal className="h-4 w-4" />
+                                                                    </Button>
+                                                                </DropdownMenuTrigger>
+                                                                <DropdownMenuContent align="end">
+                                                                    <DropdownMenuLabel>Aksi</DropdownMenuLabel>
+                                                                    <DropdownMenuItem asChild>
+                                                                        <Link href={ReadingMaterialController.edit(material.id).url}>
+                                                                            <Pencil className="mr-2 h-4 w-4" />
+                                                                            Edit & Kelola Soal
+                                                                        </Link>
+                                                                    </DropdownMenuItem>
+                                                                    <DropdownMenuSeparator />
+                                                                    <DropdownMenuItem
+                                                                        className="text-red-600"
+                                                                        onClick={() => {
+                                                                            if (confirm('Hapus bahan bacaan ini? Semua soal terkait juga akan terhapus.')) {
+                                                                                router.delete(ReadingMaterialController.destroy(material.id).url, {
+                                                                                    preserveScroll: true
+                                                                                });
+                                                                            }
+                                                                        }}
+                                                                    >
+                                                                        <Trash2 className="mr-2 h-4 w-4" />
+                                                                        Hapus
+                                                                    </DropdownMenuItem>
+                                                                </DropdownMenuContent>
+                                                            </DropdownMenu>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    ))
+                                ) : (
+                                    <Card className="border-dashed py-12">
+                                        <div className="flex flex-col items-center justify-center text-center text-muted-foreground p-6">
+                                            <FileText className="h-12 w-12 mb-4 opacity-20" />
+                                            <p className="font-medium">Belum ada bahan bacaan</p>
+                                            <p className="text-sm mt-1 mb-4">
+                                                Tambahkan bahan bacaan (wacana/artikel) untuk membuat soal berbasis literasi.
+                                            </p>
+                                            <Button type="button" onClick={() => setIsCreateReaderOpen(true)}>
+                                                <Plus className="mr-2 h-4 w-4" />
+                                                Tambah Bahan Bacaan
+                                            </Button>
+                                        </div>
+                                    </Card>
+                                )}
+                            </div>
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
+
+            {/* CREATE READING MATERIAL DIALOG */}
+            <Dialog open={isCreateReaderOpen} onOpenChange={setIsCreateReaderOpen}>
+                <DialogContent>
+                    <form onSubmit={submitCreateReader}>
+                        <DialogHeader>
+                            <DialogTitle>Tambah Bahan Bacaan Baru</DialogTitle>
+                            <DialogDescription>
+                                Masukkan judul untuk bahan bacaan baru. Anda dapat mengedit kontennya setelah ini.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="rm_title">Judul Bacaan</Label>
+                                <Input
+                                    id="rm_title"
+                                    placeholder="Contoh: Manfaat Membaca Buku"
+                                    value={readerForm.data.title}
+                                    onChange={(e) => readerForm.setData('title', e.target.value)}
+                                    required
+                                />
+                                {readerForm.errors.title && <p className="text-sm text-red-500">{readerForm.errors.title}</p>}
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button type="submit" disabled={readerForm.processing}>
+                                {readerForm.processing ? (
+                                    <>
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Membuat...
+                                    </>
+                                ) : (
+                                    'Buat & Kelola Konten'
+                                )}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
 
             {/* Create Exam Modal */}
             <Dialog open={isCreateExamOpen} onOpenChange={setIsCreateExamOpen}>

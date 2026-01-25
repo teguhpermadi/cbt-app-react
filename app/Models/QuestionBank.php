@@ -101,6 +101,14 @@ class QuestionBank extends Model
     }
 
     /**
+     * Relasi One-to-Many: Bank Soal memiliki banyak Bahan Bacaan
+     */
+    public function readingMaterials(): HasMany
+    {
+        return $this->hasMany(ReadingMaterial::class);
+    }
+
+    /**
      * Konfigurasi untuk Spatie Activity Log
      */
     public function getActivitylogOptions(): LogOptions

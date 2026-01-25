@@ -10,13 +10,17 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Activitylog\LogOptions;
 use Spatie\Activitylog\Traits\LogsActivity;
 
-class ReadingMaterial extends Model
+use Spatie\MediaLibrary\HasMedia;
+
+class ReadingMaterial extends Model implements HasMedia
 {
     /** @use HasFactory<\Database\Factories\ReadingMaterialFactory> */
-    use HasFactory, HasUlids, SoftDeletes, LogsActivity;
+    use HasFactory, HasUlids, SoftDeletes, LogsActivity, \Spatie\MediaLibrary\InteractsWithMedia;
 
     protected $fillable = [
         'subject_id',
+        'question_bank_id',
+        'user_id',
         'title',
         'content',
     ];
@@ -30,12 +34,46 @@ class ReadingMaterial extends Model
     }
 
     /**
+     * Relasi ke Bank Soal
+     */
+    public function questionBank(): BelongsTo
+    {
+        return $this->belongsTo(QuestionBank::class);
+    }
+
+    /**
+     * Relasi One-to-Many ke User (Pembuat)
+     */
+    public function author(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * Relasi One-to-Many ke Question
+     */
+    public function questions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Question::class);
+    }
+
+    /**
+     * Konfigurasi untuk Media Library
+     */
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('reading_material_file')
+            ->singleFile()
+            ->useDisk('public');
+    }
+
+    /**
      * Konfigurasi untuk Spatie Activity Log
      */
     public function getActivitylogOptions(): LogOptions
     {
         return LogOptions::defaults()
-            ->logOnly(['subject_id', 'title']) // Konten dihindari karena terlalu panjang
+            ->logOnly(['subject_id', 'user_id', 'title']) // Konten dihindari karena terlalu panjang
             ->logOnlyDirty()
             ->setDescriptionForEvent(fn(string $eventName) => "Materi Bacaan '{$this->title}' telah di-{$eventName}")
             ->useLogName('reading_material');

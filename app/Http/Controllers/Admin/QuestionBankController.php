@@ -121,7 +121,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionBank $questionBank)
     {
         // Load questions associated with this question bank
-        $questionBank->load(['questions.options', 'questions.tags']);
+        $questionBank->load(['questions.options', 'questions.tags', 'readingMaterials.questions']);
 
         // Inject Media URLs
         $questionBank->questions->transform(function ($question) {
@@ -153,6 +153,7 @@ class QuestionBankController extends Controller
             'questionBank' => $questionBank,
             'questions' => $questionBank->questions,
             'subjects' => $subjects,
+            'readingMaterials' => $questionBank->readingMaterials, // Passed explicitly
         ]);
     }
 

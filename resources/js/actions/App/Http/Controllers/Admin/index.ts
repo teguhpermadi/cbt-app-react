@@ -9,6 +9,7 @@ import LiveScoreController from './LiveScoreController'
 import ExamAnalysisController from './ExamAnalysisController'
 import ExamManualCorrectionController from './ExamManualCorrectionController'
 import QuestionBankController from './QuestionBankController'
+import ReadingMaterialController from './ReadingMaterialController'
 import QuestionController from './QuestionController'
 import QuestionSuggestionController from './QuestionSuggestionController'
 const Admin = {
@@ -23,6 +24,7 @@ LiveScoreController: Object.assign(LiveScoreController, LiveScoreController),
 ExamAnalysisController: Object.assign(ExamAnalysisController, ExamAnalysisController),
 ExamManualCorrectionController: Object.assign(ExamManualCorrectionController, ExamManualCorrectionController),
 QuestionBankController: Object.assign(QuestionBankController, QuestionBankController),
+ReadingMaterialController: Object.assign(ReadingMaterialController, ReadingMaterialController),
 QuestionController: Object.assign(QuestionController, QuestionController),
 QuestionSuggestionController: Object.assign(QuestionSuggestionController, QuestionSuggestionController),
 }

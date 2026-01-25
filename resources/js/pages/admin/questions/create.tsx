@@ -27,6 +27,7 @@ interface EnumOption {
 
 interface QuestionFormData {
     question_bank_id: string;
+    reading_material_id?: string; // Added
     content: string;
     question_type: string;
     difficulty_level: string;
@@ -40,6 +41,7 @@ interface QuestionFormData {
 
 interface Props {
     question_bank_id: string;
+    reading_material?: { id: string; title: string }; // Changed to object
     types: EnumOption[];
     difficulties: EnumOption[];
     timers: EnumOption[];
@@ -47,12 +49,13 @@ interface Props {
     order?: number;
 }
 
-export default function CreateQuestion({ question_bank_id, types, difficulties, timers, scores, order }: Props) {
+export default function CreateQuestion({ question_bank_id, reading_material, types, difficulties, timers, scores, order }: Props) {
     // Default to MultipleChoice or first available type
     const defaultType = 'multiple_choice';
 
     const initialData: QuestionFormData = {
         question_bank_id: question_bank_id,
+        reading_material_id: reading_material?.id, // Initialize
         content: '',
         question_type: defaultType,
         difficulty_level: 'sedang', // Default to Medium
@@ -60,7 +63,7 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
         score_value: 1, // Default to 1 point
         options: generateDefaultOptions(defaultType),
         question_media: null,
-        hint: '', // Added
+        hint: '',
         order: order,
     };
 
@@ -196,6 +199,16 @@ export default function CreateQuestion({ question_bank_id, types, difficulties, 
                         <AlertTitle>Error Validasi</AlertTitle>
                         <AlertDescription>
                             {validationError}
+                        </AlertDescription>
+                    </Alert>
+                )}
+
+                {reading_material && (
+                    <Alert className="bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
+                        <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                        <AlertTitle className="text-blue-800 dark:text-blue-300">Terhubung dengan Bahan Bacaan</AlertTitle>
+                        <AlertDescription className="text-blue-600 dark:text-blue-400">
+                            Pertanyaan ini akan terhubung dengan: <strong>{reading_material.title}</strong>
                         </AlertDescription>
                     </Alert>
                 )}
