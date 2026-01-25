@@ -2,7 +2,15 @@ import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Edit, Trash2, Tag, X } from "lucide-react";
+import { Edit, Trash2, Tag, X, BookOpen } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogDescription,
+} from "@/components/ui/dialog";
 import { DifficultySelector } from "./DifficultySelector";
 import { TimerSelector } from "./TimerSelector";
 import { ScoreSelector } from "./ScoreSelector";
@@ -40,59 +48,124 @@ export default function QuestionCard({
         }
     };
 
+    const hasReadingMaterial = !!question.reading_material;
+
     return (
-        <Card className="overflow-hidden border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl transition-all hover:shadow-md">
+        <Card className={`overflow-hidden border-slate-200 dark:border-slate-800 shadow-sm rounded-2xl transition-all hover:shadow-md ${hasReadingMaterial ? 'border-l-4 border-l-blue-500' : ''}`}>
             <CardHeader className="p-3 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex flex-col gap-3">
-                    <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
-                            {QUESTION_TYPE_LABELS[question.question_type] ?? question.question_type}
-                        </Badge>
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                        <div className="flex items-center gap-2">
+                            <Badge variant="outline" className="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700">
+                                {QUESTION_TYPE_LABELS[question.question_type] ?? question.question_type}
+                            </Badge>
 
-                        <DifficultySelector
-                            value={question.difficulty_level}
-                            onValueChange={(val) => handleValueChange('difficulty_level', val)}
-                            disabled={readOnly}
-                        />
+                            {hasReadingMaterial && (
+                                <Dialog>
+                                    <DialogTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2 text-blue-600 border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800"
+                                        >
+                                            <BookOpen className="w-3.5 h-3.5" />
+                                            <span className="hidden sm:inline">Lihat Bacaan</span>
+                                        </Button>
+                                    </DialogTrigger>
+                                    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                                        <DialogHeader>
+                                            <DialogTitle>{question.reading_material?.title}</DialogTitle>
+                                            <div className="sr-only">
+                                                <DialogDescription>
+                                                    Reading material content for {question.reading_material?.title}
+                                                </DialogDescription>
+                                            </div>
+                                        </DialogHeader>
+                                        <div className="mt-4 space-y-4">
+                                            {/* PDF Viewer */}
+                                            {question.reading_material?.media_type === 'application/pdf' && question.reading_material.media_url && (
+                                                <div className="w-full h-[500px] border rounded-md overflow-hidden">
+                                                    <iframe
+                                                        src={`${question.reading_material.media_url}#toolbar=0`}
+                                                        className="w-full h-full"
+                                                        title={question.reading_material.title}
+                                                    />
+                                                </div>
+                                            )}
 
-                        <TimerSelector
-                            value={question.timer}
-                            onValueChange={(val) => handleValueChange('timer', val)}
-                            disabled={readOnly}
-                        />
+                                            {/* Other Media Types (e.g., Image) */}
+                                            {question.reading_material?.media_type?.startsWith('image/') && question.reading_material.media_url && (
+                                                <div className="w-full rounded-md overflow-hidden">
+                                                    <img
+                                                        src={question.reading_material.media_url}
+                                                        alt={question.reading_material.title}
+                                                        className="w-full object-contain"
+                                                    />
+                                                </div>
+                                            )}
 
-                        <ScoreSelector
-                            value={question.score_value}
-                            onValueChange={(val) => handleValueChange('score_value', val)}
-                            disabled={readOnly}
-                        />
+                                            {question.reading_material?.content && (
+                                                <div className="prose prose-sm max-w-none dark:prose-invert">
+                                                    <RichTextEditor
+                                                        value={question.reading_material.content}
+                                                        readOnly={true}
+                                                        className="bg-transparent border-none p-0"
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </DialogContent>
+                                </Dialog>
+                            )}
+                        </div>
 
-                        {!readOnly && (
-                            <div className="flex items-center gap-1">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
-                                    onClick={() => onEdit && onEdit(question)}
-                                >
-                                    <Edit className="w-4 h-4" />
-                                </Button>
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
-                                    onClick={() => {
-                                        if (onDelete) {
-                                            if (window.confirm("Apakah anda yakin ingin menghapus pertanyaan ini?")) {
-                                                onDelete(question.id);
+                        <div className="flex items-center gap-1 sm:gap-2">
+
+                            <DifficultySelector
+                                value={question.difficulty_level}
+                                onValueChange={(val) => handleValueChange('difficulty_level', val)}
+                                disabled={readOnly}
+                            />
+
+                            <TimerSelector
+                                value={question.timer}
+                                onValueChange={(val) => handleValueChange('timer', val)}
+                                disabled={readOnly}
+                            />
+
+                            <ScoreSelector
+                                value={question.score_value}
+                                onValueChange={(val) => handleValueChange('score_value', val)}
+                                disabled={readOnly}
+                            />
+
+                            {!readOnly && (
+                                <div className="flex items-center gap-1">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                                        onClick={() => onEdit && onEdit(question)}
+                                    >
+                                        <Edit className="w-4 h-4" />
+                                    </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-8 w-8 text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                        onClick={() => {
+                                            if (onDelete) {
+                                                if (window.confirm("Apakah anda yakin ingin menghapus pertanyaan ini?")) {
+                                                    onDelete(question.id);
+                                                }
                                             }
-                                        }
-                                    }}
-                                >
-                                    <Trash2 className="w-4 h-4" />
-                                </Button>
-                            </div>
-                        )}
+                                        }}
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </Button>
+                                </div>
+                            )}
+                        </div>
                     </div>
                 </div>
             </CardHeader>
@@ -174,6 +247,6 @@ export default function QuestionCard({
                     )}
                 </div>
             </CardFooter>
-        </Card>
+        </Card >
     );
 }

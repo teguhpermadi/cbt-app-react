@@ -1,3 +1,11 @@
+export interface ReadingMaterial {
+    id: string;
+    title: string;
+    content: string;
+    media_url?: string | null;
+    media_type?: string | null;
+}
+
 export interface Option {
     id: string;
     question_id: string;
@@ -18,6 +26,8 @@ export interface Question {
     score_value: number;
     question_type: string;
     media_url?: string | null; // Added media_url
+    reading_material_id?: string | null;
+    reading_material?: ReadingMaterial | null;
     options?: Option[]; // Add options relation
     tags?: { id: number; name: { [key: string]: string } }[];
 }

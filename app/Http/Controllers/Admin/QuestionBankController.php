@@ -86,7 +86,7 @@ class QuestionBankController extends Controller
     public function show(QuestionBank $questionBank)
     {
         // Load relasi
-        $questionBank->load(['subject.grade', 'teacher', 'questions.options', 'questions.tags']);
+        $questionBank->load(['subject.grade', 'teacher', 'questions.options', 'questions.tags', 'questions.readingMaterial']);
 
         // Inject Media URLs untuk questions dan options
         $questionBank->questions->transform(function ($question) {
@@ -121,7 +121,7 @@ class QuestionBankController extends Controller
     public function edit(QuestionBank $questionBank)
     {
         // Load questions associated with this question bank
-        $questionBank->load(['questions.options', 'questions.tags', 'readingMaterials.questions']);
+        $questionBank->load(['questions.options', 'questions.tags', 'questions.readingMaterial', 'readingMaterials.questions']);
 
         // Inject Media URLs
         $questionBank->questions->transform(function ($question) {

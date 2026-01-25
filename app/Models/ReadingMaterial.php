@@ -25,6 +25,18 @@ class ReadingMaterial extends Model implements HasMedia
         'content',
     ];
 
+    protected $appends = ['media_url', 'media_type'];
+
+    public function getMediaUrlAttribute()
+    {
+        return $this->getFirstMediaUrl('reading_material_file');
+    }
+
+    public function getMediaTypeAttribute()
+    {
+        return $this->getFirstMedia('reading_material_file')?->mime_type;
+    }
+
     /**
      * Relasi One-to-Many ke Subject
      */

@@ -146,7 +146,7 @@ class QuestionController extends Controller
      */
     public function edit(Question $question)
     {
-        $question->load(['options', 'questionBank', 'suggestions.user']);
+        $question->load(['options', 'questionBank', 'suggestions.user', 'readingMaterial']);
 
         // Inject Media URLs for Frontend
         $question->media_url = $question->getFirstMediaUrl('question_content');
