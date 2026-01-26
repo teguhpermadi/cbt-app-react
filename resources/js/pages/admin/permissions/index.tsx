@@ -6,7 +6,7 @@ import Pagination from '@/components/Pagination';
 import PermissionController from '@/actions/App/Http/Controllers/Admin/PermissionController';
 
 interface Permission {
-    id: string;
+    ulid: string;
     name: string;
 }
 
@@ -27,7 +27,7 @@ export default function Index({ permissions }: IndexProps) {
 
     const handleDelete = (id: string) => {
         if (confirm('Are you sure you want to delete this permission?')) {
-            deleteForm.delete(PermissionController.destroy(id).url, {
+            deleteForm.delete(PermissionController.destroy({ permission: id }).url, {
                 preserveScroll: true,
             });
         }
@@ -45,7 +45,7 @@ export default function Index({ permissions }: IndexProps) {
                     </div>
 
                     <Button asChild className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20">
-                        <Link href={route('admin.permissions.create')}>
+                        <Link href={PermissionController.create().url}>
                             <Plus className="size-4" />
                             Add New Permission
                         </Link>
@@ -64,7 +64,7 @@ export default function Index({ permissions }: IndexProps) {
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {permissions.data.length > 0 ? (
                                     permissions.data.map((permission) => (
-                                        <tr key={permission.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                                        <tr key={permission.ulid} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
                                             <td className="px-6 py-4 font-bold">{permission.name}</td>
                                             <td className="px-6 py-4 text-right">
                                                 <div className="flex justify-end gap-2">
@@ -74,7 +74,7 @@ export default function Index({ permissions }: IndexProps) {
                                                         className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all"
                                                         asChild
                                                     >
-                                                        <Link href={route('admin.permissions.edit', permission.id)}>
+                                                        <Link href={PermissionController.edit({ permission: permission.ulid }).url}>
                                                             <Edit className="size-4" />
                                                         </Link>
                                                     </Button>
@@ -82,7 +82,7 @@ export default function Index({ permissions }: IndexProps) {
                                                         size="icon"
                                                         variant="ghost"
                                                         className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all"
-                                                        onClick={() => handleDelete(permission.id)}
+                                                        onClick={() => handleDelete(permission.ulid)}
                                                     >
                                                         <Trash2 className="size-4" />
                                                     </Button>
