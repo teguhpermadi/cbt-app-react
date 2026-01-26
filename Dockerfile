@@ -64,6 +64,7 @@ RUN apt-get update && apt-get install -y \
 
 # Copy composer files
 COPY composer.json ./
+ENV COMPOSER_PROCESS_TIMEOUT=2000
 COPY composer.lock* ./
 
 # Install PHP dependencies (production only)

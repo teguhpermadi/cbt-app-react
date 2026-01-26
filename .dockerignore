@@ -58,9 +58,7 @@ verify_*.php
 # Ignore Docker files (we want to include these in the build)
 # docker-compose*.yml will be outside the build context
 
-# Ignore lock files (we copy them explicitly)
-package-lock.json
-composer.lock
+
 
 # Ignore prettier and eslint
 .prettierrc
