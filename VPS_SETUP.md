@@ -33,15 +33,22 @@ ssh root@72.61.143.156
 sudo apt update && sudo apt upgrade -y
 sudo apt install -y curl git
 
+
 # Install Docker
 curl -fsSL https://get.docker.com -o get-docker.sh
 sudo sh get-docker.sh
+
+# Allow running Docker without sudo (Logout/Login required after this)
+sudo usermod -aG docker $USER
+
 ```
 
 ### Clone Request
 ```bash
 # Go to web folder (or create one)
-mkdir -p /var/www
+# Go to web folder (or create one)
+sudo mkdir -p /var/www
+sudo chown -R $USER:$USER /var/www
 cd /var/www
 
 # Clone your repository (Change this URL to your actual git repo)
