@@ -9,7 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 import RoleController from '@/actions/App/Http/Controllers/Admin/RoleController';
 
 interface Permission {
-    id: string;
+    ulid: string;
     name: string;
 }
 
@@ -49,7 +49,7 @@ export default function Create({ permissions }: CreateProps) {
             <div className="flex flex-col gap-6 p-6 max-w-4xl mx-auto w-full">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="rounded-xl h-10 w-10" asChild>
-                        <Link href={route('admin.roles.index')}>
+                        <Link href={RoleController.index().url}>
                             <ArrowLeft className="size-4" />
                         </Link>
                     </Button>
@@ -77,14 +77,14 @@ export default function Create({ permissions }: CreateProps) {
                             <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Permissions</Label>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 rounded-xl border border-slate-200 p-4 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
                                 {permissions.map((permission) => (
-                                    <div key={permission.id} className="flex items-center space-x-2">
+                                    <div key={permission.ulid} className="flex items-center space-x-2">
                                         <Checkbox
-                                            id={`perm-${permission.id}`}
+                                            id={`perm-${permission.ulid}`}
                                             checked={data.permissions.includes(permission.name)}
                                             onCheckedChange={() => togglePermission(permission.name)}
                                         />
                                         <label
-                                            htmlFor={`perm-${permission.id}`}
+                                            htmlFor={`perm-${permission.ulid}`}
                                             className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                                         >
                                             {permission.name}

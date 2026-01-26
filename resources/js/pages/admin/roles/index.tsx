@@ -7,9 +7,9 @@ import Pagination from '@/components/Pagination';
 import RoleController from '@/actions/App/Http/Controllers/Admin/RoleController';
 
 interface Role {
-    id: string;
+    ulid: string;
     name: string;
-    permissions: { id: string; name: string }[];
+    permissions: { ulid: string; name: string }[];
 }
 
 interface IndexProps {
@@ -27,9 +27,9 @@ const breadcrumbs = [
 export default function Index({ roles }: IndexProps) {
     const deleteForm = useForm();
 
-    const handleDelete = (id: string) => {
+    const handleDelete = (ulid: string) => {
         if (confirm('Are you sure you want to delete this role?')) {
-            deleteForm.delete(RoleController.destroy(id).url, {
+            deleteForm.delete(RoleController.destroy(ulid).url, {
                 preserveScroll: true,
             });
         }
@@ -47,7 +47,7 @@ export default function Index({ roles }: IndexProps) {
                     </div>
 
                     <Button asChild className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20">
-                        <Link href={route('admin.roles.create')}>
+                        <Link href={RoleController.create().url}>
                             <Plus className="size-4" />
                             Add New Role
                         </Link>
@@ -67,12 +67,12 @@ export default function Index({ roles }: IndexProps) {
                             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                                 {roles.data.length > 0 ? (
                                     roles.data.map((role) => (
-                                        <tr key={role.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                                        <tr key={role.ulid} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
                                             <td className="px-6 py-4 font-bold align-top">{role.name}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex flex-wrap gap-1">
                                                     {role.permissions.map((perm) => (
-                                                        <Badge key={perm.id} variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
+                                                        <Badge key={perm.ulid} variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
                                                             {perm.name}
                                                         </Badge>
                                                     ))}
@@ -87,7 +87,7 @@ export default function Index({ roles }: IndexProps) {
                                                         className="h-9 w-9 rounded-xl hover:bg-blue-50 hover:text-blue-600 dark:hover:bg-blue-900/30 transition-all"
                                                         asChild
                                                     >
-                                                        <Link href={route('admin.roles.edit', role.id)}>
+                                                        <Link href={RoleController.edit(role.ulid).url}>
                                                             <Edit className="size-4" />
                                                         </Link>
                                                     </Button>
@@ -95,7 +95,7 @@ export default function Index({ roles }: IndexProps) {
                                                         size="icon"
                                                         variant="ghost"
                                                         className="h-9 w-9 rounded-xl hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/30 transition-all"
-                                                        onClick={() => handleDelete(role.id)}
+                                                        onClick={() => handleDelete(role.ulid)}
                                                     >
                                                         <Trash2 className="size-4" />
                                                     </Button>
