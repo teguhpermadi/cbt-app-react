@@ -44,6 +44,7 @@ RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
     libfreetype6-dev \
+    libicu-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         pdo_pgsql \
@@ -88,6 +89,7 @@ RUN apt-get update && apt-get install -y \
     libpng16-16 \
     libjpeg62-turbo \
     libfreetype6 \
+    libicu72 \
     supervisor \
     nodejs \
     npm \
