@@ -57,6 +57,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
                 Route::get('students/import/template', [StudentController::class, 'downloadTemplate'])->name('students.import.template');
                 Route::get('students/export', [StudentController::class, 'export'])->name('students.export');
                 Route::post('students/import', [StudentController::class, 'storeImport'])->name('students.import');
+                Route::post('students/bulk-action', [StudentController::class, 'bulkAction'])->name('students.bulk-action');
 
                 // Admin has full control over students (create, edit, delete)
                 // Index and Show are shared below.

@@ -1,7 +1,7 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem, type User } from '@/types';
-import { Head, useForm } from '@inertiajs/react';
-import { Edit, Plus, Trash2, UserPlus, X } from 'lucide-react';
+import { Head, useForm, Link } from '@inertiajs/react';
+import { Edit, Plus, Trash2, UserPlus, X, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
@@ -28,9 +28,10 @@ import Pagination from '@/components/Pagination';
 import UserController from '@/actions/App/Http/Controllers/Admin/UserController';
 import { index } from '@/routes/admin/users';
 import { dashboard } from '@/routes/admin';
+import RoleController from '@/actions/App/Http/Controllers/Admin/RoleController';
 
 interface Role {
-    id: string;
+    ulid: string;
     name: string;
 }
 
@@ -121,94 +122,102 @@ export default function Index({ users, roles }: IndexProps) {
                         <p className="text-muted-foreground">Manage administrators, teachers, and parents.</p>
                     </div>
 
-                    <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-                        <DialogTrigger asChild>
-                            <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20">
-                                <UserPlus className="size-4" />
-                                Add New User
-                            </Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
-                            <form onSubmit={submitCreate}>
-                                <DialogHeader>
-                                    <DialogTitle className="text-xl font-bold">Add New User</DialogTitle>
-                                    <DialogDescription>Create a new administrative or teaching account.</DialogDescription>
-                                </DialogHeader>
-                                <div className="grid gap-4 py-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
-                                        <Input id="name" value={createForm.data.name} onChange={e => createForm.setData('name', e.target.value)} placeholder="John Doe" className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.name} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
-                                        <Input id="username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
-                                        {/* @ts-ignore */}
-                                        <InputError message={createForm.errors.username} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
-                                        <Input id="email" type="email" value={createForm.data.email} onChange={e => createForm.setData('email', e.target.value)} placeholder="john@example.com" className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.email} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
-                                        <Input id="password" type="password" value={createForm.data.password} onChange={e => createForm.setData('password', e.target.value)} className="rounded-xl h-11 border-slate-200" />
-                                        <InputError message={createForm.errors.password} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">User Type</Label>
-                                        <Select onValueChange={(val) => createForm.setData('user_type', val)} defaultValue={createForm.data.user_type}>
-                                            <SelectTrigger className="rounded-xl h-11 border-slate-200">
-                                                <SelectValue placeholder="Select type" />
-                                            </SelectTrigger>
-                                            <SelectContent className="rounded-xl border-none shadow-xl">
-                                                <SelectItem value="admin">Administrator</SelectItem>
-                                                <SelectItem value="teacher">Teacher</SelectItem>
-                                                <SelectItem value="parent">Parent</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <InputError message={createForm.errors.user_type} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Roles</Label>
-                                        <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-3 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
-                                            {roles.map((role) => (
-                                                <div key={role.id} className="flex items-center space-x-2">
-                                                    <input
-                                                        type="checkbox"
-                                                        id={`create-role-${role.id}`}
-                                                        className="rounded border-slate-300 text-primary shadow-sm focus:ring-primary"
-                                                        checked={createForm.data.roles.includes(role.name)}
-                                                        onChange={(e) => {
-                                                            const checked = e.target.checked;
-                                                            const currentRoles = createForm.data.roles;
-                                                            if (checked) {
-                                                                createForm.setData('roles', [...currentRoles, role.name]);
-                                                            } else {
-                                                                createForm.setData('roles', currentRoles.filter(r => r !== role.name));
-                                                            }
-                                                        }}
-                                                    />
-                                                    <label
-                                                        htmlFor={`create-role-${role.id}`}
-                                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
-                                                    >
-                                                        {role.name}
-                                                    </label>
-                                                </div>
-                                            ))}
+                    <div className="flex gap-2">
+                        <Button asChild variant="outline" className="rounded-xl flex items-center gap-2 border-slate-200 shadow-sm hover:bg-slate-100 dark:border-slate-800 dark:hover:bg-slate-800">
+                            <Link href={RoleController.index().url}>
+                                <Shield className="size-4" />
+                                Manage Roles
+                            </Link>
+                        </Button>
+                        <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
+                            <DialogTrigger asChild>
+                                <Button className="rounded-xl flex items-center gap-2 bg-primary shadow-lg shadow-primary/20">
+                                    <UserPlus className="size-4" />
+                                    Add New User
+                                </Button>
+                            </DialogTrigger>
+                            <DialogContent className="sm:max-w-[425px] rounded-3xl border-none shadow-2xl">
+                                <form onSubmit={submitCreate}>
+                                    <DialogHeader>
+                                        <DialogTitle className="text-xl font-bold">Add New User</DialogTitle>
+                                        <DialogDescription>Create a new administrative or teaching account.</DialogDescription>
+                                    </DialogHeader>
+                                    <div className="grid gap-4 py-4">
+                                        <div className="space-y-2">
+                                            <Label htmlFor="name" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
+                                            <Input id="name" value={createForm.data.name} onChange={e => createForm.setData('name', e.target.value)} placeholder="John Doe" className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.name} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="username" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Username</Label>
+                                            <Input id="username" value={createForm.data.username} onChange={e => createForm.setData('username', e.target.value)} placeholder="Username" className="rounded-xl h-11 border-slate-200" />
+                                            {/* @ts-ignore */}
+                                            <InputError message={createForm.errors.username} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="email" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email</Label>
+                                            <Input id="email" type="email" value={createForm.data.email} onChange={e => createForm.setData('email', e.target.value)} placeholder="john@example.com" className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.email} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="password" className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Password</Label>
+                                            <Input id="password" type="password" value={createForm.data.password} onChange={e => createForm.setData('password', e.target.value)} className="rounded-xl h-11 border-slate-200" />
+                                            <InputError message={createForm.errors.password} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">User Type</Label>
+                                            <Select onValueChange={(val) => createForm.setData('user_type', val)} defaultValue={createForm.data.user_type}>
+                                                <SelectTrigger className="rounded-xl h-11 border-slate-200">
+                                                    <SelectValue placeholder="Select type" />
+                                                </SelectTrigger>
+                                                <SelectContent className="rounded-xl border-none shadow-xl">
+                                                    <SelectItem value="admin">Administrator</SelectItem>
+                                                    <SelectItem value="teacher">Teacher</SelectItem>
+                                                    <SelectItem value="parent">Parent</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                            <InputError message={createForm.errors.user_type} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Roles</Label>
+                                            <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-3 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
+                                                {roles.map((role) => (
+                                                    <div key={role.ulid} className="flex items-center space-x-2">
+                                                        <input
+                                                            type="checkbox"
+                                                            id={`create-role-${role.ulid}`}
+                                                            className="rounded border-slate-300 text-primary shadow-sm focus:ring-primary"
+                                                            checked={createForm.data.roles.includes(role.name)}
+                                                            onChange={(e) => {
+                                                                const checked = e.target.checked;
+                                                                const currentRoles = createForm.data.roles;
+                                                                if (checked) {
+                                                                    createForm.setData('roles', [...currentRoles, role.name]);
+                                                                } else {
+                                                                    createForm.setData('roles', currentRoles.filter(r => r !== role.name));
+                                                                }
+                                                            }}
+                                                        />
+                                                        <label
+                                                            htmlFor={`create-role-${role.ulid}`}
+                                                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
+                                                        >
+                                                            {role.name}
+                                                        </label>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <DialogFooter>
-                                    <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
-                                        Save User
-                                    </Button>
-                                </DialogFooter>
-                            </form>
-                        </DialogContent>
-                    </Dialog>
+                                    <DialogFooter>
+                                        <Button type="submit" className="w-full rounded-xl h-11 bg-primary font-bold shadow-lg shadow-primary/20" disabled={createForm.processing}>
+                                            Save User
+                                        </Button>
+                                    </DialogFooter>
+                                </form>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
                 </div>
 
                 {/* Table Section */}
@@ -241,7 +250,7 @@ export default function Index({ users, roles }: IndexProps) {
                                             <div className="flex flex-wrap gap-1">
                                                 {user.roles && user.roles.length > 0 ? (
                                                     user.roles.filter(Boolean).map((role: any) => (
-                                                        <Badge key={role.id} variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
+                                                        <Badge key={role.ulid || role.id} variant="secondary" className="rounded-lg px-2 py-0.5 text-[10px] font-bold uppercase bg-slate-100 text-slate-600">
                                                             {role.name}
                                                         </Badge>
                                                     ))
@@ -322,10 +331,10 @@ export default function Index({ users, roles }: IndexProps) {
                                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Roles</Label>
                                 <div className="grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-3 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-900/50">
                                     {roles.map((role) => (
-                                        <div key={role.id} className="flex items-center space-x-2">
+                                        <div key={role.ulid} className="flex items-center space-x-2">
                                             <input
                                                 type="checkbox"
-                                                id={`edit-role-${role.id}`}
+                                                id={`edit-role-${role.ulid}`}
                                                 className="rounded border-slate-300 text-primary shadow-sm focus:ring-primary"
                                                 checked={editForm.data.roles.includes(role.name)}
                                                 onChange={(e) => {
@@ -339,7 +348,7 @@ export default function Index({ users, roles }: IndexProps) {
                                                 }}
                                             />
                                             <label
-                                                htmlFor={`edit-role-${role.id}`}
+                                                htmlFor={`edit-role-${role.ulid}`}
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer select-none"
                                             >
                                                 {role.name}

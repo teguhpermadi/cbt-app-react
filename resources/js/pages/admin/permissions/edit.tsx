@@ -39,7 +39,7 @@ export default function Edit({ permission }: EditProps) {
             <div className="flex flex-col gap-6 p-6 max-w-lg mx-auto w-full">
                 <div className="flex items-center gap-4">
                     <Button variant="outline" size="icon" className="rounded-xl h-10 w-10" asChild>
-                        <Link href={PermissionController.create().url}>
+                        <Link href={PermissionController.index().url}>
                             <ArrowLeft className="size-4" />
                         </Link>
                     </Button>

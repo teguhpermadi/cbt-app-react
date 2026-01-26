@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../../../wayfinder'
 /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
 export const template = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -16,7 +16,7 @@ template.definition = {
 
 /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
 template.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ template.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
 template.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -34,7 +34,7 @@ template.get = (options?: RouteQueryOptions): RouteDefinition<'get'> => ({
 })
 /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
 template.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -44,7 +44,7 @@ template.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
     /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
     const templateForm = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -54,7 +54,7 @@ template.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
 
             /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
         templateForm.get = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -63,7 +63,7 @@ template.head = (options?: RouteQueryOptions): RouteDefinition<'head'> => ({
         })
             /**
 * @see \App\Http\Controllers\Admin\StudentController::template
- * @see app/Http/Controllers/Admin/StudentController.php:19
+ * @see app/Http/Controllers/Admin/StudentController.php:21
  * @route '/admin/students/import/template'
  */
         templateForm.head = (options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({

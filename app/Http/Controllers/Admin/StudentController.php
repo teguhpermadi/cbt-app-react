@@ -14,6 +14,8 @@ use Inertia\Response;
 use App\Exports\StudentTemplateExport;
 use Maatwebsite\Excel\Facades\Excel;
 
+use Spatie\Permission\Models\Role;
+
 class StudentController extends Controller
 {
     public function downloadTemplate()
@@ -37,6 +39,7 @@ class StudentController extends Controller
             'students' => $students,
             'grades' => Grade::all(),
             'academicYears' => AcademicYear::where('is_active', true)->get(),
+            'roles' => Role::all(),
         ]);
     }
 
@@ -49,6 +52,7 @@ class StudentController extends Controller
             'password' => 'required|string|min:8',
             'grade_id' => 'required|exists:grades,id',
             'academic_year_id' => 'required|exists:academic_years,id',
+            'roles' => 'array',
         ]);
 
         $student = User::create([
@@ -59,8 +63,15 @@ class StudentController extends Controller
             'user_type' => 'student',
         ]);
 
-        // Assign 'student' role
-        $student->assignRole('student');
+        // Assign 'student' role by default if not provided, or merge
+        if ($request->has('roles')) {
+            $student->syncRoles($validated['roles']);
+            if (!$student->hasRole('student')) {
+                $student->assignRole('student');
+            }
+        } else {
+            $student->assignRole('student');
+        }
 
         // Link to grade and academic year
         $student->grades()->attach($validated['grade_id'], [
@@ -84,9 +95,18 @@ class StudentController extends Controller
             'username' => ['required', 'string', 'max:255', Rule::unique('users')->ignore($student->id)],
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($student->id)],
             'grade_id' => 'required|exists:grades,id',
+            'roles' => 'array',
         ]);
 
         $student->update($validated);
+
+        if ($request->has('roles')) {
+            $student->syncRoles($validated['roles']);
+            // Ensure student role persists for students
+            if (!$student->hasRole('student')) {
+                $student->assignRole('student');
+            }
+        }
 
         // Update grade if changed (simplified logic)
         $student->grades()->sync([$validated['grade_id'] => [
@@ -195,5 +215,45 @@ class StudentController extends Controller
         } catch (\Exception $e) {
             return back()->withErrors(['file' => 'Error importing file: ' . $e->getMessage()]);
         }
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:users,id',
+            'action' => 'required|string|in:update_grade,update_roles',
+            'data' => 'required|array',
+        ]);
+
+        $ids = $request->ids;
+        $action = $request->action;
+        $data = $request->data;
+
+        \Illuminate\Support\Facades\DB::transaction(function () use ($ids, $action, $data) {
+            $students = User::whereIn('id', $ids)->get();
+
+            foreach ($students as $student) {
+                if ($action === 'update_grade') {
+                    if (isset($data['grade_id']) && isset($data['academic_year_id'])) {
+                        $student->grades()->sync([$data['grade_id'] => [
+                            'id' => \Illuminate\Support\Str::ulid(),
+                            'academic_year_id' => $data['academic_year_id'],
+                            'is_active' => true,
+                        ]]);
+                    }
+                } elseif ($action === 'update_roles') {
+                    if (isset($data['roles'])) {
+                        $student->syncRoles($data['roles']);
+                        // Ensure student role persists
+                        if (!$student->hasRole('student')) {
+                            $student->assignRole('student');
+                        }
+                    }
+                }
+            }
+        });
+
+        return back()->with('success', 'Bulk action completed successfully.');
     }
 }
